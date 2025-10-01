@@ -29,13 +29,13 @@ fun AppNavHost(
     startDestination: String = Routes.HOME
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
-        composable(Routes.HOME) { HomeScreen() }
-        composable(Routes.AUTH) { AuthScreen() }
-        composable(Routes.CATEGORY) { CategoryScreen() }
-        composable(Routes.EXPENSE) { ExpenseScreen() }
-        composable(Routes.RECOMMENDATION) { RecommendationScreen() }
-        composable(Routes.REPORT) { ReportScreen() }
-        composable(Routes.SAVINGS) { SavingsScreen() }
+        composable(Routes.HOME) { HomeScreen(navController) }
+        composable(Routes.AUTH) { AuthScreen(navController) }
+        composable(Routes.CATEGORY) { CategoryScreen(navController) }
+        composable(Routes.EXPENSE) { ExpenseScreen(navController) }
+        composable(Routes.RECOMMENDATION) { RecommendationScreen(navController) }
+        composable(Routes.REPORT) { ReportScreen(navController) }
+        composable(Routes.SAVINGS) { SavingsScreen(navController) }
     }
 }
 
