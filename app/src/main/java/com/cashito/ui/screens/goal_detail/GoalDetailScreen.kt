@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -52,6 +53,7 @@ import com.cashito.ui.theme.LightGreen
 import com.cashito.ui.theme.PrimaryGreen
 import com.cashito.ui.theme.Spacing
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalDetailScreen(
@@ -73,7 +75,7 @@ fun GoalDetailScreen(
                     Text(
                         text = goal.title,
                         style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Semibold
+                        fontWeight = FontWeight.SemiBold
                     )
                 },
                 navigationIcon = {
@@ -162,7 +164,7 @@ fun GoalDetailScreen(
                         Text(
                             text = "Ahorrado S/ ${goal.savedAmount} / S/ ${goal.targetAmount}",
                             style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Semibold,
+                            fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface,
                             textAlign = TextAlign.Center
                         )
@@ -217,7 +219,7 @@ fun GoalDetailScreen(
                         Text(
                             text = "Plan de ahorro",
                             style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Semibold,
+                            fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         
@@ -297,7 +299,7 @@ fun GoalDetailScreen(
                 Text(
                     text = "Historial de esta meta",
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Semibold,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -400,7 +402,7 @@ fun EmptyStateCard() {
             Text(
                 text = "Aún no tienes aportes en esta meta",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Semibold,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )

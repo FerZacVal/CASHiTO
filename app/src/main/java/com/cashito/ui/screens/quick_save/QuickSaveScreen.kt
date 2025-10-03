@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,12 +37,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
-import com.cashito.ui.theme.Background
-import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.LightGreen
 import com.cashito.ui.theme.PrimaryGreen
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun QuickSaveScreen(
@@ -147,11 +146,12 @@ fun QuickSaveScreen(
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                         keyboardType = KeyboardType.Number
                     ),
-                    colors = TextFieldDefaults.colors(
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
                         focusedBorderColor = PrimaryGreen,
-                        unfocusedBorderColor = Color.Gray
+                        unfocusedBorderColor = Color.Gray,
+                        cursorColor = PrimaryGreen
                     ),
                     shape = RoundedCornerShape(Radius.md),
                     singleLine = true
@@ -187,7 +187,7 @@ fun QuickSaveScreen(
                 PrimaryButton(
                     text = "Confirmar depósito",
                     onClick = {
-                        val amount = if (customAmount.isNotEmpty()) customAmount else selectedAmount
+                        val amount = customAmount.ifEmpty { selectedAmount }
                         if (amount.isNotEmpty() && selectedGoalId.isNotEmpty()) {
                             onConfirmDeposit(amount, selectedGoalId)
                         }

@@ -87,7 +87,7 @@ fun GoalFormScreen(
                     Text(
                         text = if (isEditing) "Editar meta" else "Crear meta",
                         style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Semibold
+                        fontWeight = FontWeight.SemiBold
                     )
                 },
                 navigationIcon = {
@@ -101,15 +101,16 @@ fun GoalFormScreen(
                 )
             )
         }
-    ) { paddingValues ->
+    ) { paddingValuesScaffold -> // Padding del Scaffold
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Background)
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState()),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
-        ) {
+                .padding(paddingValuesScaffold) // Padding del Scaffold
+                .verticalScroll(rememberScrollState())
+                .padding(Spacing.lg), // Padding para el contenido, aplicado al Modifier
+            // contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg) // ELIMINAR ESTA LÍNEA
+        )  {
             // Goal Name
             CashitoTextField(
                 value = goalName,
