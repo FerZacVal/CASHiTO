@@ -19,10 +19,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,11 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.wear.compose.material.ChipDefaults
 import com.cashito.ui.components.inputs.CashitoSearchField
-import com.cashito.ui.theme.Background
 import com.cashito.ui.theme.ComponentSize
-import com.cashito.ui.theme.PrimaryGreen
 import com.cashito.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,14 +59,14 @@ fun TransactionsScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("Todos") }
-    
+
     val filters = listOf("Todos", "Depósitos", "Retiros", "Metas")
     val transactions = getSampleTransactions()
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         text = "Movimientos",
                         style = MaterialTheme.typography.headlineLarge,
@@ -83,29 +84,26 @@ fun TransactionsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         },
         floatingActionButton = {
-            androidx.compose.material3.FloatingActionButton(
-                onClick = onNavigateToNewTransaction,
-                containerColor = PrimaryGreen,
-                contentColor = Color.White
+            FloatingActionButton(
+                onClick = onNavigateToNewTransaction
             ) {
-                Icons.Default.Add
+                Icon(Icons.Default.Add, contentDescription = "Añadir transacción")
             }
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Background)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
         ) {
-            // Search Bar
             item {
                 CashitoSearchField(
                     value = searchQuery,
@@ -114,16 +112,15 @@ fun TransactionsScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.lg)) }
-            
-            // Filter Chips
+
             item {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
                     items(filters) { filter ->
-                        FilterChip(
+                        CustomFilterChip(
                             text = filter,
                             isSelected = selectedFilter == filter,
                             onClick = { selectedFilter = filter }
@@ -131,10 +128,9 @@ fun TransactionsScreen(
                     }
                 }
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Transactions by Date
+
             items(getGroupedTransactions(transactions, selectedFilter, searchQuery)) { group ->
                 TransactionGroup(
                     group = group,
@@ -147,28 +143,33 @@ fun TransactionsScreen(
 }
 
 @Composable
-fun FilterChip(
+@OptIn(ExperimentalMaterial3Api::class)
+fun CustomFilterChip(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Chip(
+    FilterChip(
+        selected = isSelected,
         onClick = onClick,
         label = {
             Text(
                 text = text,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Medium
             )
         },
-        colors = ChipDefaults.chipColors(
-            containerColor = if (isSelected) PrimaryGreen else Color.White,
-            labelColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
-        ),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (isSelected) PrimaryGreen else Color.Gray.copy(alpha = 0.3f)
-        )
+        leadingIcon = if (isSelected) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Selected",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        },
     )
 }
 
@@ -184,9 +185,9 @@ fun TransactionGroup(
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
-        
+
         Spacer(modifier = Modifier.height(Spacing.md))
-        
+
         group.transactions.forEach { transaction ->
             TransactionItem(
                 transaction = transaction,
@@ -205,7 +206,7 @@ fun TransactionItem(
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -223,26 +224,27 @@ fun TransactionItem(
             ) {
                 Text(
                     text = transaction.icon,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = transaction.color
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(Spacing.md))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.title,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = transaction.subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             Column(
                 horizontalAlignment = Alignment.End
             ) {
@@ -256,7 +258,7 @@ fun TransactionItem(
                     Text(
                         text = transaction.category,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -264,7 +266,6 @@ fun TransactionItem(
     }
 }
 
-// Data classes
 data class Transaction(
     val id: String,
     val title: String,
@@ -282,17 +283,24 @@ data class TransactionGroup(
     val transactions: List<Transaction>
 )
 
-// Sample data
-fun getSampleTransactions(): List<Transaction> = listOf(
-    Transaction("1", "Depósito automático", "Hoy, 09:30", "+S/ 200", PrimaryGreen, "💰", PrimaryGreen, "Ahorro", "Hoy"),
-    Transaction("2", "Compra en supermercado", "Hoy, 18:45", "-S/ 85.50", Color.Red, "🛒", Color(0xFF3B82F6), "Compras", "Hoy"),
-    Transaction("3", "Transferencia recibida", "Ayer, 14:20", "+S/ 500", PrimaryGreen, "📥", Color(0xFF10B981), "Transferencia", "Ayer"),
-    Transaction("4", "Pago de servicios", "Ayer, 10:15", "-S/ 120", Color.Red, "💡", Color(0xFFF59E0B), "Servicios", "Ayer"),
-    Transaction("5", "Ahorro redondeo", "Hace 2 días, 16:30", "+S/ 15.50", PrimaryGreen, "🔄", Color(0xFF8B5CF6), "Redondeo", "Hace 2 días"),
-    Transaction("6", "Compra de ropa", "Hace 2 días, 12:00", "-S/ 180", Color.Red, "👕", Color(0xFFEC4899), "Ropa", "Hace 2 días"),
-    Transaction("7", "Depósito manual", "Hace 3 días, 20:00", "+S/ 300", PrimaryGreen, "💳", PrimaryGreen, "Ahorro", "Hace 3 días"),
-    Transaction("8", "Pago de transporte", "Hace 3 días, 08:30", "-S/ 25", Color.Red, "🚌", Color(0xFF6366F1), "Transporte", "Hace 3 días")
-)
+@Composable
+fun getSampleTransactions(): List<Transaction> {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+    val errorColor = MaterialTheme.colorScheme.error
+
+    return listOf(
+        Transaction("1", "Depósito automático", "Hoy, 09:30", "+S/ 200", primaryColor, "💰", primaryColor, "Ahorro", "Hoy"),
+        Transaction("2", "Compra en supermercado", "Hoy, 18:45", "-S/ 85.50", errorColor, "🛒", secondaryColor, "Compras", "Hoy"),
+        Transaction("3", "Transferencia recibida", "Ayer, 14:20", "+S/ 500", primaryColor, "📥", tertiaryColor, "Transferencia", "Ayer"),
+        Transaction("4", "Pago de servicios", "Ayer, 10:15", "-S/ 120", errorColor, "💡", Color(0xFFF59E0B), "Servicios", "Ayer"),
+        Transaction("5", "Ahorro redondeo", "Hace 2 días, 16:30", "+S/ 15.50", primaryColor, "🔄", Color(0xFF8B5CF6), "Redondeo", "Hace 2 días"),
+        Transaction("6", "Compra de ropa", "Hace 2 días, 12:00", "-S/ 180", errorColor, "👕", Color(0xFFEC4899), "Ropa", "Hace 2 días"),
+        Transaction("7", "Depósito manual", "Hace 3 días, 20:00", "+S/ 300", primaryColor, "💳", primaryColor, "Ahorro", "Hace 3 días"),
+        Transaction("8", "Pago de transporte", "Hace 3 días, 08:30", "-S/ 25", errorColor, "🚌", Color(0xFF6366F1), "Transporte", "Hace 3 días")
+    )
+}
 
 fun getGroupedTransactions(
     transactions: List<Transaction>,
@@ -306,14 +314,14 @@ fun getGroupedTransactions(
             "Metas" -> transaction.category == "Ahorro"
             else -> true
         }
-        
-        val matchesSearch = searchQuery.isEmpty() || 
-            transaction.title.contains(searchQuery, ignoreCase = true) ||
-            transaction.amount.contains(searchQuery, ignoreCase = true)
-        
+
+        val matchesSearch = searchQuery.isEmpty() ||
+                transaction.title.contains(searchQuery, ignoreCase = true) ||
+                transaction.amount.contains(searchQuery, ignoreCase = true)
+
         matchesFilter && matchesSearch
     }
-    
+
     return filteredTransactions
         .groupBy { it.date }
         .map { (date, transactions) ->
@@ -323,9 +331,7 @@ fun getGroupedTransactions(
             when (group.date) {
                 "Hoy" -> 0
                 "Ayer" -> 1
-                "Hace 2 días" -> 2
-                "Hace 3 días" -> 3
-                else -> 4
+                else -> 2
             }
         }
 }

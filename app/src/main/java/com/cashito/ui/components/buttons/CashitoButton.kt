@@ -1,5 +1,6 @@
 package com.cashito.ui.components.buttons
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,12 +11,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cashito.ui.theme.ComponentSize
-import com.cashito.ui.theme.PrimaryGreen
-import com.cashito.ui.theme.PrimaryDark
 import com.cashito.ui.theme.Radius
 
 @Composable
@@ -32,17 +30,15 @@ fun PrimaryButton(
             .height(ComponentSize.buttonHeight),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            containerColor = PrimaryGreen,
-            contentColor = Color.White,
-            disabledContainerColor = Color.Gray,
-            disabledContentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         shape = RoundedCornerShape(Radius.md)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Semibold
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -61,18 +57,15 @@ fun SecondaryButton(
             .height(ComponentSize.buttonHeight),
         enabled = enabled,
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = PrimaryDark
+            contentColor = MaterialTheme.colorScheme.primary
         ),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (enabled) PrimaryGreen else Color.Gray
-        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         shape = RoundedCornerShape(Radius.md)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Semibold
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -87,13 +80,13 @@ fun SmallButton(
 ) {
     val buttonColors = if (isPrimary) {
         ButtonDefaults.buttonColors(
-            containerColor = PrimaryGreen,
-            contentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         )
     } else {
         ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = PrimaryDark
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
         )
     }
 

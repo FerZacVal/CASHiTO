@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,10 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
-import com.cashito.ui.theme.Background
 import com.cashito.ui.theme.ComponentSize
-import com.cashito.ui.theme.LightGreen
-import com.cashito.ui.theme.PrimaryGreen
 import com.cashito.ui.theme.Spacing
 
 
@@ -65,13 +63,14 @@ fun GoalDetailScreen(
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var isRecurringEnabled by remember { mutableStateOf(true) }
-    
+
     val goal = getSampleGoal(goalId)
-    
+    val transactions = getGoalTransactions(goalId)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         text = goal.title,
                         style = MaterialTheme.typography.headlineLarge,
@@ -80,7 +79,7 @@ fun GoalDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -93,7 +92,7 @@ fun GoalDetailScreen(
                     ) {
                         DropdownMenuItem(
                             text = { Text("Editar meta") },
-                            onClick = { 
+                            onClick = {
                                 showMenu = false
                                 onNavigateToEdit()
                             }
@@ -107,13 +106,15 @@ fun GoalDetailScreen(
                             onClick = { showMenu = false }
                         )
                         DropdownMenuItem(
-                            text = { Text("Eliminar meta", color = Color.Red) },
+                            text = {
+                                Text("Eliminar meta", color = MaterialTheme.colorScheme.error)
+                            },
                             onClick = { showMenu = false }
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
@@ -122,15 +123,14 @@ fun GoalDetailScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Background)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
         ) {
-            // Hero Section with Donut Chart
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
@@ -139,17 +139,16 @@ fun GoalDetailScreen(
                             .padding(Spacing.xl),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Large Donut Chart
                         Box(
                             modifier = Modifier.size(ComponentSize.largeDonutSize),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
-                                progress = goal.progress,
+                                progress = { goal.progress },
                                 modifier = Modifier.fillMaxSize(),
                                 color = goal.color,
                                 strokeWidth = 14.dp,
-                                trackColor = Color.Gray.copy(alpha = 0.2f)
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
                             Text(
                                 text = "${(goal.progress * 100).toInt()}%",
@@ -158,9 +157,9 @@ fun GoalDetailScreen(
                                 color = goal.color
                             )
                         }
-                        
+
                         Spacer(modifier = Modifier.height(Spacing.lg))
-                        
+
                         Text(
                             text = "Ahorrado S/ ${goal.savedAmount} / S/ ${goal.targetAmount}",
                             style = MaterialTheme.typography.headlineMedium,
@@ -168,22 +167,21 @@ fun GoalDetailScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                             textAlign = TextAlign.Center
                         )
-                        
+
                         Spacer(modifier = Modifier.height(Spacing.sm))
-                        
+
                         Text(
                             text = "Meta: ${goal.targetDate}",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
                     }
                 }
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Action Buttons
+
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -201,14 +199,13 @@ fun GoalDetailScreen(
                     )
                 }
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Recurring Savings Plan
+
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(
@@ -222,9 +219,9 @@ fun GoalDetailScreen(
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        
+
                         Spacer(modifier = Modifier.height(Spacing.md))
-                        
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -238,18 +235,18 @@ fun GoalDetailScreen(
                             Switch(
                                 checked = isRecurringEnabled,
                                 onCheckedChange = { isRecurringEnabled = it },
-                                colors = androidx.compose.material3.SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = PrimaryGreen,
-                                    uncheckedThumbColor = Color.White,
-                                    uncheckedTrackColor = Color.Gray
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
                             )
                         }
-                        
+
                         if (isRecurringEnabled) {
                             Spacer(modifier = Modifier.height(Spacing.md))
-                            
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
@@ -258,7 +255,7 @@ fun GoalDetailScreen(
                                     Text(
                                         text = "Frecuencia",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
                                         text = "Semanal",
@@ -270,7 +267,7 @@ fun GoalDetailScreen(
                                     Text(
                                         text = "Monto",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
                                         text = "S/ 200",
@@ -279,39 +276,40 @@ fun GoalDetailScreen(
                                     )
                                 }
                             }
-                            
+
                             Spacer(modifier = Modifier.height(Spacing.sm))
-                            
+
                             Text(
                                 text = "Sugerencia: programa aportes automáticos para avanzar sin pensar.",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                             )
                         }
                     }
                 }
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Transaction History
+
             item {
                 Text(
                     text = "Historial de esta meta",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.md)) }
-            
-            if (getGoalTransactions(goalId).isEmpty()) {
+
+            // --- CORRECCIÓN ---
+            // Ahora 'transactions' es una variable estable y se puede usar aquí.
+            if (transactions.isEmpty()) {
                 item {
                     EmptyStateCard()
                 }
             } else {
-                items(getGoalTransactions(goalId)) { transaction ->
+                items(transactions) { transaction ->
                     TransactionItem(
                         transaction = transaction,
                         onClick = { /* Handle transaction click */ }
@@ -323,6 +321,46 @@ fun GoalDetailScreen(
     }
 }
 
+data class Goal(val id: String, val title: String, val progress: Float, val color: Color, val savedAmount: String, val targetAmount: String, val targetDate: String)
+data class GoalTransaction(val title: String, val icon: String, val color: Color)
+
+@Composable
+fun getSampleGoal(goalId: String): Goal {
+    val goalColor = MaterialTheme.colorScheme.primary
+    return Goal(goalId, "Viaje a Cusco", 0.65f, goalColor, "3,420", "5,000", "Dic 2025")
+}
+
+@Composable
+fun getGoalTransactions(goalId: String): List<GoalTransaction> {
+    val transactionColor = MaterialTheme.colorScheme.primary
+    return listOf(
+        GoalTransaction("Ahorro semanal", "💰", transactionColor),
+        GoalTransaction("Depósito extra", "💸", transactionColor)
+    )
+}
+
+
+@Composable
+fun EmptyStateCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.xl),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Aún no hay movimientos", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            Text("¡Haz tu primer depósito para empezar!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+
 @Composable
 fun TransactionItem(
     transaction: GoalTransaction,
@@ -331,7 +369,7 @@ fun TransactionItem(
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -349,112 +387,20 @@ fun TransactionItem(
             ) {
                 Text(
                     text = transaction.icon,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = transaction.color
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(Spacing.md))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = transaction.subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
             }
-            
-            Text(
-                text = transaction.amount,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = transaction.amountColor
-            )
         }
     }
 }
-
-@Composable
-fun EmptyStateCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.xl),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "💰",
-                style = MaterialTheme.typography.displayLarge
-            )
-            
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            
-            Text(
-                text = "Aún no tienes aportes en esta meta",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-            
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            
-            Text(
-                text = "Empieza con tu primer depósito.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-// Data classes
-data class GoalDetail(
-    val id: String,
-    val title: String,
-    val savedAmount: String,
-    val targetAmount: String,
-    val progress: Float,
-    val targetDate: String,
-    val color: Color,
-    val icon: String
-)
-
-data class GoalTransaction(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val amount: String,
-    val amountColor: Color,
-    val icon: String,
-    val color: Color
-)
-
-// Sample data
-fun getSampleGoal(goalId: String): GoalDetail = GoalDetail(
-    id = goalId,
-    title = "Viaje a Cusco",
-    savedAmount = "2,600",
-    targetAmount = "4,000",
-    progress = 0.65f,
-    targetDate = "20 dic 2026",
-    color = PrimaryGreen,
-    icon = "✈️"
-)
-
-fun getGoalTransactions(goalId: String): List<GoalTransaction> = listOf(
-    GoalTransaction("1", "Depósito automático", "Hoy, 09:30", "+S/ 200", PrimaryGreen, "💰", PrimaryGreen),
-    GoalTransaction("2", "Ahorro manual", "Ayer, 15:20", "+S/ 500", PrimaryGreen, "💳", Color(0xFF3B82F6)),
-    GoalTransaction("3", "Redondeo", "Hace 2 días", "+S/ 15.50", PrimaryGreen, "🔄", Color(0xFF10B981))
-)

@@ -11,16 +11,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.Routes
+import com.cashito.ui.components.buttons.SecondaryButton
+import com.cashito.ui.theme.Spacing
 
 @Composable
 fun HomeScreen(navController: NavController? = null) {
     val screens = listOf(
-        "Auth" to Routes.AUTH,
-        "Categories" to Routes.CATEGORY,
-        "Expenses" to Routes.EXPENSE,
-        "Recommendations" to Routes.RECOMMENDATION,
-        "Reports" to Routes.REPORT,
-        "Savings" to Routes.SAVINGS
+        "Dashboard" to Routes.DASHBOARD,
+        "Splash" to Routes.SPLASH,
+        "Login" to Routes.LOGIN,
+        "Auth (Legacy)" to Routes.AUTH,
+        "Categories (Legacy)" to Routes.CATEGORY,
+        "Expenses (Legacy)" to Routes.EXPENSE,
+        "Recommendations (Legacy)" to Routes.RECOMMENDATION,
+        "Reports (Legacy)" to Routes.REPORT,
+        "Savings (Legacy)" to Routes.SAVINGS,
+        "Goal Detail" to "${Routes.GOAL_DETAIL.substringBefore('{')}1",
+        "Goal Form" to Routes.GOAL_FORM,
+        "Profile" to Routes.PROFILE,
+        "Quick Save" to Routes.QUICK_SAVE,
+        "Transactions" to Routes.TRANSACTIONS
     )
 
     Column(
@@ -30,12 +40,12 @@ fun HomeScreen(navController: NavController? = null) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "CASHiTO",
+            text = "CASHiTO Dev Menu",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 32.dp)
         )
-        
+
         Text(
             text = "Personal Finance Manager",
             style = MaterialTheme.typography.bodyLarge,
@@ -44,23 +54,15 @@ fun HomeScreen(navController: NavController? = null) {
         )
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
             modifier = Modifier.fillMaxWidth()
         ) {
             items(screens) { (title, route) ->
-                OutlinedCard(
-                    modifier = Modifier.fillMaxWidth(),
+                SecondaryButton(
+                    text = title,
                     onClick = { navController?.navigate(route) }
-                ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+                )
             }
         }
     }
 }
-
-

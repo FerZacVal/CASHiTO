@@ -1,10 +1,13 @@
 package com.cashito.ui.components.cards
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,21 +16,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.cashito.ui.components.buttons.PrimaryButton
+import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.theme.ComponentSize
-import com.cashito.ui.theme.LightGreen
-import com.cashito.ui.theme.PrimaryGreen
 import com.cashito.ui.theme.Radius
-import com.cashito.ui.theme.ShadowColor
 import com.cashito.ui.theme.Spacing
 
 @Composable
@@ -41,7 +47,7 @@ fun HeroCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(Radius.lg),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -51,8 +57,8 @@ fun HeroCard(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color.White,
-                            LightGreen.copy(alpha = 0.1f)
+                            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.5f),
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
                         )
                     )
                 )
@@ -68,12 +74,12 @@ fun HeroCard(
                     Text(
                         text = "Saldo total",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(Spacing.xs))
                     Text(
                         text = totalBalance,
-                        style = MaterialTheme.typography.displayLarge,
+                        style = MaterialTheme.typography.displaySmall, // Ajustado para mejor visualización
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -81,74 +87,72 @@ fun HeroCard(
                     Text(
                         text = goalProgress,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(Spacing.md))
                     Row {
-                        androidx.compose.material3.Button(
+                        PrimaryButton(
+                            text = "Depositar",
                             onClick = onDepositClick,
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                containerColor = PrimaryGreen
-                            ),
-                            shape = RoundedCornerShape(Radius.sm)
-                        ) {
-                            Text("Depositar")
-                        }
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                        )
                         Spacer(modifier = Modifier.width(Spacing.sm))
-                        androidx.compose.material3.OutlinedButton(
+                        SecondaryButton(
+                            text = "Retirar",
                             onClick = onWithdrawClick,
-                            shape = RoundedCornerShape(Radius.sm)
-                        ) {
-                            Text("Retirar")
-                        }
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                        )
                     }
                 }
-                
-                // Progress Ring
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
                 Box(
                     modifier = Modifier
                         .size(ComponentSize.donutSize)
                         .align(Alignment.CenterVertically)
                 ) {
-                    androidx.compose.foundation.Canvas(
-                        modifier = Modifier.fillMaxWidth()
+                    val primaryColor = MaterialTheme.colorScheme.primary
+                    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+
+                    Canvas(
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         val strokeWidth = 8.dp.toPx()
                         val radius = (size.minDimension - strokeWidth) / 2
-                        val center = androidx.compose.ui.geometry.Offset(
+                        val center = Offset(
                             size.width / 2,
                             size.height / 2
                         )
-                        
-                        // Background circle
                         drawCircle(
-                            color = Color.Gray.copy(alpha = 0.2f),
+                            color = trackColor,
                             radius = radius,
                             center = center,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
+                            style = Stroke(width = strokeWidth)
                         )
-                        
-                        // Progress arc
                         val sweepAngle = (progressPercentage / 100f) * 360f
                         drawArc(
-                            color = PrimaryGreen,
+                            color = primaryColor,
                             startAngle = -90f,
                             sweepAngle = sweepAngle,
                             useCenter = false,
-                            topLeft = androidx.compose.ui.geometry.Offset(
+                            topLeft = Offset(
                                 center.x - radius,
                                 center.y - radius
                             ),
-                            size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2),
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
+                            size = Size(radius * 2, radius * 2),
+                            style = Stroke(width = strokeWidth)
                         )
                     }
-                    
                     Text(
                         text = "$progressPercentage%",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = PrimaryGreen,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -173,22 +177,24 @@ fun GoalCard(
         modifier = modifier
             .width(140.dp)
             .height(120.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         shape = RoundedCornerShape(Radius.lg),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.md)
+                .fillMaxSize()
+                .padding(Spacing.md),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
                 Text(
                     text = icon,
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineSmall
                 )
                 Box(
                     modifier = Modifier
@@ -197,31 +203,28 @@ fun GoalCard(
                         .background(color)
                 )
             }
-            
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            
-            Spacer(modifier = Modifier.height(Spacing.xs))
-            
-            Text(
-                text = "S/ $savedAmount / S/ $targetAmount",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-            
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            
-            androidx.compose.material3.LinearProgressIndicator(
-                progress = progress,
+
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.xs))
+
+                Text(
+                    text = "S/ $savedAmount / S/ $targetAmount",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            LinearProgressIndicator(
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth(),
                 color = color,
-                trackColor = Color.Gray.copy(alpha = 0.2f)
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
     }

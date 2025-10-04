@@ -2,6 +2,7 @@ package com.cashito.ui.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,9 +32,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -49,9 +52,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.cashito.ui.theme.Background
-import com.cashito.ui.theme.LightGreen
-import com.cashito.ui.theme.PrimaryGreen
+import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,11 +65,11 @@ fun ProfileScreen(
     var biometricEnabled by remember { mutableStateOf(true) }
     var notificationsEnabled by remember { mutableStateOf(true) }
     var remindersEnabled by remember { mutableStateOf(true) }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         text = "Perfil",
                         style = MaterialTheme.typography.headlineLarge,
@@ -81,7 +82,7 @@ fun ProfileScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
@@ -90,32 +91,30 @@ fun ProfileScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Background)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
         ) {
-            // Profile Header
             item {
                 ProfileHeader(
                     name = "Ana García",
                     email = "ana.garcia@email.com"
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Account Section
+
             item {
                 ProfileSection(
                     title = "Cuenta",
                     items = listOf(
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.Default.Person,
                             title = "Información personal",
                             subtitle = "Editar perfil y datos",
                             onClick = { /* Handle edit profile */ }
                         ),
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.Default.CreditCard,
                             title = "Cuentas vinculadas",
                             subtitle = "Tarjetas y bancos",
@@ -124,21 +123,20 @@ fun ProfileScreen(
                     )
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Security Section
+
             item {
                 ProfileSection(
                     title = "Seguridad",
                     items = listOf(
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.Default.Lock,
                             title = "Cambiar contraseña",
                             subtitle = "Actualizar tu contraseña",
                             onClick = { /* Handle change password */ }
                         ),
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.Default.Settings,
                             title = "Autenticación biométrica",
                             subtitle = "Usar huella dactilar o Face ID",
@@ -146,28 +144,27 @@ fun ProfileScreen(
                                 Switch(
                                     checked = biometricEnabled,
                                     onCheckedChange = { biometricEnabled = it },
-                                    colors = androidx.compose.material3.SwitchDefaults.colors(
-                                        checkedThumbColor = Color.White,
-                                        checkedTrackColor = PrimaryGreen,
-                                        uncheckedThumbColor = Color.White,
-                                        uncheckedTrackColor = Color.Gray
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
                                     )
                                 )
                             },
-                            onClick = { /* Handle biometric toggle */ }
+                            onClick = { biometricEnabled = !biometricEnabled }
                         )
                     )
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Notifications Section
+
             item {
                 ProfileSection(
                     title = "Notificaciones",
                     items = listOf(
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.Default.Notifications,
                             title = "Notificaciones push",
                             subtitle = "Recibir notificaciones en el dispositivo",
@@ -175,17 +172,17 @@ fun ProfileScreen(
                                 Switch(
                                     checked = notificationsEnabled,
                                     onCheckedChange = { notificationsEnabled = it },
-                                    colors = androidx.compose.material3.SwitchDefaults.colors(
-                                        checkedThumbColor = Color.White,
-                                        checkedTrackColor = PrimaryGreen,
-                                        uncheckedThumbColor = Color.White,
-                                        uncheckedTrackColor = Color.Gray
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
                                     )
                                 )
                             },
-                            onClick = { /* Handle notifications toggle */ }
+                            onClick = { notificationsEnabled = !notificationsEnabled }
                         ),
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.Default.Settings,
                             title = "Recordatorios de metas",
                             subtitle = "Notificaciones sobre progreso de ahorros",
@@ -193,34 +190,33 @@ fun ProfileScreen(
                                 Switch(
                                     checked = remindersEnabled,
                                     onCheckedChange = { remindersEnabled = it },
-                                    colors = androidx.compose.material3.SwitchDefaults.colors(
-                                        checkedThumbColor = Color.White,
-                                        checkedTrackColor = PrimaryGreen,
-                                        uncheckedThumbColor = Color.White,
-                                        uncheckedTrackColor = Color.Gray
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
                                     )
                                 )
                             },
-                            onClick = { /* Handle reminders toggle */ }
+                            onClick = { remindersEnabled = !remindersEnabled }
                         )
                     )
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Support Section
+
             item {
                 ProfileSection(
                     title = "Soporte",
                     items = listOf(
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.AutoMirrored.Filled.Help,
                             title = "Preguntas frecuentes",
                             subtitle = "Encuentra respuestas rápidas",
                             onClick = { /* Handle FAQ */ }
                         ),
-                        ProfileItem(
+                        ProfileItemData(
                             icon = Icons.Default.Support,
                             title = "Contactar soporte",
                             subtitle = "Obtén ayuda personalizada",
@@ -229,19 +225,18 @@ fun ProfileScreen(
                     )
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Security Notice
+
             item {
                 SecurityNoticeCard()
             }
-            
+
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-            
-            // Logout Button
+
             item {
-                LogoutButton(
+                SecondaryButton(
+                    text = "Cerrar sesión",
                     onClick = onNavigateToLogin
                 )
             }
@@ -256,7 +251,7 @@ fun ProfileHeader(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -265,12 +260,11 @@ fun ProfileHeader(
                 .padding(Spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
             Box(
                 modifier = Modifier
                     .size(80.dp)
                     .background(
-                        color = LightGreen,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -279,12 +273,12 @@ fun ProfileHeader(
                     text = "A",
                     style = MaterialTheme.typography.displayLarge,
                     fontWeight = FontWeight.Bold,
-                    color = PrimaryGreen
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(Spacing.lg))
-            
+
             Column {
                 Text(
                     text = name,
@@ -295,7 +289,7 @@ fun ProfileHeader(
                 Text(
                     text = email,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -305,7 +299,7 @@ fun ProfileHeader(
 @Composable
 fun ProfileSection(
     title: String,
-    items: List<ProfileItem>
+    items: List<ProfileItemData>
 ) {
     Column {
         Text(
@@ -315,10 +309,10 @@ fun ProfileSection(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = Spacing.md)
         )
-        
+
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             items.forEachIndexed { index, item ->
@@ -331,26 +325,31 @@ fun ProfileSection(
                         )
                     },
                     supportingContent = {
-                        Text(
-                            text = item.subtitle,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
+                        if (item.subtitle.isNotEmpty()) {
+                            Text(
+                                text = item.subtitle,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     },
                     leadingContent = {
                         Icon(
                             imageVector = item.icon,
                             contentDescription = item.title,
-                            tint = PrimaryGreen
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     },
                     trailingContent = item.trailing,
-                    modifier = Modifier.clickable(onClick = item.onClick)                )
-                
+                    modifier = Modifier.clickable(onClick = item.onClick),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+
                 if (index < items.size - 1) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = Spacing.lg),
-                        thickness = DividerDefaults.Thickness, color = Color.Gray.copy(alpha = 0.2f)
+                        thickness = DividerDefaults.Thickness,
+                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                 }
             }
@@ -362,49 +361,33 @@ fun ProfileSection(
 fun SecurityNoticeCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = LightGreen.copy(alpha = 0.3f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Spacing.lg)
+                .padding(Spacing.lg),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = "Security",
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Spacer(modifier = Modifier.width(Spacing.sm))
             Text(
-                text = "🔒 Tus datos están cifrados y seguros",
+                text = "Tus datos están cifrados y seguros",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }
 }
 
-@Composable
-fun LogoutButton(
-    onClick: () -> Unit
-) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Text(
-            text = "Cerrar sesión",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = Color.Red,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-    }
-}
-
-// Data classes
-data class ProfileItem(
+data class ProfileItemData(
     val icon: ImageVector,
     val title: String,
     val subtitle: String,

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -21,7 +22,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,44 +33,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
-import com.cashito.ui.theme.LightGreen
-import com.cashito.ui.theme.PrimaryGreen
+import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextFieldDefaults
 
 @Composable
 fun QuickSaveScreen(
     navController: NavController,
     onNavigateBack: () -> Unit = { navController.popBackStack() },
-    onConfirmDeposit: (String, String) -> Unit = { amount, goalId -> 
-        // Handle deposit confirmation
+    onConfirmDeposit: (String, String) -> Unit = { _, _ ->
         navController.popBackStack()
     }
 ) {
     var selectedAmount by remember { mutableStateOf("") }
     var selectedGoalId by remember { mutableStateOf("") }
     var customAmount by remember { mutableStateOf("") }
-    
+
     val presetAmounts = listOf("5", "10", "20", "50")
     val goals = getSampleGoals()
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f)),
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f)),
         contentAlignment = Alignment.Center
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(Spacing.lg),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
             shape = RoundedCornerShape(Radius.lg),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
@@ -79,7 +76,6 @@ fun QuickSaveScreen(
                     .fillMaxWidth()
                     .padding(Spacing.lg)
             ) {
-                // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -92,22 +88,25 @@ fun QuickSaveScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(Spacing.xl))
-                
-                // Preset Amounts
+
                 Text(
                     text = "Selecciona un monto",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 Spacer(modifier = Modifier.height(Spacing.md))
-                
+
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
@@ -115,60 +114,48 @@ fun QuickSaveScreen(
                         PresetAmountButton(
                             amount = "S/ $amount",
                             isSelected = selectedAmount == amount,
-                            onClick = { 
+                            onClick = {
                                 selectedAmount = amount
                                 customAmount = ""
                             }
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                
-                // Custom Amount Input
+
                 Text(
                     text = "O ingresa un monto personalizado",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 Spacer(modifier = Modifier.height(Spacing.sm))
-                
-                OutlinedTextField(
+
+                CashitoTextField(
                     value = customAmount,
-                    onValueChange = { 
+                    onValueChange = {
                         customAmount = it
                         selectedAmount = ""
                     },
-                    placeholder = { Text("S/ 0") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedBorderColor = PrimaryGreen,
-                        unfocusedBorderColor = Color.Gray,
-                        cursorColor = PrimaryGreen
-                    ),
-                    shape = RoundedCornerShape(Radius.md),
-                    singleLine = true
+                    label = "Monto personalizado",
+                    placeholder = "S/ 0.00",
+                    keyboardType = KeyboardType.Number,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 Spacer(modifier = Modifier.height(Spacing.xl))
-                
-                // Goal Selection
+
                 Text(
                     text = "Selecciona una meta",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 Spacer(modifier = Modifier.height(Spacing.md))
-                
+
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
@@ -180,10 +167,9 @@ fun QuickSaveScreen(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(Spacing.xl))
-                
-                // Confirm Button
+
                 PrimaryButton(
                     text = "Confirmar depósito",
                     onClick = {
@@ -223,7 +209,7 @@ fun GoalChip(
         onClick = onClick,
         modifier = Modifier.width(120.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) PrimaryGreen else LightGreen
+            containerColor = if (isSelected) goal.color else goal.color.copy(alpha = 0.2f)
         ),
         shape = RoundedCornerShape(Radius.round)
     ) {
@@ -235,21 +221,21 @@ fun GoalChip(
         ) {
             Text(
                 text = goal.icon,
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.headlineSmall,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else goal.color
             )
             Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
                 text = goal.title,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
-                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else goal.color,
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
-// Data classes
 data class QuickSaveGoal(
     val id: String,
     val title: String,
@@ -257,10 +243,12 @@ data class QuickSaveGoal(
     val color: Color
 )
 
-// Sample data
-fun getSampleGoals(): List<QuickSaveGoal> = listOf(
-    QuickSaveGoal("1", "Viaje a Cusco", "✈️", PrimaryGreen),
-    QuickSaveGoal("2", "Laptop nueva", "💻", Color(0xFF3B82F6)),
-    QuickSaveGoal("3", "Vacaciones", "🏖️", Color(0xFF8B5CF6)),
-    QuickSaveGoal("4", "Coche", "🚗", Color(0xFFF59E0B))
-)
+@Composable
+fun getSampleGoals(): List<QuickSaveGoal> {
+    return listOf(
+        QuickSaveGoal("1", "Viaje a Cusco", "✈️", MaterialTheme.colorScheme.primary),
+        QuickSaveGoal("2", "Laptop nueva", "💻", MaterialTheme.colorScheme.secondary),
+        QuickSaveGoal("3", "Vacaciones", "🏖️", MaterialTheme.colorScheme.tertiary),
+        QuickSaveGoal("4", "Coche", "🚗", Color(0xFFF59E0B))
+    )
+}

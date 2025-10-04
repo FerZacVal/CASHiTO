@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,8 +34,6 @@ import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
-import com.cashito.ui.theme.Background
-import com.cashito.ui.theme.PrimaryGreen
 import com.cashito.ui.theme.Spacing
 
 @Composable
@@ -52,7 +51,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -62,39 +61,36 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(Spacing.xxxl))
-            
-            // Logo
+
             Box(
                 modifier = Modifier
                     .size(80.dp)
                     .background(
-                        color = PrimaryGreen,
+                        color = MaterialTheme.colorScheme.primary,
                         shape = androidx.compose.foundation.shape.CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "💰",
-                    style = MaterialTheme.typography.displayLarge
+                    style = MaterialTheme.typography.displayLarge,
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(Spacing.lg))
-            
-            // Title
+
             Text(
                 text = "Iniciar sesión",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            
+
             Spacer(modifier = Modifier.height(Spacing.xxxl))
-            
-            // Email Field
+
             CashitoTextField(
                 value = email,
-                onValueChange = { 
+                onValueChange = {
                     email = it
                     emailError = ""
                 },
@@ -104,13 +100,12 @@ fun LoginScreen(
                 isError = emailError.isNotEmpty(),
                 errorMessage = emailError
             )
-            
+
             Spacer(modifier = Modifier.height(Spacing.lg))
-            
-            // Password Field
+
             CashitoTextField(
                 value = password,
-                onValueChange = { 
+                onValueChange = {
                     password = it
                     passwordError = ""
                 },
@@ -120,10 +115,9 @@ fun LoginScreen(
                 isError = passwordError.isNotEmpty(),
                 errorMessage = passwordError
             )
-            
+
             Spacer(modifier = Modifier.height(Spacing.md))
-            
-            // Remember Me Checkbox
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -131,8 +125,10 @@ fun LoginScreen(
                 Checkbox(
                     checked = rememberMe,
                     onCheckedChange = { rememberMe = it },
-                    colors = androidx.compose.material3.CheckboxDefaults.colors(
-                        checkedColor = PrimaryGreen
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        checkmarkColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
                 Text(
@@ -141,65 +137,59 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(Spacing.xl))
-            
-            // Login Button
+
             PrimaryButton(
                 text = "Iniciar sesión",
                 onClick = {
-                    // Validate inputs
                     if (email.isEmpty()) {
                         emailError = "El correo es requerido"
                     } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                         emailError = "Formato de correo inválido"
                     }
-                    
+
                     if (password.isEmpty()) {
                         passwordError = "La contraseña es requerida"
                     } else if (password.length < 6) {
                         passwordError = "Mínimo 6 caracteres"
                     }
-                    
+
                     if (emailError.isEmpty() && passwordError.isEmpty()) {
                         onNavigateToDashboard()
                     }
                 }
             )
-            
+
             Spacer(modifier = Modifier.height(Spacing.lg))
-            
-            // Register Button
+
             SecondaryButton(
                 text = "Crear cuenta",
                 onClick = onNavigateToRegister
             )
-            
+
             Spacer(modifier = Modifier.height(Spacing.xl))
-            
-            // Social Login
+
             Text(
                 text = "O continúa con",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
             )
-            
+
             Spacer(modifier = Modifier.height(Spacing.lg))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                // Google Button
                 SmallButton(
                     text = "Google",
                     onClick = { /* Handle Google login */ },
                     isPrimary = false,
                     modifier = Modifier.weight(1f)
                 )
-                
-                // Apple Button
+
                 SmallButton(
                     text = "Apple",
                     onClick = { /* Handle Apple login */ },
@@ -207,17 +197,16 @@ fun LoginScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(Spacing.xl))
-            
-            // Forgot Password
+
             TextButton(
                 onClick = { /* Handle forgot password */ }
             ) {
                 Text(
                     text = "¿Olvidaste tu contraseña?",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = PrimaryGreen
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }

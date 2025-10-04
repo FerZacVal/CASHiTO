@@ -14,6 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.Routes
+import com.cashito.ui.components.buttons.PrimaryButton
+import com.cashito.ui.components.buttons.SecondaryButton
+import com.cashito.ui.components.buttons.SmallButton
+import com.cashito.ui.theme.Spacing
 
 @Composable
 fun ReportScreen(navController: NavController? = null) {
@@ -28,7 +32,7 @@ fun ReportScreen(navController: NavController? = null) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(Spacing.lg)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -40,7 +44,7 @@ fun ReportScreen(navController: NavController? = null) {
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            
+
             IconButton(
                 onClick = { /* TODO: Download report */ }
             ) {
@@ -48,7 +52,7 @@ fun ReportScreen(navController: NavController? = null) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -57,15 +61,15 @@ fun ReportScreen(navController: NavController? = null) {
             )
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(Spacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     Icons.Default.Analytics,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
                 Text(
                     text = "Track your financial progress with detailed reports",
                     style = MaterialTheme.typography.bodyMedium,
@@ -74,30 +78,33 @@ fun ReportScreen(navController: NavController? = null) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Text(
             text = "Available Reports",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = Spacing.md)
         )
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             items(sampleReports) { (title, period) ->
                 Card(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                    )
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = title,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -109,34 +116,28 @@ fun ReportScreen(navController: NavController? = null) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Button(
-                            onClick = { /* TODO: View report */ }
-                        ) {
-                            Text("View")
-                        }
+                        SmallButton(
+                            text = "Ver",
+                            onClick = { /* TODO: View report */ },
+                            isPrimary = true
+                        )
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
-        Button(
+        PrimaryButton(
             onClick = { /* TODO: Generate custom report */ },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Generate Custom Report")
-        }
+            text = "Generate Custom Report"
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
-        OutlinedButton(
+        SecondaryButton(
             onClick = { navController?.navigate(Routes.HOME) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Back to Home")
-        }
+            text = "Back to Home"
+        )
     }
 }
-
-

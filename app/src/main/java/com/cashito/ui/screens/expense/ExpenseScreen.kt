@@ -5,21 +5,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.Routes
+import com.cashito.ui.components.buttons.PrimaryButton
+import com.cashito.ui.components.buttons.SecondaryButton
+import com.cashito.ui.components.inputs.CashitoTextField
 
 @Composable
 fun ExpenseScreen(navController: NavController? = null) {
     var newExpenseTitle by remember { mutableStateOf("") }
     var newExpenseAmount by remember { mutableStateOf("") }
-    
+
     val sampleExpenses = listOf(
         "Coffee" to "$4.50",
         "Lunch" to "$12.00",
@@ -42,7 +47,7 @@ fun ExpenseScreen(navController: NavController? = null) {
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            
+
             FloatingActionButton(
                 onClick = { /* TODO: Add expense */ },
                 modifier = Modifier.size(48.dp)
@@ -56,7 +61,7 @@ fun ExpenseScreen(navController: NavController? = null) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             )
         ) {
             Column(
@@ -67,34 +72,32 @@ fun ExpenseScreen(navController: NavController? = null) {
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
-                OutlinedTextField(
+
+                CashitoTextField(
                     value = newExpenseTitle,
                     onValueChange = { newExpenseTitle = it },
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = "Description",
+                    placeholder = "e.g., Coffee"
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                OutlinedTextField(
+
+                CashitoTextField(
                     value = newExpenseAmount,
                     onValueChange = { newExpenseAmount = it },
-                    label = { Text("Amount") },
-                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth()
+                    label = "Amount",
+                    placeholder = "S/ 0.00",
+                    keyboardType = KeyboardType.Number
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
-                Button(
-                    onClick = { /* TODO: Save expense */ },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Add Expense")
-                }
+
+                PrimaryButton(
+                    text = "Add Expense",
+                    onClick = { /* TODO: Save expense */ }
+                )
             }
         }
 
@@ -112,7 +115,10 @@ fun ExpenseScreen(navController: NavController? = null) {
         ) {
             items(sampleExpenses) { (title, amount) ->
                 Card(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -137,13 +143,9 @@ fun ExpenseScreen(navController: NavController? = null) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedButton(
-            onClick = { navController?.navigate(Routes.HOME) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Back to Home")
-        }
+        SecondaryButton(
+            text = "Back to Home",
+            onClick = { navController?.navigate(Routes.HOME) }
+        )
     }
 }
-
-

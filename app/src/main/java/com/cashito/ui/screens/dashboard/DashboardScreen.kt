@@ -30,26 +30,69 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton // Importado para TextButton
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign // Importado para TextAlign
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-// Asegúrate de que estos componentes también usen MaterialTheme internamente
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
-// Asumiendo que estos están definidos en tu Color.kt
-import com.cashito.ui.theme.background
-import com.cashito.ui.theme.ComponentSize // Asumiendo que esto define Dp values
-import com.cashito.ui.theme.lightGreen
-import com.cashito.ui.theme.primaryGreen
-import com.cashito.ui.theme.Spacing // Asumiendo que esto define Dp values
+import com.cashito.ui.theme.ComponentSize
+import com.cashito.ui.theme.Spacing
+
+// --- INICIO DE DATOS DE MUESTRA ---
+// Se añaden aquí para que el archivo sea autocompleto y compile.
+// En un proyecto real, estos vendrían de un ViewModel o capa de datos.
+
+data class Goal(val id: String, val title: String, val savedAmount: String, val targetAmount: String, val progress: Float, val icon: String, val color: Color)
+data class Transaction(val title: String, val icon: String, val color: Color)
+data class Insight(val message: String)
+
+@Composable
+fun getSampleGoals(): List<Goal> {
+    return listOf(
+        Goal("1", "Viaje a Cusco", "3,420", "5,000", 0.65f, "✈️", MaterialTheme.colorScheme.primary),
+        Goal("2", "Laptop nueva", "800", "4,500", 0.18f, "💻", MaterialTheme.colorScheme.secondary)
+    )
+}
+
+@Composable
+fun getSampleTransactions(): List<Transaction> {
+    return listOf(
+        Transaction("Depósito automático", "💰", MaterialTheme.colorScheme.primary),
+        Transaction("Compra en supermercado", "🛒", MaterialTheme.colorScheme.secondary)
+    )
+}
+
+@Composable
+fun InsightsCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            Text(
+                "💡 ¿Sabías que?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            Text(
+                "Ahorrar S/ 20 a la semana se convierte en más de S/ 1,000 al año.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+        }
+    }
+}
+// --- FIN DE DATOS DE MUESTRA ---
 
 @Composable
 fun DashboardScreen(
@@ -59,6 +102,12 @@ fun DashboardScreen(
     onNavigateToProfile: () -> Unit = { navController.navigate("profile") },
     onNavigateToQuickSave: () -> Unit = { navController.navigate("quick_save") }
 ) {
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Llamamos a las funciones @Composable una sola vez en el scope principal.
+    val sampleGoals = getSampleGoals()
+    val sampleTransactions = getSampleTransactions()
+    // --- FIN DE LA CORRECCIÓN ---
+
     Scaffold(
         topBar = {
             DashboardTopBar(
@@ -68,7 +117,7 @@ fun DashboardScreen(
             )
         },
         bottomBar = {
-            CashitoBottomNavigation( // Asegúrate que este componente use MaterialTheme
+            CashitoBottomNavigation(
                 currentRoute = "dashboard",
                 onNavigate = { route ->
                     when (route) {
@@ -82,10 +131,6 @@ fun DashboardScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToQuickSave,
-                // Considera usar MaterialTheme.colorScheme.primary o tertiaryContainer
-                containerColor = PrimaryGreen,
-                // Considera usar MaterialTheme.colorScheme.onPrimary o onTertiaryContainer
-                contentColor = Color.White
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Quick Save")
             }
@@ -94,15 +139,13 @@ fun DashboardScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                // Asumiendo que Background es un color de tu ui.theme
-                // Si es el fondo principal de la app, MaterialTheme.colorScheme.background sería lo estándar
-                .background(Background)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
         ) {
             // Hero Card
             item {
-                HeroCard( // Asegúrate que este componente use MaterialTheme
+                HeroCard(
                     totalBalance = "S/ 3,420",
                     goalProgress = "Meta principal: Viaje a Cusco — 65%",
                     progressPercentage = 65,
@@ -118,9 +161,7 @@ fun DashboardScreen(
                 Text(
                     text = "Tus metas",
                     style = MaterialTheme.typography.headlineLarge,
-                    // Considera mover FontWeight a AppTypography si es un estilo consistente
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
@@ -130,14 +171,15 @@ fun DashboardScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
-                    items(getSampleGoals()) { goal -> // getSampleGoals debe proveer Goal objects
-                        GoalCard( // Asegúrate que este componente use MaterialTheme
+                    // Usamos la variable que ya contiene la lista de metas.
+                    items(sampleGoals) { goal ->
+                        GoalCard(
                             title = goal.title,
                             savedAmount = goal.savedAmount,
                             targetAmount = goal.targetAmount,
                             progress = goal.progress,
                             icon = goal.icon,
-                            color = goal.color, // El color del GoalCard podría venir del tema también
+                            color = goal.color,
                             onClick = { onNavigateToGoalDetail(goal.id) }
                         )
                     }
@@ -151,9 +193,7 @@ fun DashboardScreen(
                 Text(
                     text = "Acciones rápidas",
                     style = MaterialTheme.typography.headlineLarge,
-                    // Considera mover FontWeight a AppTypography
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
@@ -200,17 +240,12 @@ fun DashboardScreen(
                     Text(
                         text = "Movimientos recientes",
                         style = MaterialTheme.typography.headlineLarge,
-                        // Considera mover FontWeight a AppTypography
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        fontWeight = FontWeight.SemiBold
                     )
-                    TextButton( // Usar TextButton de Material 3
-                        onClick = onNavigateToTransactions
-                    ) {
+                    TextButton(onClick = onNavigateToTransactions) {
                         Text(
                             text = "Ver todos",
-                            // Considera usar MaterialTheme.colorScheme.primary para el color del texto del botón
-                            color = PrimaryGreen
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -218,7 +253,8 @@ fun DashboardScreen(
 
             item { Spacer(modifier = Modifier.height(Spacing.md)) }
 
-            items(getSampleTransactions()) { transaction -> // getSampleTransactions debe proveer Transaction objects
+            // Usamos la variable que ya contiene la lista de transacciones.
+            items(sampleTransactions) { transaction ->
                 TransactionItem(
                     transaction = transaction,
                     onClick = { /* Handle transaction click */ }
@@ -245,30 +281,23 @@ fun DashboardTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(Spacing.lg), // Spacing.lg debe ser un Dp value
+            .padding(Spacing.lg),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(ComponentSize.avatarSize) // ComponentSize.avatarSize debe ser un Dp value
+                    .size(ComponentSize.avatarSize)
                     .clip(CircleShape)
-                    // Considera usar un color del tema como secondaryContainer o tertiaryContainer
-                    .background(LightGreen),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "A", // Podría ser la inicial del userName
+                    text = "A",
                     style = MaterialTheme.typography.headlineMedium,
-                    // Considera mover FontWeight a AppTypography
                     fontWeight = FontWeight.Bold,
-                    // El color del texto debería contrastar con LightGreen.
-                    // Podría ser onSecondaryContainer u onTertiaryContainer si LightGreen es mapeado.
-                    // O un color personalizado que contraste bien.
-                    color = PrimaryGreen
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
@@ -277,7 +306,6 @@ fun DashboardTopBar(
             Text(
                 text = "Hola, $userName 👋",
                 style = MaterialTheme.typography.headlineMedium,
-                // Considera mover FontWeight a AppTypography
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -286,12 +314,8 @@ fun DashboardTopBar(
         Row {
             BadgedBox(
                 badge = {
-                    Badge(
-                        // Considera MaterialTheme.colorScheme.error o un rojo específico de notificaciones
-                        containerColor = Color.Red,
-                        contentColor = Color.White // O MaterialTheme.colorScheme.onError
-                    ) {
-                        Text("3") // La tipografía de la badge también es configurable
+                    Badge {
+                        Text("3")
                     }
                 }
             ) {
@@ -299,7 +323,7 @@ fun DashboardTopBar(
                     Icon(
                         Icons.Default.Notifications,
                         contentDescription = "Notifications",
-                        tint = MaterialTheme.colorScheme.onBackground // Correcto
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
@@ -308,7 +332,7 @@ fun DashboardTopBar(
                 Icon(
                     Icons.Default.Settings,
                     contentDescription = "Settings",
-                    tint = MaterialTheme.colorScheme.onBackground // Correcto
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -327,9 +351,7 @@ fun QuickActionButton(
         onClick = onClick,
         modifier = modifier.height(80.dp),
         colors = CardDefaults.cardColors(
-            // Mapea PrimaryGreen y LightGreen a roles del tema si es posible
-            // ej. primary y secondaryContainer, o surfaceVariant
-            containerColor = if (isPrimary) PrimaryGreen else LightGreen
+            containerColor = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
         ),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(Spacing.md)
     ) {
@@ -343,18 +365,13 @@ fun QuickActionButton(
             Text(
                 text = icon,
                 style = MaterialTheme.typography.headlineMedium
-                // El color del icono (texto) se tomará de LocalContentColor,
-                // que debería ser onPrimaryContainer o similar si los containerColors están bien mapeados.
             )
             Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelSmall,
-                // Considera mover FontWeight a AppTypography
                 fontWeight = FontWeight.Medium,
-                // El color del texto debe contrastar con el containerColor
-                // ej. if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
-                color = if (isPrimary) Color.White else MaterialTheme.colorScheme.onBackground,
+                color = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer,
                 textAlign = TextAlign.Center
             )
         }
@@ -363,15 +380,14 @@ fun QuickActionButton(
 
 @Composable
 fun TransactionItem(
-    transaction: Transaction, // Transaction data class debe estar definida
+    transaction: Transaction,
     onClick: () -> Unit
 ) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        // Considera MaterialTheme.colorScheme.surface o surfaceContainerLow
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // El dp está bien, elevation viene del tema
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -383,18 +399,13 @@ fun TransactionItem(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    // El transaction.color.copy(alpha = 0.1f) es una buena forma de crear un fondo suave
-                    // Asegúrate que transaction.color contraste bien con el icono de texto.
                     .background(transaction.color.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = transaction.icon,
                     style = MaterialTheme.typography.headlineSmall,
-                    // El color del icono (texto) debería ser transaction.color o uno que contraste
-                    // con el fondo del Box (transaction.color.copy(alpha = 0.1f)).
-                    // Podría ser transaction.color o MaterialTheme.colorScheme.onSurfaceVariant
-                    color = transaction.color // Asumiendo que el color del icono es el mismo que el base
+                    color = transaction.color
                 )
             }
 
@@ -403,91 +414,10 @@ fun TransactionItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    // Considera mover FontWeight a AppTypography
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = transaction.subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant // Buen uso de color de énfasis medio
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
-
-            Text(
-                text = transaction.amount,
-                style = MaterialTheme.typography.bodyMedium,
-                // Considera mover FontWeight a AppTypography
-                fontWeight = FontWeight.Medium,
-                color = transaction.amountColor // amountColor debe ser un Color, ej. PrimaryGreen o Color.Red
-            )
         }
     }
 }
-
-@Composable
-fun InsightsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        // Considera MaterialTheme.colorScheme.surface o surfaceContainerLow
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg)
-        ) {
-            Text(
-                text = "💡 Insight del mes",
-                style = MaterialTheme.typography.headlineMedium,
-                // Considera mover FontWeight a AppTypography
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            Text(
-                text = "Este mes ahorraste S/ 420 (+12% respecto al mes pasado).",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant // Buen uso
-            )
-        }
-    }
-}
-
-// Data classes (Asegúrate que estén definidas y sean correctas)
-data class Goal(
-    val id: String,
-    val title: String,
-    val savedAmount: String,
-    val targetAmount: String,
-    val progress: Float, // Debería ser Float (0.0f a 1.0f) o Int (0 a 100) para el progreso
-    val icon: String, // O ImageVector
-    val color: Color // El color asociado a la meta
-)
-
-data class Transaction(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val amount: String,
-    val amountColor: Color, // Color para el texto del monto (ej. verde para ingresos, rojo para gastos)
-    val icon: String, // O ImageVector
-    val color: Color // Color base para el icono/fondo del icono
-)
-
-// Sample data (Deberían usar las data classes definidas)
-fun getSampleGoals(): List<Goal> = listOf(
-    Goal("1", "Laptop nueva", "1200", "2000", 0.6f, "💻", PrimaryGreen),
-    Goal("2", "Vacaciones", "800", "3000", 0.27f, "✈️", Color(0xFF3B82F6)), // Considera definir este color en Color.kt
-    Goal("3", "Coche", "5000", "15000", 0.33f, "🚗", Color(0xFF8B5CF6)) // Considera definir este color en Color.kt
-)
-
-fun getSampleTransactions(): List<Transaction> = listOf(
-    Transaction("1", "Depósito automático", "Hoy, 09:30", "+S/ 200", PrimaryGreen, "💰", PrimaryGreen),
-    Transaction("2", "Compra en supermercado", "Ayer, 18:45", "-S/ 85.50", Color.Red, "🛒", Color(0xFF3B82F6)), // Color.Red para amountColor, otro color para el icono
-    Transaction("3", "Transferencia recibida", "Ayer, 14:20", "+S/ 500", PrimaryGreen, "📥", Color(0xFF10B981)) // Considera definir este color en Color.kt
-)
