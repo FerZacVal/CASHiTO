@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.cashito.ui.screens.auth.AuthScreen
+/*import com.cashito.ui.screens.auth.AuthScreen
 import com.cashito.ui.screens.category.CategoryScreen
 import com.cashito.ui.screens.dashboard.DashboardScreen
 import com.cashito.ui.screens.expense.ExpenseScreen
@@ -19,7 +19,7 @@ import com.cashito.ui.screens.recommendation.RecommendationScreen
 import com.cashito.ui.screens.report.ReportScreen
 import com.cashito.ui.screens.savings.SavingsScreen
 import com.cashito.ui.screens.splash.SplashScreen
-import com.cashito.ui.screens.transactions.TransactionsScreen
+import com.cashito.ui.screens.transactions.TransactionsScreen*/
 
 object Routes {
     const val SPLASH = "splash"
@@ -49,7 +49,7 @@ fun AppNavHost(
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         // New Cashito screens
-        composable(Routes.SPLASH) { SplashScreen(navController) }
+        /*composable(Routes.SPLASH) { SplashScreen(navController) }
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.DASHBOARD) { DashboardScreen(navController) }
         composable(Routes.GOAL_DETAIL) { goalId ->
@@ -70,7 +70,7 @@ fun AppNavHost(
         composable(Routes.EXPENSE) { ExpenseScreen(navController) }
         composable(Routes.RECOMMENDATION) { RecommendationScreen(navController) }
         composable(Routes.REPORT) { ReportScreen(navController) }
-        composable(Routes.SAVINGS) { SavingsScreen(navController) }
+        composable(Routes.SAVINGS) { SavingsScreen(navController) }*/
     }
 }
 
