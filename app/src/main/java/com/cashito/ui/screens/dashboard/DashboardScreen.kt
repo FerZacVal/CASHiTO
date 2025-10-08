@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.ui.components.cards.GoalCard
@@ -45,10 +44,6 @@ import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
-
-// --- INICIO DE DATOS DE MUESTRA ---
-// Se añaden aquí para que el archivo sea autocompleto y compile.
-// En un proyecto real, estos vendrían de un ViewModel o capa de datos.
 
 data class Goal(val id: String, val title: String, val savedAmount: String, val targetAmount: String, val progress: Float, val icon: String, val color: Color)
 data class Transaction(val title: String, val icon: String, val color: Color)
@@ -92,7 +87,6 @@ fun InsightsCard() {
         }
     }
 }
-// --- FIN DE DATOS DE MUESTRA ---
 
 @Composable
 fun DashboardScreen(
@@ -230,7 +224,6 @@ fun DashboardScreen(
 
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-            // Recent Transactions
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

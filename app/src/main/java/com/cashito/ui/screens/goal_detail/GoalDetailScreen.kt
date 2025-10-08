@@ -312,7 +312,6 @@ fun GoalDetailScreen(
 
 @Composable
 fun getSampleGoal(goalId: String): Goal {
-    // In a real app, this would fetch the goal by its ID
     return Goal(
         id = goalId,
         title = "Viaje a Cusco",
