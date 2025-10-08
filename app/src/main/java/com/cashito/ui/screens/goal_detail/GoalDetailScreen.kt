@@ -58,7 +58,7 @@ fun GoalDetailScreen(
     goalId: String,
     navController: NavController,
     onNavigateBack: () -> Unit = { navController.popBackStack() },
-    onNavigateToDeposit: () -> Unit = { navController.navigate("quick_save") },
+    onNavigateToIncome: () -> Unit = { navController.navigate("quick_save") },
     onNavigateToEdit: () -> Unit = { navController.navigate("goal_form") }
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -188,8 +188,8 @@ fun GoalDetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
                     PrimaryButton(
-                        text = "Depositar",
-                        onClick = onNavigateToDeposit,
+                        text = "Ingresar",
+                        onClick = onNavigateToIncome,
                         modifier = Modifier.weight(1f)
                     )
                     SecondaryButton(
@@ -263,27 +263,24 @@ fun GoalDetailScreen(
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
-                                Column(modifier = Modifier.weight(1f)) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalAlignment = Alignment.End
+                                ) {
                                     Text(
                                         text = "Monto",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.End
                                     )
                                     Text(
-                                        text = "S/ 200",
+                                        text = "S/ 50.00",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlign = TextAlign.End
                                     )
                                 }
                             }
-
-                            Spacer(modifier = Modifier.height(Spacing.sm))
-
-                            Text(
-                                text = "Sugerencia: programa aportes automáticos para avanzar sin pensar.",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                            )
                         }
                     }
                 }
@@ -293,77 +290,57 @@ fun GoalDetailScreen(
 
             item {
                 Text(
-                    text = "Historial de esta meta",
+                    text = "Historial de aportes",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
             item { Spacer(modifier = Modifier.height(Spacing.md)) }
 
-            // --- CORRECCIÓN ---
-            // Ahora 'transactions' es una variable estable y se puede usar aquí.
-            if (transactions.isEmpty()) {
-                item {
-                    EmptyStateCard()
-                }
-            } else {
-                items(transactions) { transaction ->
-                    TransactionItem(
-                        transaction = transaction,
-                        onClick = { /* Handle transaction click */ }
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.sm))
-                }
+            items(transactions) { transaction ->
+                TransactionItem(
+                    transaction = transaction,
+                    onClick = { /* Handle transaction click */ }
+                )
+                Spacer(modifier = Modifier.height(Spacing.sm))
             }
         }
     }
 }
 
-data class Goal(val id: String, val title: String, val progress: Float, val color: Color, val savedAmount: String, val targetAmount: String, val targetDate: String)
-data class GoalTransaction(val title: String, val icon: String, val color: Color)
-
 @Composable
 fun getSampleGoal(goalId: String): Goal {
-    val goalColor = MaterialTheme.colorScheme.primary
-    return Goal(goalId, "Viaje a Cusco", 0.65f, goalColor, "3,420", "5,000", "Dic 2025")
-}
-
-@Composable
-fun getGoalTransactions(goalId: String): List<GoalTransaction> {
-    val transactionColor = MaterialTheme.colorScheme.primary
-    return listOf(
-        GoalTransaction("Ahorro semanal", "💰", transactionColor),
-        GoalTransaction("Depósito extra", "💸", transactionColor)
+    // In a real app, this would fetch the goal by its ID
+    return Goal(
+        id = goalId,
+        title = "Viaje a Cusco",
+        savedAmount = "3,420",
+        targetAmount = "5,000",
+        progress = 0.65f,
+        icon = "✈️",
+        color = MaterialTheme.colorScheme.primary,
+        targetDate = "15 Oct 2024"
     )
 }
 
-
 @Composable
-fun EmptyStateCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.xl),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text("Aún no hay movimientos", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Text("¡Haz tu primer depósito para empezar!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
+fun getGoalTransactions(goalId: String): List<Transaction> {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val errorColor = MaterialTheme.colorScheme.error
 
+    // In a real app, this would fetch transactions for the given goal ID
+    return listOf(
+        Transaction("1", "Ingreso automático", "Hoy, 09:30", "+S/ 200", primaryColor, "💰", primaryColor, "Ahorro", "Hoy"),
+        Transaction("2", "Ingreso extra", "Ayer, 14:20", "+S/ 50", primaryColor, "💸", primaryColor, "Ahorro", "Ayer"),
+        Transaction("3", "Redondeo de compras", "Hace 2 días", "+S/ 15.50", primaryColor, "🔄", primaryColor, "Ahorro", "Hace 2 días")
+    )
+}
 
 @Composable
 fun TransactionItem(
-    transaction: GoalTransaction,
+    transaction: Transaction,
     onClick: () -> Unit
 ) {
     Card(
@@ -380,27 +357,61 @@ fun TransactionItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(ComponentSize.iconSize)
                     .clip(CircleShape)
                     .background(transaction.color.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = transaction.icon,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = transaction.color
                 )
             }
-
             Spacer(modifier = Modifier.width(Spacing.md))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.title,
                     style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                Text(
+                    text = transaction.subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+            Text(
+                text = transaction.amount,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = transaction.amountColor
+            )
         }
     }
 }
+
+data class Goal(
+    val id: String,
+    val title: String,
+    val savedAmount: String,
+    val targetAmount: String,
+    val progress: Float,
+    val icon: String,
+    val color: Color,
+    val targetDate: String
+)
+
+data class Transaction(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val amount: String,
+    val amountColor: Color,
+    val icon: String,
+    val color: Color,
+    val category: String = "",
+    val date: String
+)
+

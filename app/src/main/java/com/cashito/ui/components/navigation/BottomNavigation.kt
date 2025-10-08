@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,13 @@ fun CashitoBottomNavigation(
             label = { Text("Movimientos") },
             selected = currentRoute == "transactions",
             onClick = { onNavigate("transactions") }
+        )
+
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.BarChart, contentDescription = "Reportes") },
+            label = { Text("Reportes") },
+            selected = currentRoute == "reports",
+            onClick = { onNavigate("reports") }
         )
 
         NavigationBarItem(

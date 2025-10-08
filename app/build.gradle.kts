@@ -52,6 +52,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.play.services.maps)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
     //implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

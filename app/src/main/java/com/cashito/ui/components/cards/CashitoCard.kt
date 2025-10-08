@@ -41,8 +41,8 @@ fun HeroCard(
     totalBalance: String,
     goalProgress: String,
     progressPercentage: Int,
-    onDepositClick: () -> Unit,
-    onWithdrawClick: () -> Unit,
+    onIncomeClick: () -> Unit,
+    onExpenseClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -92,16 +92,16 @@ fun HeroCard(
                     Spacer(modifier = Modifier.height(Spacing.md))
                     Row {
                         PrimaryButton(
-                            text = "Depositar",
-                            onClick = onDepositClick,
+                            text = "Ingresar",
+                            onClick = onIncomeClick,
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp)
                         )
                         Spacer(modifier = Modifier.width(Spacing.sm))
                         SecondaryButton(
-                            text = "Retirar",
-                            onClick = onWithdrawClick,
+                            text = "Gastar",
+                            onClick = onExpenseClick,
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp)
