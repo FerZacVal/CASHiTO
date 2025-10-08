@@ -1,0 +1,172 @@
+package com.cashito.ui.screens.reports
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.cashito.ui.viewmodel.CategoryExpense
+import com.cashito.ui.viewmodel.CategoryReportViewModel
+import com.cashito.ui.theme.Spacing
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryReportScreen(
+    navController: NavController,
+    viewModel: CategoryReportViewModel = viewModel(),
+    onNavigateBack: () -> Unit = { navController.popBackStack() }
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Gastos por Categoría", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(paddingValues),
+            contentPadding = PaddingValues(Spacing.lg),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (uiState.isLoading) {
+                item {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else {
+                item {
+                    Text(
+                        "Distribución de tus gastos",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = Spacing.md)
+                    )
+                }
+                item {
+                    PieChart(expenses = uiState.expenses, modifier = Modifier.size(250.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xl))
+                }
+                item {
+                    CategoryLegend(expenses = uiState.expenses)
+                    Spacer(modifier = Modifier.height(Spacing.lg))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PieChart(
+    expenses: List<CategoryExpense>,
+    modifier: Modifier = Modifier
+) {
+    val totalAmount = expenses.sumOf { it.amount.toDouble() }.toFloat()
+
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            var startAngle = -90f
+            expenses.forEach { expense ->
+                val sweepAngle = (expense.amount / totalAmount) * 360f
+                drawArc(
+                    color = expense.color,
+                    startAngle = startAngle,
+                    sweepAngle = sweepAngle,
+                    useCenter = true
+                )
+                startAngle += sweepAngle
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CategoryLegend(expenses: List<CategoryExpense>) {
+    val totalAmount = expenses.sumOf { it.amount.toDouble() }.toFloat()
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
+    ) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
+            expenses.forEach { expense ->
+                val percentage = (expense.amount / totalAmount) * 100
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .background(expense.color, shape = CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.md))
+                        Text(
+                            text = expense.categoryName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Text(
+                        text = "S/ ${String.format("%.2f", expense.amount)} (${String.format("%.1f", percentage)}%)",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}

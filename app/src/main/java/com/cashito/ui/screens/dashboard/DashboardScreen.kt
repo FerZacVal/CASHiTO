@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.ui.components.cards.GoalCard
@@ -45,10 +44,6 @@ import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
-
-// --- INICIO DE DATOS DE MUESTRA ---
-// Se añaden aquí para que el archivo sea autocompleto y compile.
-// En un proyecto real, estos vendrían de un ViewModel o capa de datos.
 
 data class Goal(val id: String, val title: String, val savedAmount: String, val targetAmount: String, val progress: Float, val icon: String, val color: Color)
 data class Transaction(val title: String, val icon: String, val color: Color)
@@ -65,7 +60,7 @@ fun getSampleGoals(): List<Goal> {
 @Composable
 fun getSampleTransactions(): List<Transaction> {
     return listOf(
-        Transaction("Depósito automático", "💰", MaterialTheme.colorScheme.primary),
+        Transaction("Ingreso automático", "💰", MaterialTheme.colorScheme.primary),
         Transaction("Compra en supermercado", "🛒", MaterialTheme.colorScheme.secondary)
     )
 }
@@ -92,21 +87,19 @@ fun InsightsCard() {
         }
     }
 }
-// --- FIN DE DATOS DE MUESTRA ---
 
 @Composable
 fun DashboardScreen(
     navController: NavController,
     onNavigateToGoalDetail: (String) -> Unit = { navController.navigate("goal_detail/$it") },
     onNavigateToTransactions: () -> Unit = { navController.navigate("transactions") },
+    onNavigateToReports: () -> Unit = { navController.navigate("reports") },
+    onNavigateToGoals: () -> Unit = { navController.navigate("goals") },
     onNavigateToProfile: () -> Unit = { navController.navigate("profile") },
     onNavigateToQuickSave: () -> Unit = { navController.navigate("quick_save") }
 ) {
-    // --- INICIO DE LA CORRECCIÓN ---
-    // Llamamos a las funciones @Composable una sola vez en el scope principal.
     val sampleGoals = getSampleGoals()
     val sampleTransactions = getSampleTransactions()
-    // --- FIN DE LA CORRECCIÓN ---
 
     Scaffold(
         topBar = {
@@ -121,9 +114,11 @@ fun DashboardScreen(
                 currentRoute = "dashboard",
                 onNavigate = { route ->
                     when (route) {
+                        "dashboard" -> { /* Already on this screen */ }
                         "transactions" -> onNavigateToTransactions()
+                        "reports" -> onNavigateToReports()
+                        "goals" -> onNavigateToGoals()
                         "profile" -> onNavigateToProfile()
-                        else -> { /* Handle other routes */ }
                     }
                 }
             )
@@ -149,8 +144,8 @@ fun DashboardScreen(
                     totalBalance = "S/ 3,420",
                     goalProgress = "Meta principal: Viaje a Cusco — 65%",
                     progressPercentage = 65,
-                    onDepositClick = onNavigateToQuickSave,
-                    onWithdrawClick = { /* Handle withdraw */ }
+                    onIncomeClick = onNavigateToQuickSave,
+                    onExpenseClick = { navController.navigate("quick_out") } // Updated to navigate to QuickOutScreen
                 )
             }
 
@@ -171,7 +166,6 @@ fun DashboardScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                 ) {
-                    // Usamos la variable que ya contiene la lista de metas.
                     items(sampleGoals) { goal ->
                         GoalCard(
                             title = goal.title,
@@ -212,10 +206,10 @@ fun DashboardScreen(
                         modifier = Modifier.weight(1f)
                     )
                     QuickActionButton(
-                        text = "Redondeo",
-                        icon = "🔄",
+                        text = "Gasto rápido", // New quick action
+                        icon = "💸",
                         isPrimary = false,
-                        onClick = { /* Handle round up */ },
+                        onClick = { navController.navigate("quick_out") },
                         modifier = Modifier.weight(1f)
                     )
                     QuickActionButton(
@@ -230,7 +224,6 @@ fun DashboardScreen(
 
             item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-            // Recent Transactions
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -253,7 +246,6 @@ fun DashboardScreen(
 
             item { Spacer(modifier = Modifier.height(Spacing.md)) }
 
-            // Usamos la variable que ya contiene la lista de transacciones.
             items(sampleTransactions) { transaction ->
                 TransactionItem(
                     transaction = transaction,
@@ -314,26 +306,15 @@ fun DashboardTopBar(
         Row {
             BadgedBox(
                 badge = {
-                    Badge {
-                        Text("3")
-                    }
+                    Badge { Text("3") }
                 }
             ) {
                 IconButton(onClick = onNotificationClick) {
-                    Icon(
-                        Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
+                    Icon(Icons.Default.Notifications, contentDescription = "Notifications")
                 }
             }
-
             IconButton(onClick = onSettingsClick) {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
+                Icon(Icons.Default.Settings, contentDescription = "Settings")
             }
         }
     }
@@ -349,75 +330,55 @@ fun QuickActionButton(
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier.height(80.dp),
+        modifier = modifier.height(60.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (isPrimary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
         ),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(Spacing.md)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(Spacing.md),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = icon,
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(Spacing.xs))
+            Text(text = icon, style = MaterialTheme.typography.headlineSmall)
             Text(
                 text = text,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Medium,
-                color = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer,
-                textAlign = TextAlign.Center
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
 }
 
 @Composable
-fun TransactionItem(
-    transaction: Transaction,
-    onClick: () -> Unit
-) {
+fun TransactionItem(transaction: Transaction, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.md),
+            modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(ComponentSize.iconSize)
                     .clip(CircleShape)
                     .background(transaction.color.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = transaction.icon,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = transaction.color
-                )
+                Text(text = transaction.icon, style = MaterialTheme.typography.bodyLarge, color = transaction.color)
             }
-
             Spacer(modifier = Modifier.width(Spacing.md))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = transaction.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            Text(
+                text = transaction.title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
