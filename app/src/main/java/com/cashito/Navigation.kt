@@ -32,6 +32,8 @@ object Routes {
     const val QUICK_OUT = "quick_out"
     const val REPORTS = "reports"
     const val CATEGORY_REPORT = "category_report"
+    const val INCOME_REPORT = "income_report"
+    const val BALANCE_REPORT = "balance_report"
     const val INSIGHTS = "insights"
     const val PROFILE = "profile"
     const val NOTIFICATIONS = "notifications"

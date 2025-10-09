@@ -19,34 +19,38 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
+import com.cashito.ui.viewmodel.LoginViewModel
 import com.cashito.ui.theme.Spacing
 
 @Composable
 fun LoginScreen(
     navController: NavController,
+    viewModel: LoginViewModel = viewModel(),
     onNavigateToDashboard: () -> Unit = { navController.navigate("dashboard") },
     onNavigateToRegister: () -> Unit = { navController.navigate("register") }
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var rememberMe by remember { mutableStateOf(false) }
-    var emailError by remember { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.isLoginSuccess) {
+        if (uiState.isLoginSuccess) {
+            onNavigateToDashboard()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -89,31 +93,25 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             CashitoTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    emailError = ""
-                },
+                value = uiState.email,
+                onValueChange = viewModel::onEmailChange,
                 label = "Correo electrónico",
                 placeholder = "correo@ejemplo.com",
                 keyboardType = KeyboardType.Email,
-                isError = emailError.isNotEmpty(),
-                errorMessage = emailError
+                isError = uiState.emailError != null,
+                errorMessage = uiState.emailError
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
             CashitoTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    passwordError = ""
-                },
+                value = uiState.password,
+                onValueChange = viewModel::onPasswordChange,
                 label = "Contraseña",
                 placeholder = "Contraseña",
                 isPassword = true,
-                isError = passwordError.isNotEmpty(),
-                errorMessage = passwordError
+                isError = uiState.passwordError != null,
+                errorMessage = uiState.passwordError
             )
 
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -123,8 +121,8 @@ fun LoginScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
-                    checked = rememberMe,
-                    onCheckedChange = { rememberMe = it },
+                    checked = uiState.rememberMe,
+                    onCheckedChange = viewModel::onRememberMeChange,
                     colors = CheckboxDefaults.colors(
                         checkedColor = MaterialTheme.colorScheme.primary,
                         uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -142,23 +140,7 @@ fun LoginScreen(
 
             PrimaryButton(
                 text = "Iniciar sesión",
-                onClick = {
-                    if (email.isEmpty()) {
-                        emailError = "El correo es requerido"
-                    } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                        emailError = "Formato de correo inválido"
-                    }
-
-                    if (password.isEmpty()) {
-                        passwordError = "La contraseña es requerida"
-                    } else if (password.length < 6) {
-                        passwordError = "Mínimo 6 caracteres"
-                    }
-
-                    if (emailError.isEmpty() && passwordError.isEmpty()) {
-                        onNavigateToDashboard()
-                    }
-                }
+                onClick = viewModel::onLoginClick
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
