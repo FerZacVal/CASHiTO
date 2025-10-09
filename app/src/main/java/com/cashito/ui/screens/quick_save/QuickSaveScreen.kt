@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -24,10 +23,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,27 +33,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.viewmodel.IncomeCategory
+import com.cashito.ui.viewmodel.QuickSaveGoal
+import com.cashito.ui.viewmodel.QuickSaveViewModel
 
 @Composable
 fun QuickSaveScreen(
     navController: NavController,
-    onNavigateBack: () -> Unit = { navController.popBackStack() },
-    onConfirmIncome: (String, String) -> Unit = { _, _ ->
-        navController.popBackStack()
-    }
+    viewModel: QuickSaveViewModel = viewModel(),
+    onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
-    var selectedAmount by remember { mutableStateOf("") }
-    var selectedGoalId by remember { mutableStateOf("") }
-    var customAmount by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
 
-    val presetAmounts = listOf("5", "10", "20", "50")
-    val goals = getSampleGoals()
+    LaunchedEffect(uiState.incomeConfirmed) {
+        if (uiState.incomeConfirmed) {
+            onNavigateBack()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -82,7 +83,7 @@ fun QuickSaveScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Ahorro rápido",
+                        text = "Ingreso rápido",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -110,35 +111,20 @@ fun QuickSaveScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
-                    items(presetAmounts) { amount ->
+                    items(uiState.presetAmounts) { amount ->
                         PresetAmountButton(
                             amount = "S/ $amount",
-                            isSelected = selectedAmount == amount,
-                            onClick = {
-                                selectedAmount = amount
-                                customAmount = ""
-                            }
+                            isSelected = uiState.selectedAmount == amount,
+                            onClick = { viewModel.onPresetAmountSelected(amount) }
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
 
-                Text(
-                    text = "O ingresa un monto personalizado",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(Spacing.sm))
-
                 CashitoTextField(
-                    value = customAmount,
-                    onValueChange = {
-                        customAmount = it
-                        selectedAmount = ""
-                    },
+                    value = uiState.customAmount,
+                    onValueChange = viewModel::onCustomAmountChanged,
                     label = "Monto personalizado",
                     placeholder = "S/ 0.00",
                     keyboardType = KeyboardType.Number,
@@ -148,7 +134,7 @@ fun QuickSaveScreen(
                 Spacer(modifier = Modifier.height(Spacing.xl))
 
                 Text(
-                    text = "Selecciona una meta",
+                    text = "Selecciona una categoría de ingreso",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -159,26 +145,44 @@ fun QuickSaveScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
-                    items(goals) { goal ->
-                        GoalChip(
-                            goal = goal,
-                            isSelected = selectedGoalId == goal.id,
-                            onClick = { selectedGoalId = goal.id }
+                    items(uiState.categories) { category ->
+                        IncomeCategoryChip(
+                            category = category,
+                            isSelected = uiState.selectedCategoryId == category.id,
+                            onClick = { viewModel.onCategorySelected(category.id) }
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.xl))
 
+                Text(
+                    text = "¿A qué meta va este ingreso?",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.md))
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    items(uiState.goals) { goal ->
+                        GoalChip(
+                            goal = goal,
+                            isSelected = uiState.selectedGoalId == goal.id,
+                            onClick = { viewModel.onGoalSelected(goal.id) }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(Spacing.xxxl))
+
                 PrimaryButton(
                     text = "Confirmar ingreso",
-                    onClick = {
-                        val amount = customAmount.ifEmpty { selectedAmount }
-                        if (amount.isNotEmpty() && selectedGoalId.isNotEmpty()) {
-                            onConfirmIncome(amount, selectedGoalId)
-                        }
-                    },
-                    enabled = (customAmount.isNotEmpty() || selectedAmount.isNotEmpty()) && selectedGoalId.isNotEmpty()
+                    onClick = viewModel::onConfirmIncome,
+                    enabled = uiState.isConfirmEnabled
                 )
             }
         }
@@ -236,19 +240,39 @@ fun GoalChip(
     }
 }
 
-data class QuickSaveGoal(
-    val id: String,
-    val title: String,
-    val icon: String,
-    val color: Color
-)
-
 @Composable
-fun getSampleGoals(): List<QuickSaveGoal> {
-    return listOf(
-        QuickSaveGoal("1", "Viaje a Cusco", "✈️", MaterialTheme.colorScheme.primary),
-        QuickSaveGoal("2", "Laptop nueva", "💻", MaterialTheme.colorScheme.secondary),
-        QuickSaveGoal("3", "Vacaciones", "🏖️", MaterialTheme.colorScheme.tertiary),
-        QuickSaveGoal("4", "Coche", "🚗", Color(0xFFF59E0B))
-    )
+fun IncomeCategoryChip(
+    category: IncomeCategory,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.width(120.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) category.color else category.color.copy(alpha = 0.2f)
+        ),
+        shape = RoundedCornerShape(Radius.round)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = category.icon,
+                style = MaterialTheme.typography.headlineSmall,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else category.color
+            )
+            Spacer(modifier = Modifier.height(Spacing.xs))
+            Text(
+                text = category.title,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else category.color,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }

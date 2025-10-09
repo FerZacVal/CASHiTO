@@ -329,7 +329,6 @@ fun getGoalTransactions(goalId: String): List<Transaction> {
     val primaryColor = MaterialTheme.colorScheme.primary
     val errorColor = MaterialTheme.colorScheme.error
 
-    // In a real app, this would fetch transactions for the given goal ID
     return listOf(
         Transaction("1", "Ingreso automático", "Hoy, 09:30", "+S/ 200", primaryColor, "💰", primaryColor, "Ahorro", "Hoy"),
         Transaction("2", "Ingreso extra", "Ayer, 14:20", "+S/ 50", primaryColor, "💸", primaryColor, "Ahorro", "Ayer"),
