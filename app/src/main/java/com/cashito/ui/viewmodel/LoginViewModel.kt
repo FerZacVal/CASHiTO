@@ -1,9 +1,12 @@
 package com.cashito.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cashito.domain.usecases.auth.LoginUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 // --- STATE ---
 data class LoginUiState(
@@ -16,7 +19,9 @@ data class LoginUiState(
 )
 
 // --- VIEWMODEL ---
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val loginUseCase: LoginUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -54,8 +59,14 @@ class LoginViewModel : ViewModel() {
         )
 
         if (emailError == null && passwordError == null) {
-            // TODO: Implement actual login logic
-            _uiState.value = _uiState.value.copy(isLoginSuccess = true)
+            viewModelScope.launch {
+                loginUseCase(state.email, state.password)
+                    .onSuccess { _uiState.value = _uiState.value.copy(isLoginSuccess = true) }
+                    .onFailure { 
+                        // TODO: Map exception to a user-friendly error message
+                        _uiState.value = _uiState.value.copy(passwordError = it.message)
+                    }
+            }
         }
     }
 }

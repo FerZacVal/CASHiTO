@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
@@ -36,11 +35,12 @@ import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.viewmodel.LoginViewModel
 import com.cashito.ui.theme.Spacing
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = viewModel(),
+    viewModel: LoginViewModel = koinViewModel(),
     onNavigateToDashboard: () -> Unit = { navController.navigate("dashboard") },
     onNavigateToRegister: () -> Unit = { navController.navigate("register") }
 ) {
@@ -55,7 +55,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -70,14 +70,14 @@ fun LoginScreen(
                 modifier = Modifier
                     .size(80.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                         shape = androidx.compose.foundation.shape.CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "💰",
-                    style = MaterialTheme.typography.displayLarge,
+                    style = androidx.compose.material3.MaterialTheme.typography.displayLarge,
                 )
             }
 
@@ -85,9 +85,9 @@ fun LoginScreen(
 
             Text(
                 text = "Iniciar sesión",
-                style = MaterialTheme.typography.headlineLarge,
+                style = androidx.compose.material3.MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(Spacing.xxxl))
@@ -124,15 +124,15 @@ fun LoginScreen(
                     checked = uiState.rememberMe,
                     onCheckedChange = viewModel::onRememberMeChange,
                     colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.primary,
-                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        checkmarkColor = MaterialTheme.colorScheme.onPrimary
+                        checkedColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                        uncheckedColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                        checkmarkColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
                     )
                 )
                 Text(
                     text = "Mantener sesión",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -154,8 +154,8 @@ fun LoginScreen(
 
             Text(
                 text = "O continúa con",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
             )
 
@@ -187,8 +187,8 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "¿Olvidaste tu contraseña?",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary
                 )
             }
         }
