@@ -13,16 +13,16 @@ import kotlinx.coroutines.flow.asStateFlow
 // --- STATE ---
 data class CategoryExpense(val categoryName: String, val amount: Float, val color: Color)
 
-data class CategoryReportUiState(
+data class CategoryExpenseReportUiState(
     val expenses: List<CategoryExpense> = emptyList(),
     val isLoading: Boolean = true
 )
 
 // --- VIEWMODEL ---
-class CategoryReportViewModel : ViewModel() {
+class CategoryExpenseReportViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CategoryReportUiState())
-    val uiState: StateFlow<CategoryReportUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(CategoryExpenseReportUiState())
+    val uiState: StateFlow<CategoryExpenseReportUiState> = _uiState.asStateFlow()
 
     init {
         loadCategoryExpenses()
@@ -38,6 +38,6 @@ class CategoryReportViewModel : ViewModel() {
             CategoryExpense("Pagos", 1200.00f, errorLight)
         )
 
-        _uiState.value = CategoryReportUiState(expenses = sampleExpenses, isLoading = false)
+        _uiState.value = CategoryExpenseReportUiState(expenses = sampleExpenses, isLoading = false)
     }
 }

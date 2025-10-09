@@ -39,15 +39,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.cashito.ui.viewmodel.CategoryExpense
-import com.cashito.ui.viewmodel.CategoryReportViewModel
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.viewmodel.CategoryIncome
+import com.cashito.ui.viewmodel.IncomeReportViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryReportScreen(
+fun IncomeReportScreen(
     navController: NavController,
-    viewModel: CategoryReportViewModel = viewModel(),
+    viewModel: IncomeReportViewModel = viewModel(),
     onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -55,7 +55,7 @@ fun CategoryReportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Gastos por Categoría", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold) },
+                title = { Text("Ingresos por Categoría", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
@@ -85,18 +85,18 @@ fun CategoryReportScreen(
             } else {
                 item {
                     Text(
-                        "Distribución de tus gastos",
+                        "Distribución de tus ingresos",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = Spacing.md)
                     )
                 }
                 item {
-                    PieChart(expenses = uiState.expenses, modifier = Modifier.size(250.dp))
+                    IncomePieChart(incomes = uiState.incomes, modifier = Modifier.size(250.dp))
                     Spacer(modifier = Modifier.height(Spacing.xl))
                 }
                 item {
-                    CategoryLegend(expenses = uiState.expenses)
+                    IncomeCategoryLegend(incomes = uiState.incomes)
                     Spacer(modifier = Modifier.height(Spacing.lg))
                 }
             }
@@ -105,19 +105,19 @@ fun CategoryReportScreen(
 }
 
 @Composable
-fun PieChart(
-    expenses: List<CategoryExpense>,
+fun IncomePieChart(
+    incomes: List<CategoryIncome>,
     modifier: Modifier = Modifier
 ) {
-    val totalAmount = expenses.sumOf { it.amount.toDouble() }.toFloat()
+    val totalAmount = incomes.sumOf { it.amount.toDouble() }.toFloat()
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) { 
             var startAngle = -90f
-            expenses.forEach { expense ->
-                val sweepAngle = (expense.amount / totalAmount) * 360f
+            incomes.forEach { income ->
+                val sweepAngle = (income.amount / totalAmount) * 360f
                 drawArc(
-                    color = expense.color,
+                    color = income.color,
                     startAngle = startAngle,
                     sweepAngle = sweepAngle,
                     useCenter = true
@@ -130,16 +130,16 @@ fun PieChart(
 
 
 @Composable
-fun CategoryLegend(expenses: List<CategoryExpense>) {
-    val totalAmount = expenses.sumOf { it.amount.toDouble() }.toFloat()
+fun IncomeCategoryLegend(incomes: List<CategoryIncome>) {
+    val totalAmount = incomes.sumOf { it.amount.toDouble() }.toFloat()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {
         Column(modifier = Modifier.padding(Spacing.md)) {
-            expenses.forEach { expense ->
-                val percentage = (expense.amount / totalAmount) * 100
+            incomes.forEach { income ->
+                val percentage = (income.amount / totalAmount) * 100
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -151,17 +151,17 @@ fun CategoryLegend(expenses: List<CategoryExpense>) {
                         Box(
                             modifier = Modifier
                                 .size(16.dp)
-                                .background(expense.color, shape = CircleShape)
+                                .background(income.color, shape = CircleShape)
                         )
                         Spacer(modifier = Modifier.width(Spacing.md))
                         Text(
-                            text = expense.categoryName,
+                            text = income.categoryName,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
                     }
                     Text(
-                        text = "S/ ${String.format("%.2f", expense.amount)} (${String.format("%.1f", percentage)}%)",
+                        text = "S/ ${String.format("%.2f", income.amount)} (${String.format("%.1f", percentage)}%)",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold
                     )

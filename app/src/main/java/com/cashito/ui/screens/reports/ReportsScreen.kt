@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.Routes
 import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.ReportsViewModel
 
@@ -42,9 +43,9 @@ fun ReportsScreen(
     navController: NavController,
     viewModel: ReportsViewModel = viewModel(),
     onNavigateBack: () -> Unit = { navController.popBackStack() },
-    onNavigateToCategoryReport: () -> Unit = { navController.navigate("category_report") },
-    onNavigateToIncomeReport: () -> Unit = { navController.navigate("income_report") },
-    onNavigateToBalanceReport: () -> Unit = { navController.navigate("balance_report") }
+    onNavigateToCategoryReport: () -> Unit = { navController.navigate(Routes.CATEGORY_EXPENSE_REPORT) },
+    onNavigateToIncomeReport: () -> Unit = { navController.navigate(Routes.INCOME_REPORT) },
+    onNavigateToBalanceReport: () -> Unit = { navController.navigate(Routes.BALANCE_REPORT) }
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

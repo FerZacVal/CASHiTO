@@ -24,6 +24,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,38 +33,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
-
-data class Goal(val id: String, val title: String, val savedAmount: String, val targetAmount: String, val progress: Float, val icon: String, val color: Color)
-data class Transaction(val title: String, val icon: String, val color: Color)
-data class Insight(val message: String)
-
-@Composable
-fun getSampleGoals(): List<Goal> {
-    return listOf(
-        Goal("1", "Viaje a Cusco", "3,420", "5,000", 0.65f, "✈️", MaterialTheme.colorScheme.primary),
-        Goal("2", "Laptop nueva", "800", "4,500", 0.18f, "💻", MaterialTheme.colorScheme.secondary)
-    )
-}
-
-@Composable
-fun getSampleTransactions(): List<Transaction> {
-    return listOf(
-        Transaction("Ingreso automático", "💰", MaterialTheme.colorScheme.primary),
-        Transaction("Compra en supermercado", "🛒", MaterialTheme.colorScheme.secondary)
-    )
-}
+import com.cashito.ui.viewmodel.DashboardGoal
+import com.cashito.ui.viewmodel.DashboardTransaction
+import com.cashito.ui.viewmodel.DashboardViewModel
 
 @Composable
 fun InsightsCard() {
@@ -91,6 +78,7 @@ fun InsightsCard() {
 @Composable
 fun DashboardScreen(
     navController: NavController,
+    viewModel: DashboardViewModel = viewModel(),
     onNavigateToGoalDetail: (String) -> Unit = { navController.navigate("goal_detail/$it") },
     onNavigateToTransactions: () -> Unit = { navController.navigate("transactions") },
     onNavigateToReports: () -> Unit = { navController.navigate("reports") },
@@ -98,13 +86,12 @@ fun DashboardScreen(
     onNavigateToProfile: () -> Unit = { navController.navigate("profile") },
     onNavigateToQuickSave: () -> Unit = { navController.navigate("quick_save") }
 ) {
-    val sampleGoals = getSampleGoals()
-    val sampleTransactions = getSampleTransactions()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
             DashboardTopBar(
-                userName = "Ana",
+                userName = uiState.userName,
                 onNotificationClick = { /* Handle notification */ },
                 onSettingsClick = { onNavigateToProfile() }
             )
@@ -131,134 +118,136 @@ fun DashboardScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
-        ) {
-            // Hero Card
-            item {
-                HeroCard(
-                    totalBalance = "S/ 3,420",
-                    goalProgress = "Meta principal: Viaje a Cusco — 65%",
-                    progressPercentage = 65,
-                    onIncomeClick = onNavigateToQuickSave,
-                    onExpenseClick = { navController.navigate("quick_out") } // Updated to navigate to QuickOutScreen
-                )
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-
-            item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-
-            // Goals Section
-            item {
-                Text(
-                    text = "Tus metas",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(Spacing.md)) }
-
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                ) {
-                    items(sampleGoals) { goal ->
-                        GoalCard(
-                            title = goal.title,
-                            savedAmount = goal.savedAmount,
-                            targetAmount = goal.targetAmount,
-                            progress = goal.progress,
-                            icon = goal.icon,
-                            color = goal.color,
-                            onClick = { onNavigateToGoalDetail(goal.id) }
-                        )
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-
-            // Quick Actions
-            item {
-                Text(
-                    text = "Acciones rápidas",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(Spacing.md)) }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                ) {
-                    QuickActionButton(
-                        text = "Ahorro rápido",
-                        icon = "💰",
-                        isPrimary = true,
-                        onClick = onNavigateToQuickSave,
-                        modifier = Modifier.weight(1f)
-                    )
-                    QuickActionButton(
-                        text = "Gasto rápido", // New quick action
-                        icon = "💸",
-                        isPrimary = false,
-                        onClick = { navController.navigate("quick_out") },
-                        modifier = Modifier.weight(1f)
-                    )
-                    QuickActionButton(
-                        text = "Enviar",
-                        icon = "📤",
-                        isPrimary = false,
-                        onClick = { /* Handle transfer */ },
-                        modifier = Modifier.weight(1f)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(paddingValues),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
+            ) {
+                item {
+                    HeroCard(
+                        totalBalance = uiState.totalBalance,
+                        goalProgress = uiState.mainGoalProgressText,
+                        progressPercentage = uiState.mainGoalProgressPercentage,
+                        onIncomeClick = onNavigateToQuickSave,
+                        onExpenseClick = { navController.navigate("quick_out") }
                     )
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(Spacing.xl)) }
+                item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                item {
                     Text(
-                        text = "Movimientos recientes",
+                        text = "Tus metas",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )
-                    TextButton(onClick = onNavigateToTransactions) {
-                        Text(
-                            text = "Ver todos",
-                            color = MaterialTheme.colorScheme.primary
+                }
+
+                item { Spacer(modifier = Modifier.height(Spacing.md)) }
+
+                item {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                    ) {
+                        items(uiState.goals) { goal ->
+                            GoalCard(
+                                title = goal.title,
+                                savedAmount = goal.savedAmount,
+                                targetAmount = goal.targetAmount,
+                                progress = goal.progress,
+                                icon = goal.icon,
+                                color = goal.color,
+                                onClick = { onNavigateToGoalDetail(goal.id) }
+                            )
+                        }
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(Spacing.xl)) }
+
+                item {
+                    Text(
+                        text = "Acciones rápidas",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(Spacing.md)) }
+
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                    ) {
+                        QuickActionButton(
+                            text = "Ahorro rápido",
+                            icon = "💰",
+                            isPrimary = true,
+                            onClick = onNavigateToQuickSave,
+                            modifier = Modifier.weight(1f)
+                        )
+                        QuickActionButton(
+                            text = "Gasto rápido",
+                            icon = "💸",
+                            isPrimary = false,
+                            onClick = { navController.navigate("quick_out") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        QuickActionButton(
+                            text = "Enviar",
+                            icon = "📤",
+                            isPrimary = false,
+                            onClick = { /* Handle transfer */ },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
-            }
 
-            item { Spacer(modifier = Modifier.height(Spacing.md)) }
+                item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-            items(sampleTransactions) { transaction ->
-                TransactionItem(
-                    transaction = transaction,
-                    onClick = { /* Handle transaction click */ }
-                )
-                Spacer(modifier = Modifier.height(Spacing.sm))
-            }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Movimientos recientes",
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        TextButton(onClick = onNavigateToTransactions) {
+                            Text(
+                                text = "Ver todos",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
 
-            item { Spacer(modifier = Modifier.height(Spacing.xl)) }
+                item { Spacer(modifier = Modifier.height(Spacing.md)) }
 
-            // Insights Card
-            item {
-                InsightsCard()
+                items(uiState.transactions) { transaction ->
+                    TransactionItem(
+                        transaction = transaction,
+                        onClick = { /* Handle transaction click */ }
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                }
+
+                item { Spacer(modifier = Modifier.height(Spacing.xl)) }
+
+                item {
+                    InsightsCard()
+                }
             }
         }
     }
@@ -286,7 +275,7 @@ fun DashboardTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "A",
+                    text = userName.firstOrNull()?.uppercase() ?: "",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -353,7 +342,7 @@ fun QuickActionButton(
 }
 
 @Composable
-fun TransactionItem(transaction: Transaction, onClick: () -> Unit) {
+fun TransactionItem(transaction: DashboardTransaction, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
