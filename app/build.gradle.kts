@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -10,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.cashito"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -59,4 +60,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation("com.google.firebase:firebase-auth")
 }
