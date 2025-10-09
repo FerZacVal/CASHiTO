@@ -22,17 +22,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.viewmodel.CreateUserViewModel
 import com.cashito.ui.theme.Spacing
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CreateUserScreen(
     navController: NavController,
-    viewModel: CreateUserViewModel = viewModel(),
+    viewModel: CreateUserViewModel = koinViewModel(),
     onNavigateToLogin: () -> Unit = { navController.navigate("login") }
 ) {
     val uiState by viewModel.uiState.collectAsState()

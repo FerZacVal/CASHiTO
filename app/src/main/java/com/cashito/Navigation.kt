@@ -24,10 +24,12 @@ import com.cashito.ui.screens.splash.SplashScreen
 import com.cashito.ui.screens.transactions.TransactionsScreen
 
 object Routes {
+    // New Routes
     const val SPLASH = "splash"
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val DASHBOARD = "dashboard"
+    const val HOME = "dashboard" // Alias for the main screen
     const val GOAL_DETAIL = "goal_detail/{goalId}"
     const val GOAL_FORM = "goal_form"
     const val GOALS = "goals"
@@ -41,6 +43,14 @@ object Routes {
     const val INSIGHTS = "insights"
     const val PROFILE = "profile"
     const val NOTIFICATIONS = "notifications"
+
+    // Legacy Routes for Dev Menu
+    const val AUTH = "auth_legacy"
+    const val CATEGORY = "category_legacy"
+    const val EXPENSE = "expense_legacy"
+    const val RECOMMENDATION = "recommendation_legacy"
+    const val REPORT = "report_legacy"
+    const val SAVINGS = "savings_legacy"
 }
 
 @Composable
@@ -70,5 +80,7 @@ fun AppNavHost(
         composable(Routes.BALANCE_REPORT) { BalanceScreen(navController) }
         composable(Routes.GOAL_FORM) { GoalFormScreen(navController) }
         composable(Routes.PROFILE) { ProfileScreen(navController) }
+
+        // TODO: Add composables for legacy routes if they need to be displayed
     }
 }

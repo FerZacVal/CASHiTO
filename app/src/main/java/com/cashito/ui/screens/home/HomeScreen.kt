@@ -20,12 +20,12 @@ fun HomeScreen(navController: NavController? = null) {
         "Dashboard" to Routes.DASHBOARD,
         "Splash" to Routes.SPLASH,
         "Login" to Routes.LOGIN,
-        "Auth (Legacy)" to Routes.AUTH,
-        "Categories (Legacy)" to Routes.CATEGORY,
-        "Expenses (Legacy)" to Routes.EXPENSE,
-        "Recommendations (Legacy)" to Routes.RECOMMENDATION,
-        "Reports (Legacy)" to Routes.REPORT,
-        "Savings (Legacy)" to Routes.SAVINGS,
+        // "Auth (Legacy)" to Routes.AUTH, // Disabled: No screen implemented
+        // "Categories (Legacy)" to Routes.CATEGORY, // Disabled: No screen implemented
+        // "Expenses (Legacy)" to Routes.EXPENSE, // Disabled: No screen implemented
+        // "Recommendations (Legacy)" to Routes.RECOMMENDATION, // Disabled: No screen implemented
+        // "Reports (Legacy)" to Routes.REPORT, // Disabled: No screen implemented
+        // "Savings (Legacy)" to Routes.SAVINGS, // Disabled: No screen implemented
         "Goal Detail" to "${Routes.GOAL_DETAIL.substringBefore('{')}1",
         "Goal Form" to Routes.GOAL_FORM,
         "Profile" to Routes.PROFILE,
