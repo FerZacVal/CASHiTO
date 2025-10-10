@@ -1,5 +1,6 @@
-package com.cashito.data.repositories.auth
+package com.cashito.data.repositories
 
+// Forcing the correct import path
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
 import com.cashito.data.mappers.toDomain
 import com.cashito.domain.entities.auth.User
@@ -25,9 +26,16 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun register(email: String, password: String): User {
+    override suspend fun register(email: String, password: String, nombre: String): User {
         try {
-            return firebaseAuthDataSource.createUser(email, password).toDomain()
+            // Step 1: Create user in Firebase Authentication
+            val firebaseUser = firebaseAuthDataSource.createUser(email, password)
+            
+            // Step 2: Save user profile to Firestore, now with the name
+            firebaseAuthDataSource.saveUserProfile(firebaseUser, nombre)
+
+            // Step 3: Return the domain user object
+            return firebaseUser.toDomain()
         } catch (e: FirebaseAuthUserCollisionException) {
             throw AuthException(AuthError.UserAlreadyExists)
         } catch (e: Exception) {

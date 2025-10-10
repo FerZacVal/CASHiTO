@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.quick_out
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,60 +29,42 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
-import com.cashito.ui.components.chips.SelectionChip
 import com.cashito.ui.components.inputs.CashitoTextField
-import com.cashito.ui.theme.CASHiTOTheme
+import com.cashito.ui.viewmodel.QuickOutCategory
+import com.cashito.ui.viewmodel.QuickOutViewModel
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
-import com.cashito.ui.theme.errorLight
-import com.cashito.ui.theme.primaryLight
-import com.cashito.ui.theme.secondaryLight
-import com.cashito.ui.viewmodel.QuickOutCategory
-import com.cashito.ui.viewmodel.QuickOutUiState
-import com.cashito.ui.viewmodel.QuickOutViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun QuickOutScreen(
     navController: NavController,
-    viewModel: QuickOutViewModel = viewModel()
+    viewModel: QuickOutViewModel = koinViewModel(),
+    onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
+    Log.d("FlowDebug", "QuickOutScreen: Composable - INICIO de la función. Si este log no aparece, el crash ocurre en la inyección del ViewModel.")
+
+    Log.d("FlowDebug", "QuickOutScreen: Declarando uiState...")
     val uiState by viewModel.uiState.collectAsState()
+    Log.d("FlowDebug", "QuickOutScreen: uiState declarado.")
 
-    val onNavigateBack: () -> Unit = { navController.popBackStack() }
-
+    Log.d("FlowDebug", "QuickOutScreen: Declarando LaunchedEffect...")
     LaunchedEffect(uiState.expenseConfirmed) {
+        Log.d("FlowDebug", "QuickOutScreen: LaunchedEffect - INICIO del bloque. expenseConfirmed: ${uiState.expenseConfirmed}")
         if (uiState.expenseConfirmed) {
             onNavigateBack()
         }
     }
+    Log.d("FlowDebug", "QuickOutScreen: LaunchedEffect declarado.")
 
-    QuickOutScreenContent(
-        uiState = uiState,
-        onPresetAmountSelected = viewModel::onPresetAmountSelected,
-        onCustomAmountChanged = viewModel::onCustomAmountChanged,
-        onCategorySelected = viewModel::onCategorySelected,
-        onConfirmExpense = viewModel::onConfirmExpense,
-        onNavigateBack = onNavigateBack
-    )
-}
-
-@Composable
-fun QuickOutScreenContent(
-    uiState: QuickOutUiState,
-    onPresetAmountSelected: (String) -> Unit,
-    onCustomAmountChanged: (String) -> Unit,
-    onCategorySelected: (String) -> Unit,
-    onConfirmExpense: () -> Unit,
-    onNavigateBack: () -> Unit
-) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -139,16 +122,25 @@ fun QuickOutScreenContent(
                         PresetAmountButton(
                             amount = "S/ $amount",
                             isSelected = uiState.selectedAmount == amount,
-                            onClick = { onPresetAmountSelected(amount) }
+                            onClick = { viewModel.onPresetAmountSelected(amount) }
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
 
+                Text(
+                    text = "O ingresa un monto personalizado",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
                 CashitoTextField(
                     value = uiState.customAmount,
-                    onValueChange = onCustomAmountChanged,
+                    onValueChange = viewModel::onCustomAmountChanged,
                     label = "Monto personalizado",
                     placeholder = "S/ 0.00",
                     keyboardType = KeyboardType.Number,
@@ -170,21 +162,19 @@ fun QuickOutScreenContent(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
                     items(uiState.categories) { category ->
-                        SelectionChip(
-                            title = category.title,
-                            icon = category.icon,
-                            color = category.color,
+                        CategoryChip(
+                            category = category,
                             isSelected = uiState.selectedCategoryId == category.id,
-                            onClick = { onCategorySelected(category.id) }
+                            onClick = { viewModel.onCategorySelected(category.id) }
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(Spacing.xxxl))
+                Spacer(modifier = Modifier.height(Spacing.xl))
 
                 PrimaryButton(
                     text = "Confirmar gasto",
-                    onClick = onConfirmExpense,
+                    onClick = viewModel::onConfirmExpense,
                     enabled = uiState.isConfirmEnabled
                 )
             }
@@ -206,26 +196,39 @@ fun PresetAmountButton(
     )
 }
 
-@Preview(showBackground = true)
 @Composable
-fun QuickOutScreenPreview() {
-    CASHiTOTheme {
-        QuickOutScreenContent(
-            uiState = QuickOutUiState(
-                presetAmounts = listOf("5", "10", "20", "50"),
-                categories = listOf(
-                    QuickOutCategory("1", "Comida", "🍔", primaryLight),
-                    QuickOutCategory("2", "Transporte", "🚌", secondaryLight)
-                ),
-                selectedAmount = "10",
-                selectedCategoryId = "2",
-                isConfirmEnabled = true
-            ),
-            onPresetAmountSelected = {},
-            onCustomAmountChanged = {},
-            onCategorySelected = {},
-            onConfirmExpense = {},
-            onNavigateBack = {}
-        )
+fun CategoryChip(
+    category: QuickOutCategory,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.width(120.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) category.color else category.color.copy(alpha = 0.2f)
+        ),
+        shape = RoundedCornerShape(Radius.round)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = category.icon,
+                style = MaterialTheme.typography.headlineSmall,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else category.color
+            )
+            Spacer(modifier = Modifier.height(Spacing.xs))
+            Text(
+                text = category.title,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else category.color,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

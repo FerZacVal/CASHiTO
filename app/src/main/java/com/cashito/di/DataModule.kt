@@ -1,22 +1,32 @@
 package com.cashito.di
 
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
-import com.cashito.data.repositories.auth.AuthRepositoryImpl
+import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
+import com.cashito.data.repositories.AuthRepositoryImpl
+import com.cashito.data.repositories.ExpenseRepositoryImpl
+import com.cashito.data.repositories.IncomeRepositoryImpl
 import com.cashito.domain.repositories.auth.AuthRepository
+import com.cashito.domain.repositories.expense.ExpenseRepository
+import com.cashito.domain.repositories.income.IncomeRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.koin.dsl.module
 
 val dataModule = module {
 
-    // Provee una instancia única (singleton) de FirebaseAuth
+    // --- Firebase Instances ---
     single { FirebaseAuth.getInstance() }
+    single { FirebaseFirestore.getInstance() }
 
-    // Provee una instancia del DataSource. Koin automáticamente le pasará
-    // la instancia de FirebaseAuth que definimos en la línea anterior (get()).
+    // --- DataSources ---
+    // CORRECCIÓN: FirebaseAuthDataSource solo necesita UNA dependencia (FirebaseAuth).
     single { FirebaseAuthDataSource(get()) }
+    // FirebaseTransactionDataSource necesita DOS dependencias (Firestore y Auth).
+    single { FirebaseTransactionDataSource(get(), get()) }
 
-    // Provee la implementación del repositorio. Cuando el dominio pida un `AuthRepository`,
-    // Koin le dará un `AuthRepositoryImpl`, pasándole el DataSource que ya sabe crear (get()).
+    // --- Repositories ---
     single<AuthRepository> { AuthRepositoryImpl(get()) }
+    single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
+    single<IncomeRepository> { IncomeRepositoryImpl(get()) }
 
 }

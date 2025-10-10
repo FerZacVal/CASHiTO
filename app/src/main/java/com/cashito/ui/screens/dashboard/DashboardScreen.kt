@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -346,6 +347,7 @@ fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    Log.d("FlowDebug", "DASHBOARDSCREEN: BOTTON quick save")
     Card(
         onClick = onClick,
         modifier = modifier.height(60.dp),
@@ -368,6 +370,7 @@ fun QuickActionButton(
             )
         }
     }
+
 }
 
 @Composable
@@ -377,6 +380,7 @@ fun TransactionItem(transaction: DashboardTransaction, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {
+
         Row(
             modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically

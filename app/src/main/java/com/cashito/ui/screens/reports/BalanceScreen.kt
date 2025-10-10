@@ -123,7 +123,7 @@ fun BalanceScreenContent(
 
 @Composable
 fun BalanceSummaryCard(summary: BalanceSummary) {
-    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("es", "PE")) }
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale.Builder().setLanguage("es").setRegion("PE").build()) }
     val isPositive = summary.change >= 0
     val changeColor = if (isPositive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 
