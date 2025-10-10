@@ -1,6 +1,7 @@
 package com.cashito.ui.viewmodel
 
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.category.Category
@@ -26,6 +27,8 @@ data class QuickOutCategory(
 )
 
 data class QuickOutUiState(
+    val transactionId: String? = null,
+    val isEditing: Boolean = false,
     val presetAmounts: List<String> = listOf("5", "10", "20", "50"),
     val categories: List<QuickOutCategory> = emptyList(),
     val amount: String = "",
@@ -37,7 +40,8 @@ data class QuickOutUiState(
 
 // --- VIEWMODEL ---
 class QuickOutViewModel(
-    private val addExpenseUseCase: AddExpenseUseCase
+    private val addExpenseUseCase: AddExpenseUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(QuickOutUiState())
@@ -45,6 +49,10 @@ class QuickOutViewModel(
 
     init {
         loadCategories()
+        val transactionId: String? = savedStateHandle["transactionId"]
+        if (transactionId != null) {
+            loadExpenseForEditing(transactionId)
+        }
     }
 
     private fun loadCategories() {
@@ -58,6 +66,19 @@ class QuickOutViewModel(
                 )
             )
         }
+    }
+
+    private fun loadExpenseForEditing(transactionId: String) {
+        // TODO: Implementar un GetExpenseByIdUseCase para obtener los datos reales
+        _uiState.update {
+            it.copy(
+                transactionId = transactionId,
+                isEditing = true,
+                amount = "25.00", // Dato de ejemplo
+                selectedCategoryId = "2" // ID de "Transporte", dato de ejemplo
+            )
+        }
+        validateConfirmButton()
     }
 
     fun onPresetAmountSelected(preset: String) {
@@ -98,26 +119,31 @@ class QuickOutViewModel(
 
         _uiState.update { it.copy(isConfirmEnabled = false) }
 
-        viewModelScope.launch {
-            val state = _uiState.value
-            val amountValue = state.amount.toDoubleOrNull() ?: 0.0
-            val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
+        if (_uiState.value.isEditing) {
+            // TODO: Llamar a UpdateExpenseUseCase
+            _uiState.update { it.copy(expenseConfirmed = true) } // Simular éxito por ahora
+        } else {
+            viewModelScope.launch {
+                val state = _uiState.value
+                val amountValue = state.amount.toDoubleOrNull() ?: 0.0
+                val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
 
-            if (selectedCategory != null) {
-                val expense = Expense(
-                    id = "", // Firestore will generate the ID
-                    description = selectedCategory.title,
-                    amount = amountValue,
-                    date = Date(),
-                    category = Category(
-                        id = selectedCategory.id,
-                        name = selectedCategory.title,
-                        icon = selectedCategory.icon,
-                        color = selectedCategory.colorHex
+                if (selectedCategory != null) {
+                    val expense = Expense(
+                        id = "", // Firestore will generate the ID
+                        description = selectedCategory.title,
+                        amount = amountValue,
+                        date = Date(),
+                        category = Category(
+                            id = selectedCategory.id,
+                            name = selectedCategory.title,
+                            icon = selectedCategory.icon,
+                            color = selectedCategory.colorHex
+                        )
                     )
-                )
-                addExpenseUseCase(expense)
-                _uiState.update { it.copy(expenseConfirmed = true) }
+                    addExpenseUseCase(expense)
+                    _uiState.update { it.copy(expenseConfirmed = true) }
+                }
             }
         }
     }
