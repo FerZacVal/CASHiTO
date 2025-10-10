@@ -26,7 +26,8 @@ data class Transaction(
     val icon: String,
     val color: Color, // Este color es para el icono
     val category: String,
-    val date: String // Representación del grupo (e.g., "Hoy", "Ayer", "dd/MM/yyyy")
+    val date: String, // Representación del grupo (e.g., "Hoy", "Ayer", "dd/MM/yyyy")
+    val type: TransactionType // Needed to know if it's income or expense for deletion/edition
 )
 
 data class TransactionGroup(
@@ -35,12 +36,15 @@ data class TransactionGroup(
 )
 
 data class TransactionsUiState(
-    val allTransactions: List<Transaction> = emptyList(), // Lista plana con todas las transacciones de la UI
+    val allTransactions: List<Transaction> = emptyList(),
     val filteredTransactions: List<TransactionGroup> = emptyList(),
     val searchQuery: String = "",
     val selectedFilter: String = "Todos",
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val selectedTransaction: Transaction? = null, // Transaction currently selected by long press
+    val showOptionsDialog: Boolean = false, // To show Edit/Delete options
+    val showDeleteConfirmDialog: Boolean = false // To show the final delete confirmation
 )
 
 // --- VIEWMODEL ---
@@ -84,6 +88,39 @@ class TransactionsViewModel(
         filterTransactions()
     }
 
+    // --- Actions for Long Press ---
+
+    fun onTransactionLongPressed(transaction: Transaction) {
+        _uiState.update { it.copy(selectedTransaction = transaction, showOptionsDialog = true) }
+    }
+
+    fun onDismissDialogs() {
+        _uiState.update { it.copy(selectedTransaction = null, showOptionsDialog = false, showDeleteConfirmDialog = false) }
+    }
+
+    fun onDeleteRequest() {
+        _uiState.update { it.copy(showOptionsDialog = false, showDeleteConfirmDialog = true) }
+    }
+
+    fun onDeleteConfirm() {
+        val transactionId = _uiState.value.selectedTransaction?.id
+        if (transactionId != null) {
+            // TODO: Call actual DeleteTransactionUseCase
+
+            // For now, just remove it from the local list for immediate feedback
+            val updatedTransactions = _uiState.value.allTransactions.filterNot { it.id == transactionId }
+            _uiState.update { state ->
+                state.copy(
+                    allTransactions = updatedTransactions,
+                )
+            }
+            // After updating the list, we need to re-apply filters and grouping
+            filterTransactions()
+        }
+        // Hide all dialogs regardless
+        onDismissDialogs()
+    }
+
     private fun filterTransactions() {
         val state = _uiState.value
         val filtered = state.allTransactions.filter { transaction ->
@@ -124,6 +161,7 @@ private fun DomainTransaction.toUiTransaction(): Transaction {
         icon = this.category?.icon ?: "❓",
         color = iconColor,
         category = this.category?.name ?: "Sin categoría",
-        date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(this.date) // Usaremos una fecha formateada para agrupar
+        date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(this.date), // Usaremos una fecha formateada para agrupar
+        type = this.type
     )
 }

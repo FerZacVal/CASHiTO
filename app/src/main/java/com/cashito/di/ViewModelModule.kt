@@ -23,12 +23,12 @@ val viewModelModule = module {
     viewModel { LoginViewModel(get()) }
     viewModel { CreateUserViewModel(get()) }
 
-    // --- Transaction ViewModels (necesitan UseCase) ---
-    viewModel { QuickOutViewModel(get()) }
-    viewModel { QuickSaveViewModel(get()) }
+    // --- Transaction ViewModels (necesitan UseCase y/o SavedStateHandle) ---
+    viewModel { QuickOutViewModel(get(), get()) }      // Modificado
+    viewModel { QuickSaveViewModel(get(), get()) }      // Modificado
     viewModel { TransactionsViewModel(get()) }
 
-    // --- Goal ViewModels (necesitan) ---
+    // --- Goal ViewModels (necesitan SavedStateHandle) ---
     viewModel { GoalsViewModel() }
     viewModel { GoalDetailViewModel(get()) }
     viewModel { GoalFormViewModel(get()) }

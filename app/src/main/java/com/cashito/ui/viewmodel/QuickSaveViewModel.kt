@@ -1,6 +1,7 @@
 package com.cashito.ui.viewmodel
 
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.category.Category
@@ -26,6 +27,8 @@ data class QuickSaveCategory(
 )
 
 data class QuickSaveUiState(
+    val transactionId: String? = null,
+    val isEditing: Boolean = false,
     val presetAmounts: List<String> = listOf("50", "100", "500", "1000"),
     val categories: List<QuickSaveCategory> = emptyList(),
     val amount: String = "",
@@ -37,7 +40,8 @@ data class QuickSaveUiState(
 
 // --- VIEWMODEL ---
 class QuickSaveViewModel(
-    private val addIncomeUseCase: AddIncomeUseCase
+    private val addIncomeUseCase: AddIncomeUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(QuickSaveUiState())
@@ -45,6 +49,10 @@ class QuickSaveViewModel(
 
     init {
         loadCategories()
+        val transactionId: String? = savedStateHandle["transactionId"]
+        if (transactionId != null) {
+            loadIncomeForEditing(transactionId)
+        }
     }
 
     private fun loadCategories() {
@@ -58,6 +66,19 @@ class QuickSaveViewModel(
                 )
             )
         }
+    }
+
+    private fun loadIncomeForEditing(transactionId: String) {
+        // TODO: Implementar un GetIncomeByIdUseCase para obtener los datos reales
+        _uiState.update {
+            it.copy(
+                transactionId = transactionId,
+                isEditing = true,
+                amount = "150.00", // Dato de ejemplo
+                selectedCategoryId = "6" // ID de "Ventas", dato de ejemplo
+            )
+        }
+        validateConfirmButton() // Validar el botón después de cargar
     }
 
     fun onPresetAmountSelected(preset: String) {
@@ -98,26 +119,31 @@ class QuickSaveViewModel(
 
         _uiState.update { it.copy(isConfirmEnabled = false) }
 
-        viewModelScope.launch {
-            val state = _uiState.value
-            val amountValue = state.amount.toDoubleOrNull() ?: 0.0
-            val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
+        if (_uiState.value.isEditing) {
+            // TODO: Llamar a UpdateIncomeUseCase
+            _uiState.update { it.copy(incomeConfirmed = true) } // Simular éxito por ahora
+        } else {
+            viewModelScope.launch {
+                val state = _uiState.value
+                val amountValue = state.amount.toDoubleOrNull() ?: 0.0
+                val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
 
-            if (selectedCategory != null) {
-                val income = Income(
-                    id = "", // Firestore will generate the ID
-                    description = selectedCategory.title,
-                    amount = amountValue,
-                    date = Date(),
-                    category = Category(
-                        id = selectedCategory.id,
-                        name = selectedCategory.title,
-                        icon = selectedCategory.icon,
-                        color = selectedCategory.colorHex
+                if (selectedCategory != null) {
+                    val income = Income(
+                        id = "", // Firestore will generate the ID
+                        description = selectedCategory.title,
+                        amount = amountValue,
+                        date = Date(),
+                        category = Category(
+                            id = selectedCategory.id,
+                            name = selectedCategory.title,
+                            icon = selectedCategory.icon,
+                            color = selectedCategory.colorHex
+                        )
                     )
-                )
-                addIncomeUseCase(income)
-                _uiState.update { it.copy(incomeConfirmed = true) }
+                    addIncomeUseCase(income)
+                    _uiState.update { it.copy(incomeConfirmed = true) }
+                }
             }
         }
     }
