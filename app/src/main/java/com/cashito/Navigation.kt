@@ -1,6 +1,5 @@
 package com.cashito
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -23,6 +22,7 @@ import com.cashito.ui.screens.reports.CategoryExpenseReportScreen
 import com.cashito.ui.screens.reports.IncomeReportScreen
 import com.cashito.ui.screens.reports.ReportsScreen
 import com.cashito.ui.screens.splash.SplashScreen
+import com.cashito.ui.screens.transactions.TransactionEditScreen
 import com.cashito.ui.screens.transactions.TransactionsScreen
 
 object Routes {
@@ -42,6 +42,7 @@ object Routes {
     const val BALANCE_REPORT = "balance_report"
     const val PROFILE = "profile"
     const val CATEGORY_FORM = "category_form"
+    const val TRANSACTION_EDIT = "transaction_edit"
 }
 
 @Composable
@@ -79,5 +80,11 @@ fun AppNavHost(
         }
         composable(Routes.PROFILE) { ProfileScreen(navController) }
         composable(Routes.CATEGORY_FORM) { CategoryFormScreen(navController) }
+        composable(
+            route = "${Routes.TRANSACTION_EDIT}/{transactionId}",
+            arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
+        ) {
+            TransactionEditScreen(navController)
+        }
     }
 }

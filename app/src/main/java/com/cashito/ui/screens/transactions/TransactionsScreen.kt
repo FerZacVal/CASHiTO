@@ -75,10 +75,9 @@ fun TransactionsScreen(
     val filters = listOf("Todos", "Ingresos", "Gastos")
     val sheetState = rememberModalBottomSheetState()
 
-    val onNavigateToEdit: (Transaction) -> Unit = { transaction ->
+    val onNavigateToEdit: (Transaction) -> Unit = {
         viewModel.onDismissDialogs()
-        val baseRoute = if (transaction.type == TransactionType.INCOME) Routes.QUICK_SAVE else Routes.QUICK_OUT
-        navController.navigate("$baseRoute?transactionId=${transaction.id}")
+        navController.navigate("${Routes.TRANSACTION_EDIT}/${it.id}")
     }
 
     if (uiState.showOptionsDialog) {

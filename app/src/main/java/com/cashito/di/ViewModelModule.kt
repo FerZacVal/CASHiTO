@@ -14,6 +14,7 @@ import com.cashito.ui.viewmodel.ProfileViewModel
 import com.cashito.ui.viewmodel.QuickOutViewModel
 import com.cashito.ui.viewmodel.QuickSaveViewModel
 import com.cashito.ui.viewmodel.ReportsViewModel
+import com.cashito.ui.viewmodel.TransactionEditViewModel
 import com.cashito.ui.viewmodel.TransactionsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -27,6 +28,7 @@ val viewModelModule = module {
     viewModel { QuickOutViewModel(get(), get()) }      // Modificado
     viewModel { QuickSaveViewModel(get(), get()) }      // Modificado
     viewModel { TransactionsViewModel(get()) }
+    viewModel { TransactionEditViewModel(get()) }
 
     // --- Goal ViewModels (necesitan SavedStateHandle) ---
     viewModel { GoalsViewModel() }
@@ -39,6 +41,6 @@ val viewModelModule = module {
     viewModel { CategoryExpenseReportViewModel() }
     viewModel { IncomeReportViewModel() }
     viewModel { BalanceViewModel() }
-    viewModel { DashboardViewModel() }
-    viewModel { ProfileViewModel() }
+    viewModel { DashboardViewModel(get()) }
+    viewModel { ProfileViewModel(get()) }
 }
