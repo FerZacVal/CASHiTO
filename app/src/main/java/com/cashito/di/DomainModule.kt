@@ -1,5 +1,6 @@
 package com.cashito.di
 
+import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
@@ -11,7 +12,8 @@ val domainModule = module {
 
     // Auth
     factory { RegisterUseCase(get()) }
-    factory { LoginUseCase(get()) } // <-- ESTA LÍNEA FALTABA
+    factory { LoginUseCase(get()) }
+    factory { GetCurrentUserUseCase(get()) }
 
     // Income & Expense
     factory { AddIncomeUseCase(get()) }

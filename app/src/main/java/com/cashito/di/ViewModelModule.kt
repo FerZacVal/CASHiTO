@@ -22,11 +22,12 @@ val viewModelModule = module {
     // --- Auth ViewModels (necesitan UseCase) ---
     viewModel { LoginViewModel(get()) }
     viewModel { CreateUserViewModel(get()) }
+    viewModel { ProfileViewModel(get()) }
 
     // --- Transaction ViewModels (necesitan UseCase) ---
     viewModel { QuickOutViewModel(get()) }
     viewModel { QuickSaveViewModel(get()) }
-    viewModel { TransactionsViewModel(get()) }
+    viewModel { TransactionsViewModel(get(), get()) }
 
     // --- Goal ViewModels (necesitan) ---
     viewModel { GoalsViewModel() }
@@ -39,6 +40,5 @@ val viewModelModule = module {
     viewModel { CategoryExpenseReportViewModel() }
     viewModel { IncomeReportViewModel() }
     viewModel { BalanceViewModel() }
-    viewModel { DashboardViewModel() }
-    viewModel { ProfileViewModel() }
+    viewModel { DashboardViewModel(get()) } // CORREGIDO: Añadida dependencia
 }

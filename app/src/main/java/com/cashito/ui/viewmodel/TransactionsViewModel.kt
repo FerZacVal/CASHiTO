@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.transaction.TransactionType
+import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import com.cashito.ui.theme.errorLight
 import com.cashito.ui.theme.primaryLight
@@ -35,7 +36,8 @@ data class TransactionGroup(
 )
 
 data class TransactionsUiState(
-    val allTransactions: List<Transaction> = emptyList(), // Lista plana con todas las transacciones de la UI
+    val userName: String = "", // AÑADIDO: Campo para el nombre del usuario
+    val allTransactions: List<Transaction> = emptyList(),
     val filteredTransactions: List<TransactionGroup> = emptyList(),
     val searchQuery: String = "",
     val selectedFilter: String = "Todos",
@@ -45,20 +47,27 @@ data class TransactionsUiState(
 
 // --- VIEWMODEL ---
 class TransactionsViewModel(
-    private val getTransactionsUseCase: GetTransactionsUseCase
+    private val getTransactionsUseCase: GetTransactionsUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase // AÑADIDO: Inyección del nuevo UseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionsUiState())
     val uiState: StateFlow<TransactionsUiState> = _uiState.asStateFlow()
 
     init {
-        loadTransactions()
+        loadInitialData()
     }
 
-    private fun loadTransactions() {
+    private fun loadInitialData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
+            // Cargar nombre de usuario
+            val user = getCurrentUserUseCase()
+            // CORRECCIÓN: Usar 'displayName' en lugar de 'nombre'
+            _uiState.update { it.copy(userName = user?.displayName ?: "") }
+
+            // Cargar transacciones
             getTransactionsUseCase().onSuccess { domainTransactions ->
                 val uiTransactions = domainTransactions.map { it.toUiTransaction() }
                 _uiState.update {
@@ -67,7 +76,7 @@ class TransactionsViewModel(
                         isLoading = false
                     )
                 }
-                filterTransactions() // Filtrar después de cargar
+                filterTransactions()
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, error = error.message) }
             }
@@ -90,7 +99,7 @@ class TransactionsViewModel(
             val matchesFilter = when (state.selectedFilter) {
                 "Ingresos" -> transaction.amount.startsWith("+")
                 "Gastos" -> transaction.amount.startsWith("-")
-                else -> true // "Todos"
+                else -> true
             }
             val matchesSearch = state.searchQuery.isEmpty() ||
                     transaction.title.contains(state.searchQuery, ignoreCase = true) ||
@@ -124,6 +133,6 @@ private fun DomainTransaction.toUiTransaction(): Transaction {
         icon = this.category?.icon ?: "❓",
         color = iconColor,
         category = this.category?.name ?: "Sin categoría",
-        date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(this.date) // Usaremos una fecha formateada para agrupar
+        date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(this.date)
     )
 }
