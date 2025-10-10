@@ -10,7 +10,6 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseAuthDataSource(private val firebaseAuth: FirebaseAuth) {
 
-    // Get Firestore instance manually, without KTX
     private val firestore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 
     suspend fun signIn(email: String, password: String): FirebaseUser {
@@ -23,11 +22,6 @@ class FirebaseAuthDataSource(private val firebaseAuth: FirebaseAuth) {
             ?: throw IllegalStateException("FirebaseUser is null after create user")
     }
 
-    /**
-     * Saves a simple user profile to Firestore.
-     * @param user The FirebaseUser object, containing the UID and email.
-     * @param nombre The user's display name.
-     */
     suspend fun saveUserProfile(user: FirebaseUser, nombre: String) {
         val userProfile = hashMapOf(
             "userId" to user.uid,
@@ -38,6 +32,12 @@ class FirebaseAuthDataSource(private val firebaseAuth: FirebaseAuth) {
         firestore.collection("Usuarios").document(user.uid)
             .set(userProfile)
             .await()
+    }
+
+    suspend fun getUserProfile(): Map<String, Any>? {
+        val userId = firebaseAuth.currentUser?.uid ?: return null
+        val document = firestore.collection("Usuarios").document(userId).get().await()
+        return if (document.exists()) document.data else null
     }
 
     fun getAuthState(): Flow<FirebaseUser?> = callbackFlow {

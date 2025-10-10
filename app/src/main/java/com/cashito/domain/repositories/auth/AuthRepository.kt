@@ -8,6 +8,7 @@ interface AuthRepository {
     suspend fun register(email: String, password: String, nombre: String): User
     suspend fun logout()
     fun getAuthState(): Flow<User?>
+    suspend fun getCurrentUser(): User?
 }
 
 // --- ERROR HANDLING ---

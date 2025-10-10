@@ -43,7 +43,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.Routes
 import com.cashito.ui.components.cards.GoalCard
@@ -58,11 +57,12 @@ import com.cashito.ui.viewmodel.DashboardGoal
 import com.cashito.ui.viewmodel.DashboardTransaction
 import com.cashito.ui.viewmodel.DashboardUiState
 import com.cashito.ui.viewmodel.DashboardViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun DashboardScreen(
     navController: NavController,
-    viewModel: DashboardViewModel = viewModel()
+    viewModel: DashboardViewModel = koinViewModel() // CORREGIDO
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
