@@ -41,6 +41,6 @@ val viewModelModule = module {
     viewModel { CategoryExpenseReportViewModel() }
     viewModel { IncomeReportViewModel() }
     viewModel { BalanceViewModel() }
-    viewModel { DashboardViewModel() }
-    viewModel { ProfileViewModel() }
+    viewModel { DashboardViewModel(get()) }
+    viewModel { ProfileViewModel(get()) }
 }
