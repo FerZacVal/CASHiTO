@@ -1,5 +1,6 @@
 package com.cashito
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -68,11 +69,14 @@ fun AppNavHost(
             route = Routes.GOAL_DETAIL,
             arguments = listOf(navArgument("goalId") { type = NavType.StringType })
         ) {
+            Log.d("FlowDebug", "Navigation: Go detailScrreen.")
             GoalDetailScreen(navController = navController)
         }
         composable(Routes.GOALS) { GoalsScreen(navController) }
         composable(Routes.TRANSACTIONS) { TransactionsScreen(navController) }
-        composable(Routes.QUICK_SAVE) { QuickSaveScreen(navController) }
+        composable(Routes.QUICK_SAVE) {
+            Log.d("FlowDebug", "Navigation: QUICK_SAVE SCREEN.")
+            QuickSaveScreen(navController) }
         composable(Routes.QUICK_OUT) { QuickOutScreen(navController) }
         composable(Routes.REPORTS) { ReportsScreen(navController) }
         composable(Routes.CATEGORY_EXPENSE_REPORT) { CategoryExpenseReportScreen(navController) }

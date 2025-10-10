@@ -1,7 +1,7 @@
 package com.cashito.domain.usecases.expense
 
 import com.cashito.domain.entities.expense.Expense
-import com.cashito.domain.repositories.ExpenseRepository
+import com.cashito.domain.repositories.expense.ExpenseRepository
 
 class AddExpenseUseCase(
     private val repository: ExpenseRepository
@@ -10,5 +10,3 @@ class AddExpenseUseCase(
         repository.addExpense(expense)
     }
 }
-
-

@@ -13,7 +13,6 @@ class CashitoApplication : Application() {
 
         startKoin {
             androidContext(this@CashitoApplication)
-            // Cargas todos los módulos de Koin que definen cómo construir tus dependencias.
             modules(dataModule, domainModule, viewModelModule)
         }
     }

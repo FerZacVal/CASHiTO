@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.quick_save
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,30 +34,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
-import com.cashito.ui.viewmodel.IncomeCategory
-import com.cashito.ui.viewmodel.QuickSaveGoal
+import com.cashito.ui.viewmodel.QuickSaveCategory
 import com.cashito.ui.viewmodel.QuickSaveViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun QuickSaveScreen(
     navController: NavController,
-    viewModel: QuickSaveViewModel = viewModel(),
+    viewModel: QuickSaveViewModel = koinViewModel(),
     onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    Log.d("FlowDebug", "QuickSaveScreen: Composable - INICIO de la función. Si este log no aparece, el crash ocurre en la inyección del ViewModel.")
 
+    Log.d("FlowDebug", "QuickSaveScreen: Declarando uiState...")
+    val uiState by viewModel.uiState.collectAsState()
+    Log.d("FlowDebug", "QuickSaveScreen: uiState declarado.")
+
+    Log.d("FlowDebug", "QuickSaveScreen: Declarando LaunchedEffect...")
     LaunchedEffect(uiState.incomeConfirmed) {
+        Log.d("FlowDebug", "QuickSaveScreen: LaunchedEffect - INICIO del bloque. incomeConfirmed: ${uiState.incomeConfirmed}")
         if (uiState.incomeConfirmed) {
             onNavigateBack()
         }
     }
+    Log.d("FlowDebug", "QuickSaveScreen: LaunchedEffect declarado.")
 
     Box(
         modifier = Modifier
@@ -154,29 +161,6 @@ fun QuickSaveScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(Spacing.xl))
-
-                Text(
-                    text = "¿A qué meta va este ingreso?",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(Spacing.md))
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-                ) {
-                    items(uiState.goals) { goal ->
-                        GoalChip(
-                            goal = goal,
-                            isSelected = uiState.selectedGoalId == goal.id,
-                            onClick = { viewModel.onGoalSelected(goal.id) }
-                        )
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                 PrimaryButton(
@@ -204,45 +188,8 @@ fun PresetAmountButton(
 }
 
 @Composable
-fun GoalChip(
-    goal: QuickSaveGoal,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.width(120.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) goal.color else goal.color.copy(alpha = 0.2f)
-        ),
-        shape = RoundedCornerShape(Radius.round)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.md),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = goal.icon,
-                style = MaterialTheme.typography.headlineSmall,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else goal.color
-            )
-            Spacer(modifier = Modifier.height(Spacing.xs))
-            Text(
-                text = goal.title,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Medium,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else goal.color,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
 fun IncomeCategoryChip(
-    category: IncomeCategory,
+    category: QuickSaveCategory,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {

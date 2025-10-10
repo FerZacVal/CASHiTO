@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.quick_out
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,13 +50,20 @@ fun QuickOutScreen(
     viewModel: QuickOutViewModel = viewModel(),
     onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    Log.d("FlowDebug", "QuickOutScreen: Composable - INICIO de la función. Si este log no aparece, el crash ocurre en la inyección del ViewModel.")
 
+    Log.d("FlowDebug", "QuickOutScreen: Declarando uiState...")
+    val uiState by viewModel.uiState.collectAsState()
+    Log.d("FlowDebug", "QuickOutScreen: uiState declarado.")
+
+    Log.d("FlowDebug", "QuickOutScreen: Declarando LaunchedEffect...")
     LaunchedEffect(uiState.expenseConfirmed) {
+        Log.d("FlowDebug", "QuickOutScreen: LaunchedEffect - INICIO del bloque. expenseConfirmed: ${uiState.expenseConfirmed}")
         if (uiState.expenseConfirmed) {
             onNavigateBack()
         }
     }
+    Log.d("FlowDebug", "QuickOutScreen: LaunchedEffect declarado.")
 
     Box(
         modifier = Modifier

@@ -2,12 +2,18 @@ package com.cashito.ui.viewmodel
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cashito.domain.entities.category.Category
+import com.cashito.domain.entities.expense.Expense
+import com.cashito.domain.usecases.expense.AddExpenseUseCase
 import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.theme.secondaryLight
 import com.cashito.ui.theme.tertiaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.util.Date
 
 // --- STATE ---
 data class QuickOutCategory(
@@ -28,7 +34,9 @@ data class QuickOutUiState(
 )
 
 // --- VIEWMODEL ---
-class QuickOutViewModel : ViewModel() {
+class QuickOutViewModel(
+    private val addExpenseUseCase: AddExpenseUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(QuickOutUiState())
     val uiState: StateFlow<QuickOutUiState> = _uiState.asStateFlow()
@@ -38,7 +46,6 @@ class QuickOutViewModel : ViewModel() {
     }
 
     private fun loadCategories() {
-        // TODO: Replace with actual data fetching
         _uiState.value = _uiState.value.copy(
             categories = listOf(
                 QuickOutCategory("1", "Comida", "🍔", primaryLight),
@@ -72,13 +79,35 @@ class QuickOutViewModel : ViewModel() {
 
     private fun validateConfirmButton() {
         val state = _uiState.value
-        val isEnabled = (state.customAmount.isNotEmpty() || state.selectedAmount.isNotEmpty()) && state.selectedCategoryId.isNotEmpty()
+        val amount = state.customAmount.toDoubleOrNull() ?: state.selectedAmount.toDoubleOrNull() ?: 0.0
+        val isEnabled = amount > 0 && state.selectedCategoryId.isNotEmpty()
         _uiState.value = state.copy(isConfirmEnabled = isEnabled)
     }
 
     fun onConfirmExpense() {
         if (!_uiState.value.isConfirmEnabled) return
-        // TODO: Implement expense saving logic
-        _uiState.value = _uiState.value.copy(expenseConfirmed = true)
+
+        viewModelScope.launch {
+            val state = _uiState.value
+            val amount = state.customAmount.toDoubleOrNull() ?: state.selectedAmount.toDoubleOrNull() ?: 0.0
+            val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
+
+            if (selectedCategory != null) {
+                val expense = Expense(
+                    id = "", // Firestore will generate the ID
+                    description = selectedCategory.title,
+                    amount = amount,
+                    date = Date(),
+                    category = Category( // Creating the domain category object
+                        id = selectedCategory.id,
+                        name = selectedCategory.title,
+                        icon = selectedCategory.icon,
+                        color = "" // Color mapping can be done later
+                    )
+                )
+                addExpenseUseCase(expense)
+                _uiState.value = _uiState.value.copy(expenseConfirmed = true)
+            } 
+        }
     }
 }
