@@ -20,7 +20,8 @@ data class QuickOutCategory(
     val id: String,
     val title: String,
     val icon: String,
-    val color: Color
+    val color: Color,
+    val colorHex: String
 )
 
 data class QuickOutUiState(
@@ -48,10 +49,10 @@ class QuickOutViewModel(
     private fun loadCategories() {
         _uiState.value = _uiState.value.copy(
             categories = listOf(
-                QuickOutCategory("1", "Comida", "🍔", primaryLight),
-                QuickOutCategory("2", "Transporte", "🚌", secondaryLight),
-                QuickOutCategory("3", "Compras", "🛒", tertiaryLight),
-                QuickOutCategory("4", "Ocio", "🎉", Color(0xFFF59E0B))
+                QuickOutCategory("1", "Comida", "🍔", primaryLight, "#FF6F00"),
+                QuickOutCategory("2", "Transporte", "🚌", secondaryLight, "#FFAB00"),
+                QuickOutCategory("3", "Compras", "🛒", tertiaryLight, "#00BFA5"),
+                QuickOutCategory("4", "Ocio", "🎉", Color(0xFFF59E0B), "#F59E0B")
             )
         )
     }
@@ -87,6 +88,8 @@ class QuickOutViewModel(
     fun onConfirmExpense() {
         if (!_uiState.value.isConfirmEnabled) return
 
+        _uiState.value = _uiState.value.copy(isConfirmEnabled = false)
+
         viewModelScope.launch {
             val state = _uiState.value
             val amount = state.customAmount.toDoubleOrNull() ?: state.selectedAmount.toDoubleOrNull() ?: 0.0
@@ -102,12 +105,12 @@ class QuickOutViewModel(
                         id = selectedCategory.id,
                         name = selectedCategory.title,
                         icon = selectedCategory.icon,
-                        color = "" // Color mapping can be done later
+                        color = selectedCategory.colorHex
                     )
                 )
                 addExpenseUseCase(expense)
                 _uiState.value = _uiState.value.copy(expenseConfirmed = true)
-            } 
+            }
         }
     }
 }

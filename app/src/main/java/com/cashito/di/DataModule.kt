@@ -6,7 +6,7 @@ import com.cashito.data.repositories.AuthRepositoryImpl
 import com.cashito.data.repositories.ExpenseRepositoryImpl
 import com.cashito.data.repositories.IncomeRepositoryImpl
 import com.cashito.domain.repositories.auth.AuthRepository
-//import com.cashito.domain.repositories.expense.ExpenseRepository
+import com.cashito.domain.repositories.expense.ExpenseRepository
 import com.cashito.domain.repositories.income.IncomeRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,7 +25,7 @@ val dataModule = module {
 
     // --- Repositories ---
     single<AuthRepository> { AuthRepositoryImpl(get()) }
-   // single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
+    single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
 
 }

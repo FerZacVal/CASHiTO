@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
@@ -43,11 +42,12 @@ import com.cashito.ui.viewmodel.QuickOutCategory
 import com.cashito.ui.viewmodel.QuickOutViewModel
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun QuickOutScreen(
     navController: NavController,
-    viewModel: QuickOutViewModel = viewModel(),
+    viewModel: QuickOutViewModel = koinViewModel(),
     onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
     Log.d("FlowDebug", "QuickOutScreen: Composable - INICIO de la función. Si este log no aparece, el crash ocurre en la inyección del ViewModel.")
