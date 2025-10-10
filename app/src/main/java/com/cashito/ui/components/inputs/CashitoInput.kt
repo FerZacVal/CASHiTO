@@ -2,7 +2,6 @@ package com.cashito.ui.components.inputs
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
 
@@ -40,9 +38,7 @@ fun CashitoTextField(
             onValueChange = onValueChange,
             label = { Text(label) },
             placeholder = { Text(placeholder) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(ComponentSize.inputHeight),
+            modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             isError = isError,
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
@@ -73,9 +69,7 @@ fun CashitoSearchField(
         value = value,
         onValueChange = onValueChange,
         placeholder = { Text(placeholder) },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(ComponentSize.inputHeight),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Radius.md),
         singleLine = true,
         leadingIcon = {

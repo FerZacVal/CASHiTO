@@ -20,22 +20,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
+import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-    navController: NavController,
-    onNavigateToLogin: () -> Unit = { navController.navigate("login") }
+    navController: NavController
 ) {
+    val onNavigateToLogin: () -> Unit = { navController.navigate("login") }
+
     LaunchedEffect(Unit) {
         delay(2500)
         onNavigateToLogin()
     }
+    
+    SplashScreenContent(
+        onNavigateToLogin = onNavigateToLogin
+    )
+}
 
+@Composable
+fun SplashScreenContent(onNavigateToLogin: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -110,5 +120,13 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SplashScreenPreview() {
+    CASHiTOTheme {
+        SplashScreenContent(onNavigateToLogin = {})
     }
 }

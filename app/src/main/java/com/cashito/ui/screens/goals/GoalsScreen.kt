@@ -23,23 +23,41 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.cards.GoalCard
-import com.cashito.ui.viewmodel.GoalsViewModel
+import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.theme.primaryLight
+import com.cashito.ui.theme.secondaryLight
+import com.cashito.ui.viewmodel.Goal
+import com.cashito.ui.viewmodel.GoalsUiState
+import com.cashito.ui.viewmodel.GoalsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalsScreen(
     navController: NavController,
-    viewModel: GoalsViewModel = viewModel(),
-    onNavigateToGoalDetail: (String) -> Unit = { goalId -> navController.navigate("goal_detail/$goalId") },
-    onNavigateBack: () -> Unit = { navController.popBackStack() }
+    viewModel: GoalsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    GoalsScreenContent(
+        uiState = uiState,
+        onNavigateToGoalDetail = { goalId -> navController.navigate("goal_detail/$goalId") },
+        onNavigateBack = { navController.popBackStack() }
+    )
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GoalsScreenContent(
+    uiState: GoalsUiState,
+    onNavigateToGoalDetail: (String) -> Unit,
+    onNavigateBack: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,5 +101,24 @@ fun GoalsScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GoalsScreenPreview() {
+    CASHiTOTheme {
+        GoalsScreenContent(
+            uiState = GoalsUiState(
+                goals = listOf(
+                    Goal("1", "Viaje a Cusco", "3,420", "5,000", 0.65f, "✈️", primaryLight),
+                    Goal("2", "Laptop nueva", "800", "4,500", 0.18f, "💻", secondaryLight),
+                    Goal("3", "Ahorro de emergencia", "1,200", "10,000", 0.12f, "🛡️", Color.Gray)
+                ),
+                isLoading = false
+            ),
+            onNavigateToGoalDetail = {},
+            onNavigateBack = {}
+        )
     }
 }

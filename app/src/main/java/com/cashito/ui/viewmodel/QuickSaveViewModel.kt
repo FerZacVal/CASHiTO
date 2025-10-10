@@ -84,7 +84,8 @@ class QuickSaveViewModel : ViewModel() {
     private fun validateConfirmButton() {
         val state = _uiState.value
         val isAmountSelected = state.customAmount.isNotEmpty() || state.selectedAmount.isNotEmpty()
-        val isEnabled = isAmountSelected && state.selectedGoalId.isNotEmpty() && state.selectedCategoryId.isNotEmpty()
+        // A category is mandatory, but a goal is optional.
+        val isEnabled = isAmountSelected && state.selectedCategoryId.isNotEmpty()
         _uiState.value = state.copy(isConfirmEnabled = isEnabled)
     }
 

@@ -1,6 +1,5 @@
 package com.cashito.ui.screens.reports
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,30 +36,42 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.ui.components.charts.LineChart
+import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.BalanceEntry
 import com.cashito.ui.viewmodel.BalanceSummary
+import com.cashito.ui.viewmodel.BalanceUiState
 import com.cashito.ui.viewmodel.BalanceViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BalanceScreen(
     navController: NavController,
-    viewModel: BalanceViewModel = viewModel(),
-    onNavigateBack: () -> Unit = { navController.popBackStack() }
+    viewModel: BalanceViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    BalanceScreenContent(
+        uiState = uiState,
+        onPeriodSelected = viewModel::onPeriodSelected,
+        onNavigateBack = { navController.popBackStack() }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BalanceScreenContent(
+    uiState: BalanceUiState,
+    onPeriodSelected: (String) -> Unit,
+    onNavigateBack: () -> Unit
+) {
     val filters = listOf("Diario", "Semanal", "Mensual")
 
     Scaffold(
@@ -88,7 +99,7 @@ fun BalanceScreen(
                         filters.forEach { filter ->
                             FilterChip(
                                 selected = uiState.selectedPeriod == filter,
-                                onClick = { viewModel.onPeriodSelected(filter) },
+                                onClick = { onPeriodSelected(filter) },
                                 label = { Text(filter) },
                                 leadingIcon = if (uiState.selectedPeriod == filter) { { Icon(Icons.Default.Done, null) } } else { null }
                             )
@@ -143,52 +154,27 @@ fun BalanceSummaryCard(summary: BalanceSummary) {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun LineChart(data: List<BalanceEntry>, modifier: Modifier = Modifier) {
-    val maxBalance = data.maxOfOrNull { it.balance } ?: 1f
-    val minBalance = data.minOfOrNull { it.balance } ?: 0f
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+fun BalanceScreenPreview() {
+    val sampleData = listOf(
+        BalanceEntry("Sem 1", 5200f),
+        BalanceEntry("Sem 2", 5600f),
+        BalanceEntry("Sem 3", 5400f),
+        BalanceEntry("Sem 4", 5800f)
+    )
+    val sampleSummary = BalanceSummary(5800f, 250.75f, "semana anterior")
 
-    Box(modifier = modifier) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val stepX = if (data.size > 1) size.width / (data.size - 1) else 0f
-            val path = Path()
-            val gradientPath = Path()
-
-            (0..4).forEach { i ->
-                val y = size.height * (i / 4f)
-                drawLine(gridColor, start = Offset(0f, y), end = Offset(size.width, y), strokeWidth = 1f)
-            }
-
-            data.forEachIndexed { i, entry ->
-                val x = stepX * i
-                val y = size.height - ((entry.balance - minBalance) / (maxBalance - minBalance).coerceAtLeast(1f)) * size.height
-                if (i == 0) {
-                    path.moveTo(x, y)
-                    gradientPath.moveTo(x, y)
-                } else {
-                    path.lineTo(x, y)
-                    gradientPath.lineTo(x, y)
-                }
-            }
-
-            gradientPath.lineTo(size.width, size.height)
-            gradientPath.lineTo(0f, size.height)
-            gradientPath.close()
-            drawPath(
-                gradientPath,
-                brush = Brush.verticalGradient(colors = listOf(primaryColor.copy(alpha = 0.3f), Color.Transparent)),
-            )
-
-            drawPath(path, color = primaryColor, style = Stroke(width = 4.dp.toPx()))
-
-            data.forEachIndexed { i, entry ->
-                val x = stepX * i
-                val y = size.height - ((entry.balance - minBalance) / (maxBalance - minBalance).coerceAtLeast(1f)) * size.height
-                drawCircle(color = primaryColor, radius = 8f, center = Offset(x, y))
-                drawCircle(color = Color.White, radius = 4f, center = Offset(x, y))
-            }
-        }
+    CASHiTOTheme {
+        BalanceScreenContent(
+            uiState = BalanceUiState(
+                balanceData = sampleData,
+                summary = sampleSummary,
+                selectedPeriod = "Semanal",
+                isLoading = false
+            ),
+            onPeriodSelected = {},
+            onNavigateBack = {}
+        )
     }
 }
