@@ -38,10 +38,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,11 +48,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.viewmodel.GoalFormViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,29 +63,21 @@ import java.util.Locale
 @Composable
 fun GoalFormScreen(
     navController: NavController,
-    isEditing: Boolean = false,
-    onNavigateBack: () -> Unit = { navController.popBackStack() },
-    onSaveGoal: (GoalFormData) -> Unit = {
-        navController.popBackStack()
-    }
+    viewModel: GoalFormViewModel = viewModel(),
+    isEditing: Boolean = false, // This can be passed to the ViewModel if edit logic is needed
+    onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
-    var goalName by remember { mutableStateOf("") }
-    var targetAmount by remember { mutableStateOf("") }
-    var selectedDate by remember { mutableStateOf<Long?>(null) }
-    var selectedIcon by remember { mutableStateOf("💻") }
-    var selectedColor by remember { mutableStateOf(Color.Unspecified) }
-    if (selectedColor == Color.Unspecified) {
-        selectedColor = MaterialTheme.colorScheme.primary
-    }
-    var isRecurringEnabled by remember { mutableStateOf(false) }
-    var recurringAmount by remember { mutableStateOf("") }
-    var recurringFrequency by remember { mutableStateOf("Semanal") }
-    var showDatePicker by remember { mutableStateOf(false) }
-
+    val uiState by viewModel.uiState.collectAsState()
     val datePickerState = rememberDatePickerState()
 
     val goalIcons = getGoalIcons()
     val goalColors = getGoalColors()
+
+    LaunchedEffect(uiState.goalSaved) {
+        if (uiState.goalSaved) {
+            onNavigateBack()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -117,21 +110,25 @@ fun GoalFormScreen(
                 .padding(Spacing.lg)
         ) {
             CashitoTextField(
-                value = goalName,
-                onValueChange = { goalName = it },
+                value = uiState.goalName,
+                onValueChange = viewModel::onGoalNameChange,
                 label = "Nombre de la meta",
                 placeholder = "Viaje a Cusco",
+                isError = uiState.goalNameError != null,
+                errorMessage = uiState.goalNameError,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
             CashitoTextField(
-                value = targetAmount,
-                onValueChange = { targetAmount = it },
+                value = uiState.targetAmount,
+                onValueChange = viewModel::onTargetAmountChange,
                 label = "Monto objetivo",
                 placeholder = "S/ 4,000",
                 keyboardType = KeyboardType.Number,
+                isError = uiState.targetAmountError != null,
+                errorMessage = uiState.targetAmountError,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -147,7 +144,7 @@ fun GoalFormScreen(
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             Card(
-                onClick = { showDatePicker = true },
+                onClick = { viewModel.onDatePickerDismiss(true) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -165,33 +162,30 @@ fun GoalFormScreen(
                     )
                     Spacer(modifier = Modifier.width(Spacing.md))
                     Text(
-                        text = if (selectedDate != null) {
-                            val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                            formatter.format(Date(selectedDate!!))
-                        } else {
-                            "Seleccionar fecha"
-                        },
+                        text = uiState.selectedDate?.let {
+                            SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(it))
+                        } ?: "Seleccionar fecha",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (selectedDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (uiState.selectedDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            if (showDatePicker) {
+            if (uiState.showDatePicker) {
                 DatePickerDialog(
-                    onDismissRequest = { showDatePicker = false },
+                    onDismissRequest = { viewModel.onDatePickerDismiss(false) },
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                selectedDate = datePickerState.selectedDateMillis
-                                showDatePicker = false
+                                viewModel.onDateSelected(datePickerState.selectedDateMillis)
+                                viewModel.onDatePickerDismiss(false)
                             }
                         ) {
                             Text("OK")
                         }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showDatePicker = false }) {
+                        TextButton(onClick = { viewModel.onDatePickerDismiss(false) }) {
                             Text("Cancelar")
                         }
                     }
@@ -214,11 +208,11 @@ fun GoalFormScreen(
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
-                items(getGoalIcons()) { icon ->
+                items(goalIcons) { icon ->
                     IconSelectionButton(
                         icon = icon,
-                        isSelected = selectedIcon == icon,
-                        onClick = { selectedIcon = icon }
+                        isSelected = uiState.selectedIcon == icon,
+                        onClick = { viewModel.onIconSelected(icon) }
                     )
                 }
             }
@@ -240,161 +234,41 @@ fun GoalFormScreen(
                 items(goalColors) { color ->
                     ColorSelectionButton(
                         color = color,
-                        isSelected = selectedColor == color,
-                        onClick = { selectedColor = color }
+                        isSelected = uiState.selectedColor == color,
+                        onClick = { viewModel.onColorSelected(color) }
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(Spacing.xl))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(Spacing.lg)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Aporte recurrente",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Switch(
-                            checked = isRecurringEnabled,
-                            onCheckedChange = { isRecurringEnabled = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        )
-                    }
+            // Recurring contribution section (optional)
 
-                    if (isRecurringEnabled) {
-                        Spacer(modifier = Modifier.height(Spacing.lg))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                        ) {
-                            CashitoTextField(
-                                value = recurringAmount,
-                                onValueChange = { recurringAmount = it },
-                                label = "Monto",
-                                placeholder = "S/ 200",
-                                keyboardType = KeyboardType.Number,
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            CashitoTextField(
-                                value = recurringFrequency,
-                                onValueChange = { recurringFrequency = it },
-                                label = "Frecuencia",
-                                placeholder = "Semanal",
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(Spacing.sm))
-
-                        Text(
-                            text = "Sugerencia: programa aportes automáticos para avanzar sin pensar.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(Spacing.xl))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             PrimaryButton(
                 text = if (isEditing) "Guardar cambios" else "Crear meta",
-                onClick = {
-                    if (goalName.isNotEmpty() && targetAmount.isNotEmpty()) {
-                        val formData = GoalFormData(
-                            name = goalName,
-                            targetAmount = targetAmount,
-                            targetDate = selectedDate,
-                            icon = selectedIcon,
-                            color = selectedColor,
-                            isRecurring = isRecurringEnabled,
-                            recurringAmount = recurringAmount,
-                            recurringFrequency = recurringFrequency
-                        )
-                        onSaveGoal(formData)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
+                onClick = viewModel::onSaveGoal,
+                enabled = uiState.isFormValid
             )
         }
     }
 }
 
-data class GoalFormData(
-    val name: String,
-    val targetAmount: String,
-    val targetDate: Long?,
-    val icon: String,
-    val color: Color,
-    val isRecurring: Boolean,
-    val recurringAmount: String?,
-    val recurringFrequency: String?
-)
-
-fun getGoalIcons(): List<String> {
-    return listOf("💻", "✈️", "🚗", "🏠", "🎓", "💍")
-}
-
-@Composable
-fun getGoalColors(): List<Color> {
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    val errorColor = MaterialTheme.colorScheme.error
-    val primaryContainerColor = MaterialTheme.colorScheme.primaryContainer
-
-    return remember {
-        listOf(
-            primaryColor,
-            secondaryColor,
-            tertiaryColor,
-            errorColor,
-            primaryContainerColor
-        )
-    }
-}
-
-
 @Composable
 fun IconSelectionButton(icon: String, isSelected: Boolean, onClick: () -> Unit) {
-    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer
-    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-
     Box(
         modifier = Modifier
-            .size(ComponentSize.avatarSize)
+            .size(ComponentSize.iconSize * 2)
             .clip(CircleShape)
-            .background(backgroundColor)
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = icon,
-            style = MaterialTheme.typography.headlineSmall,
-            color = contentColor
-        )
+        Text(text = icon, style = MaterialTheme.typography.headlineSmall)
     }
 }
 
@@ -402,8 +276,7 @@ fun IconSelectionButton(icon: String, isSelected: Boolean, onClick: () -> Unit) 
 fun ColorSelectionButton(color: Color, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(ComponentSize.avatarSize)
-            .padding(Spacing.xs)
+            .size(ComponentSize.iconSize * 2)
             .clip(CircleShape)
             .background(color)
             .clickable(onClick = onClick),
@@ -412,10 +285,28 @@ fun ColorSelectionButton(color: Color, isSelected: Boolean, onClick: () -> Unit)
         if (isSelected) {
             Box(
                 modifier = Modifier
-                    .size(ComponentSize.avatarSize / 2)
+                    .size(ComponentSize.iconSize)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onPrimary)
+                    .background(Color.White.copy(alpha = 0.5f))
             )
         }
     }
 }
+
+fun getGoalIcons(): List<String> = listOf("✈️", "💻", "🛡️", "🎁", "🏠", "🚗", "🎓", "💍")
+
+@Composable
+fun getGoalColors(): List<Color> = listOf(
+    MaterialTheme.colorScheme.primary,
+    MaterialTheme.colorScheme.secondary,
+    MaterialTheme.colorScheme.tertiary,
+    Color(0xFFF59E0B),
+    Color(0xFFEC4899),
+    Color(0xFF8B5CF6)
+)
+
+// A data class to hold form data if needed for navigation
+data class GoalFormData(
+    val name: String,
+    val amount: String
+)

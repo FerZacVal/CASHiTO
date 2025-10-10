@@ -1,46 +1,57 @@
 package com.cashito
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-// import com.cashito.ui.screens.category.CategoryScreen
+import androidx.navigation.navArgument
 import com.cashito.ui.screens.dashboard.DashboardScreen
-// import com.cashito.ui.screens.expense.ExpenseScreen
 import com.cashito.ui.screens.goal_detail.GoalDetailScreen
 import com.cashito.ui.screens.goal_form.GoalFormScreen
-// import com.cashito.ui.screens.home.HomeScreen
+import com.cashito.ui.screens.goals.GoalsScreen
 import com.cashito.ui.screens.login.CreateUserScreen
 import com.cashito.ui.screens.login.LoginScreen
 import com.cashito.ui.screens.profile.ProfileScreen
+import com.cashito.ui.screens.quick_out.QuickOutScreen
 import com.cashito.ui.screens.quick_save.QuickSaveScreen
-// import com.cashito.ui.screens.recommendation.RecommendationScreen
-// import com.cashito.ui.screens.report.ReportScreen
-// import com.cashito.ui.screens.savings.SavingsScreen
+import com.cashito.ui.screens.reports.BalanceScreen
+import com.cashito.ui.screens.reports.CategoryExpenseReportScreen
+import com.cashito.ui.screens.reports.IncomeReportScreen
+import com.cashito.ui.screens.reports.ReportsScreen
 import com.cashito.ui.screens.splash.SplashScreen
 import com.cashito.ui.screens.transactions.TransactionsScreen
 
 object Routes {
+    // New Routes
     const val SPLASH = "splash"
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val DASHBOARD = "dashboard"
+    const val HOME = "dashboard" // Alias for the main screen
     const val GOAL_DETAIL = "goal_detail/{goalId}"
     const val GOAL_FORM = "goal_form"
+    const val GOALS = "goals"
     const val TRANSACTIONS = "transactions"
     const val QUICK_SAVE = "quick_save"
+    const val QUICK_OUT = "quick_out"
+    const val REPORTS = "reports"
+    const val CATEGORY_EXPENSE_REPORT = "category_expense_report"
+    const val INCOME_REPORT = "income_report"
+    const val BALANCE_REPORT = "balance_report"
     const val INSIGHTS = "insights"
     const val PROFILE = "profile"
     const val NOTIFICATIONS = "notifications"
 
-    // Routes for screens not yet created
-    // const val HOME = "home"
-    // const val CATEGORY = "category"
-    // const val EXPENSE = "expense"
-    // const val RECOMMENDATION = "recommendation"
-    // const val REPORT = "report"
-    // const val SAVINGS = "savings"
+    // Legacy Routes for Dev Menu
+    const val AUTH = "auth_legacy"
+    const val CATEGORY = "category_legacy"
+    const val EXPENSE = "expense_legacy"
+    const val RECOMMENDATION = "recommendation_legacy"
+    const val REPORT = "report_legacy"
+    const val SAVINGS = "savings_legacy"
 }
 
 @Composable
@@ -49,30 +60,31 @@ fun AppNavHost(
     startDestination: String = Routes.SPLASH
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
-        // Onboarding and Auth
+        // New Cashito screens
         composable(Routes.SPLASH) { SplashScreen(navController) }
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.REGISTER) { CreateUserScreen(navController) }
-
-        // Main App Screens
         composable(Routes.DASHBOARD) { DashboardScreen(navController) }
-        composable(Routes.GOAL_DETAIL) { backStackEntry ->
-            GoalDetailScreen(
-                goalId = backStackEntry.arguments?.getString("goalId") ?: "",
-                navController = navController
-            )
+        composable(
+            route = Routes.GOAL_DETAIL,
+            arguments = listOf(navArgument("goalId") { type = NavType.StringType })
+        ) {
+            Log.d("FlowDebug", "Navigation: Go detailScrreen.")
+            GoalDetailScreen(navController = navController)
         }
+        composable(Routes.GOALS) { GoalsScreen(navController) }
         composable(Routes.TRANSACTIONS) { TransactionsScreen(navController) }
-        composable(Routes.QUICK_SAVE) { QuickSaveScreen(navController) }
+        composable(Routes.QUICK_SAVE) {
+            Log.d("FlowDebug", "Navigation: QUICK_SAVE SCREEN.")
+            QuickSaveScreen(navController) }
+        composable(Routes.QUICK_OUT) { QuickOutScreen(navController) }
+        composable(Routes.REPORTS) { ReportsScreen(navController) }
+        composable(Routes.CATEGORY_EXPENSE_REPORT) { CategoryExpenseReportScreen(navController) }
+        composable(Routes.INCOME_REPORT) { IncomeReportScreen(navController) }
+        composable(Routes.BALANCE_REPORT) { BalanceScreen(navController) }
         composable(Routes.GOAL_FORM) { GoalFormScreen(navController) }
         composable(Routes.PROFILE) { ProfileScreen(navController) }
 
-        // Legacy or other screens (commented out until implemented)
-        // composable(Routes.HOME) { HomeScreen(navController) }
-        // composable(Routes.CATEGORY) { CategoryScreen(navController) }
-        // composable(Routes.EXPENSE) { ExpenseScreen(navController) }
-        // composable(Routes.RECOMMENDATION) { RecommendationScreen(navController) }
-        // composable(Routes.REPORT) { ReportScreen(navController) }
-        // composable(Routes.SAVINGS) { SavingsScreen(navController) }
+        // TODO: Add composables for legacy routes if they need to be displayed
     }
 }

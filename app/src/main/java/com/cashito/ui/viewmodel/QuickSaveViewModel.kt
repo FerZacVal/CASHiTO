@@ -1,11 +1,12 @@
 package com.cashito.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.category.Category
-import com.cashito.domain.entities.expense.Expense
-import com.cashito.domain.usecases.expense.AddExpenseUseCase
+import com.cashito.domain.entities.income.Income
+import com.cashito.domain.usecases.income.AddIncomeUseCase
 import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.theme.secondaryLight
 import com.cashito.ui.theme.tertiaryLight
@@ -16,42 +17,45 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 // --- STATE ---
-data class QuickOutCategory(
+data class QuickSaveCategory(
     val id: String,
     val title: String,
     val icon: String,
-    val color: Color
+    val color: Color,
+    val colorHex: String
 )
 
-data class QuickOutUiState(
-    val presetAmounts: List<String> = listOf("5", "10", "20", "50"),
-    val categories: List<QuickOutCategory> = emptyList(),
+data class QuickSaveUiState(
+    val presetAmounts: List<String> = listOf("50", "100", "500", "1000"),
+    val categories: List<QuickSaveCategory> = emptyList(),
     val selectedAmount: String = "",
     val customAmount: String = "",
     val selectedCategoryId: String = "",
     val isConfirmEnabled: Boolean = false,
-    val expenseConfirmed: Boolean = false
+    val incomeConfirmed: Boolean = false
 )
 
 // --- VIEWMODEL ---
-class QuickOutViewModel(
-    private val addExpenseUseCase: AddExpenseUseCase
+class QuickSaveViewModel(
+    private val addIncomeUseCase: AddIncomeUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(QuickOutUiState())
-    val uiState: StateFlow<QuickOutUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(QuickSaveUiState())
+    val uiState: StateFlow<QuickSaveUiState> = _uiState.asStateFlow()
 
     init {
+        Log.d("FlowDebug", "QUICKE SABE VIEW MODEL: CLASS")
         loadCategories()
+
     }
 
     private fun loadCategories() {
         _uiState.value = _uiState.value.copy(
             categories = listOf(
-                QuickOutCategory("1", "Comida", "🍔", primaryLight),
-                QuickOutCategory("2", "Transporte", "🚌", secondaryLight),
-                QuickOutCategory("3", "Compras", "🛒", tertiaryLight),
-                QuickOutCategory("4", "Ocio", "🎉", Color(0xFFF59E0B))
+                QuickSaveCategory("5", "Nómina", "💼", primaryLight, "#FF6F00"),
+                QuickSaveCategory("6", "Ventas", "📈", secondaryLight, "#FFAB00"),
+                QuickSaveCategory("7", "Freelance", "💻", tertiaryLight, "#00BFA5"),
+                QuickSaveCategory("8", "Regalo", "🎁", Color(0xFF10B981), "#10B981")
             )
         )
     }
@@ -84,8 +88,10 @@ class QuickOutViewModel(
         _uiState.value = state.copy(isConfirmEnabled = isEnabled)
     }
 
-    fun onConfirmExpense() {
+    fun onConfirmIncome() {
         if (!_uiState.value.isConfirmEnabled) return
+
+        _uiState.value = _uiState.value.copy(isConfirmEnabled = false)
 
         viewModelScope.launch {
             val state = _uiState.value
@@ -93,21 +99,21 @@ class QuickOutViewModel(
             val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
 
             if (selectedCategory != null) {
-                val expense = Expense(
-                    id = "", // Firestore will generate the ID
+                val income = Income(
+                    id = "",
                     description = selectedCategory.title,
                     amount = amount,
                     date = Date(),
-                    category = Category( // Creating the domain category object
+                    category = Category(
                         id = selectedCategory.id,
                         name = selectedCategory.title,
                         icon = selectedCategory.icon,
-                        color = "" // Color mapping can be done later
+                        color = selectedCategory.colorHex
                     )
                 )
-                addExpenseUseCase(expense)
-                _uiState.value = _uiState.value.copy(expenseConfirmed = true)
-            } 
+                addIncomeUseCase(income)
+                _uiState.value = _uiState.value.copy(incomeConfirmed = true)
+            }
         }
     }
 }

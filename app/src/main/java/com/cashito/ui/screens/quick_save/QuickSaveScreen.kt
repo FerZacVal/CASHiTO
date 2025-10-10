@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.quick_save
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
@@ -24,10 +24,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,21 +40,30 @@ import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.viewmodel.QuickSaveCategory
+import com.cashito.ui.viewmodel.QuickSaveViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun QuickSaveScreen(
     navController: NavController,
-    onNavigateBack: () -> Unit = { navController.popBackStack() },
-    onConfirmIncome: (String, String) -> Unit = { _, _ ->
-        navController.popBackStack()
-    }
+    viewModel: QuickSaveViewModel = koinViewModel(),
+    onNavigateBack: () -> Unit = { navController.popBackStack() }
 ) {
-    var selectedAmount by remember { mutableStateOf("") }
-    var selectedGoalId by remember { mutableStateOf("") }
-    var customAmount by remember { mutableStateOf("") }
+    Log.d("FlowDebug", "QuickSaveScreen: Composable - INICIO de la función. Si este log no aparece, el crash ocurre en la inyección del ViewModel.")
 
-    val presetAmounts = listOf("5", "10", "20", "50")
-    val goals = getSampleGoals()
+    Log.d("FlowDebug", "QuickSaveScreen: Declarando uiState...")
+    val uiState by viewModel.uiState.collectAsState()
+    Log.d("FlowDebug", "QuickSaveScreen: uiState declarado.")
+
+    Log.d("FlowDebug", "QuickSaveScreen: Declarando LaunchedEffect...")
+    LaunchedEffect(uiState.incomeConfirmed) {
+        Log.d("FlowDebug", "QuickSaveScreen: LaunchedEffect - INICIO del bloque. incomeConfirmed: ${uiState.incomeConfirmed}")
+        if (uiState.incomeConfirmed) {
+            onNavigateBack()
+        }
+    }
+    Log.d("FlowDebug", "QuickSaveScreen: LaunchedEffect declarado.")
 
     Box(
         modifier = Modifier
@@ -82,7 +90,7 @@ fun QuickSaveScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Ahorro rápido",
+                        text = "Ingreso rápido",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -110,35 +118,20 @@ fun QuickSaveScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
-                    items(presetAmounts) { amount ->
+                    items(uiState.presetAmounts) { amount ->
                         PresetAmountButton(
                             amount = "S/ $amount",
-                            isSelected = selectedAmount == amount,
-                            onClick = {
-                                selectedAmount = amount
-                                customAmount = ""
-                            }
+                            isSelected = uiState.selectedAmount == amount,
+                            onClick = { viewModel.onPresetAmountSelected(amount) }
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
 
-                Text(
-                    text = "O ingresa un monto personalizado",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(Spacing.sm))
-
                 CashitoTextField(
-                    value = customAmount,
-                    onValueChange = {
-                        customAmount = it
-                        selectedAmount = ""
-                    },
+                    value = uiState.customAmount,
+                    onValueChange = viewModel::onCustomAmountChanged,
                     label = "Monto personalizado",
                     placeholder = "S/ 0.00",
                     keyboardType = KeyboardType.Number,
@@ -148,7 +141,7 @@ fun QuickSaveScreen(
                 Spacer(modifier = Modifier.height(Spacing.xl))
 
                 Text(
-                    text = "Selecciona una meta",
+                    text = "Selecciona una categoría de ingreso",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -159,26 +152,21 @@ fun QuickSaveScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
-                    items(goals) { goal ->
-                        GoalChip(
-                            goal = goal,
-                            isSelected = selectedGoalId == goal.id,
-                            onClick = { selectedGoalId = goal.id }
+                    items(uiState.categories) { category ->
+                        IncomeCategoryChip(
+                            category = category,
+                            isSelected = uiState.selectedCategoryId == category.id,
+                            onClick = { viewModel.onCategorySelected(category.id) }
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(Spacing.xl))
+                Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                 PrimaryButton(
                     text = "Confirmar ingreso",
-                    onClick = {
-                        val amount = customAmount.ifEmpty { selectedAmount }
-                        if (amount.isNotEmpty() && selectedGoalId.isNotEmpty()) {
-                            onConfirmIncome(amount, selectedGoalId)
-                        }
-                    },
-                    enabled = (customAmount.isNotEmpty() || selectedAmount.isNotEmpty()) && selectedGoalId.isNotEmpty()
+                    onClick = viewModel::onConfirmIncome,
+                    enabled = uiState.isConfirmEnabled
                 )
             }
         }
@@ -200,8 +188,8 @@ fun PresetAmountButton(
 }
 
 @Composable
-fun GoalChip(
-    goal: QuickSaveGoal,
+fun IncomeCategoryChip(
+    category: QuickSaveCategory,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -209,7 +197,7 @@ fun GoalChip(
         onClick = onClick,
         modifier = Modifier.width(120.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) goal.color else goal.color.copy(alpha = 0.2f)
+            containerColor = if (isSelected) category.color else category.color.copy(alpha = 0.2f)
         ),
         shape = RoundedCornerShape(Radius.round)
     ) {
@@ -220,35 +208,18 @@ fun GoalChip(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = goal.icon,
+                text = category.icon,
                 style = MaterialTheme.typography.headlineSmall,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else goal.color
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else category.color
             )
             Spacer(modifier = Modifier.height(Spacing.xs))
             Text(
-                text = goal.title,
+                text = category.title,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else goal.color,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else category.color,
                 textAlign = TextAlign.Center
             )
         }
     }
-}
-
-data class QuickSaveGoal(
-    val id: String,
-    val title: String,
-    val icon: String,
-    val color: Color
-)
-
-@Composable
-fun getSampleGoals(): List<QuickSaveGoal> {
-    return listOf(
-        QuickSaveGoal("1", "Viaje a Cusco", "✈️", MaterialTheme.colorScheme.primary),
-        QuickSaveGoal("2", "Laptop nueva", "💻", MaterialTheme.colorScheme.secondary),
-        QuickSaveGoal("3", "Vacaciones", "🏖️", MaterialTheme.colorScheme.tertiary),
-        QuickSaveGoal("4", "Coche", "🚗", Color(0xFFF59E0B))
-    )
 }

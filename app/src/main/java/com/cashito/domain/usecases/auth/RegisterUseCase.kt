@@ -14,13 +14,14 @@ class RegisterUseCase(private val authRepository: AuthRepository) {
      *
      * @param email El email del nuevo usuario.
      * @param password La contraseña del nuevo usuario.
+     * @param nombre El nombre del nuevo usuario.
      * @return Un [Result] que encapsula el [User] en caso de éxito o la [AuthException] en caso de fallo.
      */
-    suspend operator fun invoke(email: String, password: String): Result<User> {
+    suspend operator fun invoke(email: String, password: String, nombre: String): Result<User> {
         return try {
             // Aquí podría ir lógica de negocio adicional si fuera necesario,
             // como validar la fortaleza de la contraseña a nivel de dominio.
-            val user = authRepository.register(email, password)
+            val user = authRepository.register(email, password, nombre)
             Result.success(user)
         } catch (e: AuthException) {
             Result.failure(e)

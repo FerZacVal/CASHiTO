@@ -33,8 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.cashito.ui.viewmodel.ReportsViewModel
+import com.cashito.Routes
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.viewmodel.ReportsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,8 +43,9 @@ fun ReportsScreen(
     navController: NavController,
     viewModel: ReportsViewModel = viewModel(),
     onNavigateBack: () -> Unit = { navController.popBackStack() },
-    onNavigateToCategoryReport: () -> Unit = { navController.navigate("category_report") },
-    onNavigateToBalanceReport: () -> Unit = { navController.navigate("balance_report") }
+    onNavigateToCategoryReport: () -> Unit = { navController.navigate(Routes.CATEGORY_EXPENSE_REPORT) },
+    onNavigateToIncomeReport: () -> Unit = { navController.navigate(Routes.INCOME_REPORT) },
+    onNavigateToBalanceReport: () -> Unit = { navController.navigate(Routes.BALANCE_REPORT) }
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -92,7 +94,14 @@ fun ReportsScreen(
                 }
                 item {
                     ReportNavigationCard(
-                        title = "Desglose por Categoría",
+                        title = "Desglose de Ingresos",
+                        subtitle = "Analiza tus ingresos por cada categoría",
+                        onClick = onNavigateToIncomeReport
+                    )
+                }
+                item {
+                    ReportNavigationCard(
+                        title = "Desglose de Gastos",
                         subtitle = "Analiza tus gastos por cada categoría",
                         onClick = onNavigateToCategoryReport
                     )
