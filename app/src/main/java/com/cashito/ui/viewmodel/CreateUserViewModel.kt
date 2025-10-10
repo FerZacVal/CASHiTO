@@ -11,11 +11,11 @@ import kotlinx.coroutines.launch
 
 // --- STATE ---
 data class CreateUserUiState(
-    val name: String = "",
+    val nombre: String = "",
     val email: String = "",
     val password: String = "",
     val isLoading: Boolean = false,
-    val nameError: String? = null,
+    val nombreError: String? = null,
     val emailError: String? = null,
     val passwordError: String? = null,
     val registrationError: String? = null, // For general registration errors
@@ -30,8 +30,8 @@ class CreateUserViewModel(
     private val _uiState = MutableStateFlow(CreateUserUiState())
     val uiState: StateFlow<CreateUserUiState> = _uiState.asStateFlow()
 
-    fun onNameChange(name: String) {
-        _uiState.update { it.copy(name = name, nameError = null) }
+    fun onNombreChange(nombre: String) {
+        _uiState.update { it.copy(nombre = nombre, nombreError = null) }
     }
 
     fun onEmailChange(email: String) {
@@ -47,20 +47,24 @@ class CreateUserViewModel(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, registrationError = null) }
-            try {
-                val state = _uiState.value
-                registerUseCase(state.email, state.password)
-                _uiState.update { it.copy(isLoading = false, isRegistrationSuccess = true) }
-            } catch (e: Exception) {
-                // Here you could map specific exceptions to user-friendly messages
-                _uiState.update { it.copy(isLoading = false, registrationError = e.message ?: "Error desconocido") }
-            }
+            
+            val state = _uiState.value
+            val result = registerUseCase(state.email, state.password, state.nombre)
+
+            result.fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false, isRegistrationSuccess = true) }
+                },
+                onFailure = { e ->
+                    _uiState.update { it.copy(isLoading = false, registrationError = e.message ?: "Error desconocido") }
+                }
+            )
         }
     }
 
     private fun validateInputs(): Boolean {
         val state = _uiState.value
-        val nameError = if (state.name.isBlank()) "El nombre es requerido" else null
+        val nombreError = if (state.nombre.isBlank()) "El nombre es requerido" else null
         val emailError = when {
             state.email.isBlank() -> "El correo es requerido"
             !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches() -> "Formato de correo inválido"
@@ -74,12 +78,12 @@ class CreateUserViewModel(
 
         _uiState.update {
             it.copy(
-                nameError = nameError,
+                nombreError = nombreError,
                 emailError = emailError,
                 passwordError = passwordError
             )
         }
 
-        return nameError == null && emailError == null && passwordError == null
+        return nombreError == null && emailError == null && passwordError == null
     }
 }

@@ -66,12 +66,12 @@ fun CreateUserScreen(
             Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             CashitoTextField(
-                value = uiState.name,
-                onValueChange = viewModel::onNameChange,
+                value = uiState.nombre,
+                onValueChange = viewModel::onNombreChange,
                 label = "Nombre",
                 placeholder = "Tu nombre completo",
-                isError = uiState.nameError != null,
-                errorMessage = uiState.nameError
+                isError = uiState.nombreError != null,
+                errorMessage = uiState.nombreError
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))

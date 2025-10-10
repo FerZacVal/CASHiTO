@@ -1,7 +1,7 @@
 package com.cashito.di
 
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
-import com.cashito.data.repositories.auth.AuthRepositoryImpl
+import com.cashito.data.repositories.AuthRepositoryImpl
 import com.cashito.domain.repositories.auth.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.dsl.module
