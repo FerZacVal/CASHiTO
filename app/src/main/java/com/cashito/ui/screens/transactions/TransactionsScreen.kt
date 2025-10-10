@@ -45,7 +45,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.inputs.CashitoSearchField
 import com.cashito.ui.theme.ComponentSize
@@ -53,12 +52,13 @@ import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.Transaction
 import com.cashito.ui.viewmodel.TransactionGroup
 import com.cashito.ui.viewmodel.TransactionsViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
     navController: NavController,
-    viewModel: TransactionsViewModel = viewModel(),
+    viewModel: TransactionsViewModel = koinViewModel(),
     onNavigateBack: () -> Unit = { navController.popBackStack() },
     onNavigateToNewTransaction: () -> Unit = { navController.navigate("quick_save") } // Or a more general screen
 ) {

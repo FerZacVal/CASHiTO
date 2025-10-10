@@ -6,7 +6,7 @@ import com.cashito.data.repositories.AuthRepositoryImpl
 import com.cashito.data.repositories.ExpenseRepositoryImpl
 import com.cashito.data.repositories.IncomeRepositoryImpl
 import com.cashito.domain.repositories.auth.AuthRepository
-//import com.cashito.domain.repositories.expense.ExpenseRepository
+import com.cashito.domain.repositories.expense.ExpenseRepository
 import com.cashito.domain.repositories.income.IncomeRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,13 +19,14 @@ val dataModule = module {
     single { FirebaseFirestore.getInstance() }
 
     // --- DataSources ---
+    // CORRECCIÓN: FirebaseAuthDataSource solo necesita UNA dependencia (FirebaseAuth).
     single { FirebaseAuthDataSource(get()) }
-    // Se corrige: Se proveen las dos dependencias que necesita el constructor
+    // FirebaseTransactionDataSource necesita DOS dependencias (Firestore y Auth).
     single { FirebaseTransactionDataSource(get(), get()) }
 
     // --- Repositories ---
     single<AuthRepository> { AuthRepositoryImpl(get()) }
-   // single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
+    single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
 
 }
