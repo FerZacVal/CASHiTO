@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.Routes
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
@@ -68,14 +69,15 @@ fun DashboardScreen(
     DashboardScreenContent(
         uiState = uiState,
         onGoalClick = { goalId -> navController.navigate("goal_detail/$goalId") },
-        onTransactionsClick = { navController.navigate("transactions") },
-        onReportsClick = { navController.navigate("reports") },
-        onGoalsClick = { navController.navigate("goals") },
-        onProfileClick = { navController.navigate("profile") },
-        onQuickSaveClick = { navController.navigate("quick_save") },
-        onQuickOutClick = { navController.navigate("quick_out") },
+        onTransactionsClick = { navController.navigate(Routes.TRANSACTIONS) },
+        onReportsClick = { navController.navigate(Routes.REPORTS) },
+        onGoalsClick = { navController.navigate(Routes.GOALS) },
+        onProfileClick = { navController.navigate(Routes.PROFILE) },
+        onQuickSaveClick = { navController.navigate(Routes.QUICK_SAVE) },
+        onQuickOutClick = { navController.navigate(Routes.QUICK_OUT) },
+        onAddCategoryClick = { navController.navigate(Routes.CATEGORY_FORM) },
+        onCreateGoalClick = { navController.navigate(Routes.GOAL_FORM) },
         onNotificationClick = { /* TODO */ },
-        onTransferClick = { /* TODO */ },
         onTransactionItemClick = { /* TODO */ }
     )
 }
@@ -90,8 +92,9 @@ fun DashboardScreenContent(
     onProfileClick: () -> Unit,
     onQuickSaveClick: () -> Unit,
     onQuickOutClick: () -> Unit,
+    onAddCategoryClick: () -> Unit,
+    onCreateGoalClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    onTransferClick: () -> Unit,
     onTransactionItemClick: (DashboardTransaction) -> Unit,
 ) {
     Scaffold(
@@ -118,9 +121,9 @@ fun DashboardScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onQuickSaveClick,
+                onClick = onAddCategoryClick,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Quick Save")
+                Icon(Icons.Default.Add, contentDescription = "Añadir categoría")
             }
         }
     ) { paddingValues ->
@@ -208,10 +211,10 @@ fun DashboardScreenContent(
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
-                            text = "Enviar",
-                            icon = "📤",
+                            text = "Crear Meta",
+                            icon = "🎯",
                             isPrimary = false,
-                            onClick = onTransferClick,
+                            onClick = onCreateGoalClick,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -347,7 +350,6 @@ fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Log.d("FlowDebug", "DASHBOARDSCREEN: BOTTON quick save")
     Card(
         onClick = onClick,
         modifier = modifier.height(60.dp),
@@ -370,7 +372,6 @@ fun QuickActionButton(
             )
         }
     }
-
 }
 
 @Composable
@@ -380,7 +381,6 @@ fun TransactionItem(transaction: DashboardTransaction, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {
-
         Row(
             modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
@@ -432,8 +432,9 @@ fun DashboardScreenPreview() {
             onProfileClick = {},
             onQuickSaveClick = {},
             onQuickOutClick = {},
+            onAddCategoryClick = {},
+            onCreateGoalClick = {},
             onNotificationClick = {},
-            onTransferClick = {},
             onTransactionItemClick = {}
         )
     }

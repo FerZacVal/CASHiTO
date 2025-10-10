@@ -48,7 +48,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
@@ -57,6 +56,7 @@ import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.GoalFormUiState
 import com.cashito.ui.viewmodel.GoalFormViewModel
+import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,8 +65,7 @@ import java.util.Locale
 @Composable
 fun GoalFormScreen(
     navController: NavController,
-    viewModel: GoalFormViewModel = viewModel(),
-    isEditing: Boolean = false
+    viewModel: GoalFormViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val datePickerState = rememberDatePickerState()
@@ -80,7 +79,6 @@ fun GoalFormScreen(
     GoalFormScreenContent(
         uiState = uiState,
         datePickerState = datePickerState,
-        isEditing = isEditing,
         onGoalNameChange = viewModel::onGoalNameChange,
         onTargetAmountChange = viewModel::onTargetAmountChange,
         onDatePickerDismiss = viewModel::onDatePickerDismiss,
@@ -100,7 +98,6 @@ fun GoalFormScreen(
 fun GoalFormScreenContent(
     uiState: GoalFormUiState,
     datePickerState: DatePickerState,
-    isEditing: Boolean,
     onGoalNameChange: (String) -> Unit,
     onTargetAmountChange: (String) -> Unit,
     onDatePickerDismiss: (Boolean) -> Unit,
@@ -116,7 +113,7 @@ fun GoalFormScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isEditing) "Editar meta" else "Crear meta", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
+                title = { Text(if (uiState.isEditing) "Editar meta" else "Crear meta", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
@@ -212,7 +209,7 @@ fun GoalFormScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-            PrimaryButton(text = if (isEditing) "Guardar cambios" else "Crear meta", onClick = onSaveGoal, enabled = uiState.isFormValid)
+            PrimaryButton(text = if (uiState.isEditing) "Guardar cambios" else "Crear meta", onClick = onSaveGoal, enabled = uiState.isFormValid)
         }
     }
 }
@@ -269,7 +266,26 @@ fun GoalFormScreenPreview() {
         GoalFormScreenContent(
             uiState = GoalFormUiState(goalNameError = "El nombre es requerido", isFormValid = true, selectedDate = System.currentTimeMillis()),
             datePickerState = rememberDatePickerState(),
-            isEditing = false,
+            onGoalNameChange = {},
+            onTargetAmountChange = {},
+            onDatePickerDismiss = {},
+            onDateSelected = {},
+            onIconSelected = {},
+            onColorSelected = {},
+            onSaveGoal = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+fun GoalFormScreenEditPreview() {
+    CASHiTOTheme {
+        GoalFormScreenContent(
+            uiState = GoalFormUiState(isEditing = true, goalName = "Viaje a Cusco", targetAmount = "5000", isFormValid = true, selectedDate = System.currentTimeMillis()),
+            datePickerState = rememberDatePickerState(),
             onGoalNameChange = {},
             onTargetAmountChange = {},
             onDatePickerDismiss = {},

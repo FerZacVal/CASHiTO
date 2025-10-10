@@ -14,6 +14,7 @@ data class CategoryIncome(val categoryName: String, val amount: Float, val color
 
 data class IncomeReportUiState(
     val incomes: List<CategoryIncome> = emptyList(),
+    val chartType: ChartType = ChartType.PIE,
     val isLoading: Boolean = true
 )
 
@@ -27,6 +28,10 @@ class IncomeReportViewModel : ViewModel() {
         loadIncomeData()
     }
 
+    fun onChartTypeChange(newType: ChartType) {
+        _uiState.value = _uiState.value.copy(chartType = newType)
+    }
+
     private fun loadIncomeData() {
         // TODO: Replace with actual data fetching from a repository
         val sampleIncomes = listOf(
@@ -36,6 +41,9 @@ class IncomeReportViewModel : ViewModel() {
             CategoryIncome("Otros", 150.00f, Color(0xFF8B5CF6))
         )
 
-        _uiState.value = IncomeReportUiState(incomes = sampleIncomes, isLoading = false)
+        _uiState.value = _uiState.value.copy(
+            incomes = sampleIncomes,
+            isLoading = false
+        )
     }
 }

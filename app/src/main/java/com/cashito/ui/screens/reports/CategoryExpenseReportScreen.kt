@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.reports
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,6 +28,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -39,6 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.ui.components.charts.BarChart
+import com.cashito.ui.components.charts.BarChartEntry
 import com.cashito.ui.components.charts.PieChart
 import com.cashito.ui.components.charts.PieChartEntry
 import com.cashito.ui.theme.CASHiTOTheme
@@ -50,6 +58,7 @@ import com.cashito.ui.theme.tertiaryLight
 import com.cashito.ui.viewmodel.CategoryExpense
 import com.cashito.ui.viewmodel.CategoryExpenseReportUiState
 import com.cashito.ui.viewmodel.CategoryExpenseReportViewModel
+import com.cashito.ui.viewmodel.ChartType
 
 @Composable
 fun CategoryExpenseReportScreen(
@@ -60,6 +69,7 @@ fun CategoryExpenseReportScreen(
 
     CategoryExpenseReportScreenContent(
         uiState = uiState,
+        onChartTypeChange = viewModel::onChartTypeChange,
         onNavigateBack = { navController.popBackStack() }
     )
 }
@@ -68,6 +78,7 @@ fun CategoryExpenseReportScreen(
 @Composable
 fun CategoryExpenseReportScreenContent(
     uiState: CategoryExpenseReportUiState,
+    onChartTypeChange: (ChartType) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
@@ -98,11 +109,38 @@ fun CategoryExpenseReportScreenContent(
                     Text("Distribución de tus gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = Spacing.md))
                 }
                 item {
-                    PieChart(
-                        entries = uiState.expenses.map { PieChartEntry(it.amount, it.color) },
-                        modifier = Modifier.size(250.dp),
-                        emptyChartMessage = "Sin gastos"
-                    )
+                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                            selected = uiState.chartType == ChartType.PIE,
+                            onClick = { onChartTypeChange(ChartType.PIE) },
+                            label = { Text("Torta") },
+                            icon = { Icon(Icons.Default.PieChart, null) }
+                        )
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                            selected = uiState.chartType == ChartType.BAR,
+                            onClick = { onChartTypeChange(ChartType.BAR) },
+                            label = { Text("Barras") },
+                            icon = { Icon(Icons.Default.BarChart, null) }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(Spacing.lg))
+                }
+                item {
+                    Crossfade(targetState = uiState.chartType, label = "chart-animation") { chartType ->
+                        when(chartType) {
+                            ChartType.PIE -> PieChart(
+                                entries = uiState.expenses.map { PieChartEntry(it.amount, it.color) },
+                                modifier = Modifier.size(250.dp),
+                                emptyChartMessage = "Sin gastos"
+                            )
+                            ChartType.BAR -> BarChart(
+                                entries = uiState.expenses.map { BarChartEntry(it.amount, it.color, it.categoryName) },
+                                modifier = Modifier.height(250.dp).fillMaxWidth()
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(Spacing.xl))
                 }
                 item {
@@ -166,8 +204,10 @@ fun CategoryExpenseReportScreenPreview() {
         CategoryExpenseReportScreenContent(
             uiState = CategoryExpenseReportUiState(
                 expenses = sampleExpenses,
-                isLoading = false
+                isLoading = false,
+                chartType = ChartType.BAR
             ),
+            onChartTypeChange = {},
             onNavigateBack = {}
         )
     }

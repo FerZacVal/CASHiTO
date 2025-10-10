@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
@@ -53,11 +52,12 @@ import com.cashito.ui.viewmodel.GoalDetail
 import com.cashito.ui.viewmodel.GoalDetailUiState
 import com.cashito.ui.viewmodel.GoalDetailViewModel
 import com.cashito.ui.viewmodel.GoalTransaction
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun GoalDetailScreen(
     navController: NavController,
-    viewModel: GoalDetailViewModel = viewModel()
+    viewModel: GoalDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -65,7 +65,7 @@ fun GoalDetailScreen(
         uiState = uiState,
         onNavigateBack = { navController.popBackStack() },
         onNavigateToIncome = { navController.navigate("quick_save") },
-        onNavigateToEdit = { navController.navigate("goal_form") },
+        onNavigateToEdit = { goalId -> navController.navigate("goal_form?goalId=$goalId") },
         onShowMenu = viewModel::onShowMenu,
         onRecurringChanged = viewModel::onRecurringChanged,
         onTransactionClick = { /* TODO */ }
@@ -78,7 +78,7 @@ fun GoalDetailScreenContent(
     uiState: GoalDetailUiState,
     onNavigateBack: () -> Unit,
     onNavigateToIncome: () -> Unit,
-    onNavigateToEdit: () -> Unit,
+    onNavigateToEdit: (String) -> Unit,
     onShowMenu: (Boolean) -> Unit,
     onRecurringChanged: (Boolean) -> Unit,
     onTransactionClick: (GoalTransaction) -> Unit
@@ -113,7 +113,7 @@ fun GoalDetailScreenContent(
                                 text = { Text("Editar meta") },
                                 onClick = {
                                     onShowMenu(false)
-                                    onNavigateToEdit()
+                                    uiState.goal.id.let(onNavigateToEdit)
                                 }
                             )
                             DropdownMenuItem(
@@ -157,7 +157,7 @@ fun GoalDetailScreenContent(
                         )
                         SecondaryButton(
                             text = "Editar meta",
-                            onClick = onNavigateToEdit,
+                            onClick = { uiState.goal.id.let(onNavigateToEdit) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -244,7 +244,7 @@ private fun GoalSummary(goal: GoalDetail) {
 @Composable
 private fun SavingsPlanSection(isRecurringEnabled: Boolean, onRecurringChanged: (Boolean) -> Unit) {
     Column {
-        Text(text = "Plan de Ahorro", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = Spacing.sm))
+        Text(text = "Plan de Ahorro", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = Spacing.sm), color = MaterialTheme.colorScheme.onSurface)
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)

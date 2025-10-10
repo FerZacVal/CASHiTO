@@ -10,8 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.Routes
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
@@ -47,6 +50,7 @@ fun GoalsScreen(
     GoalsScreenContent(
         uiState = uiState,
         onNavigateToGoalDetail = { goalId -> navController.navigate("goal_detail/$goalId") },
+        onNavigateToCreateGoal = { navController.navigate(Routes.GOAL_FORM) },
         onNavigateBack = { navController.popBackStack() }
     )
 }
@@ -56,6 +60,7 @@ fun GoalsScreen(
 fun GoalsScreenContent(
     uiState: GoalsUiState,
     onNavigateToGoalDetail: (String) -> Unit,
+    onNavigateToCreateGoal: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
@@ -72,6 +77,11 @@ fun GoalsScreenContent(
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onNavigateToCreateGoal) {
+                Icon(Icons.Default.Add, contentDescription = "Crear nueva meta")
+            }
         }
     ) { paddingValues ->
         LazyColumn(
@@ -118,6 +128,7 @@ fun GoalsScreenPreview() {
                 isLoading = false
             ),
             onNavigateToGoalDetail = {},
+            onNavigateToCreateGoal = {},
             onNavigateBack = {}
         )
     }

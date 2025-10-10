@@ -10,11 +10,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+enum class ChartType { PIE, BAR }
+
 // --- STATE ---
 data class CategoryExpense(val categoryName: String, val amount: Float, val color: Color)
 
 data class CategoryExpenseReportUiState(
     val expenses: List<CategoryExpense> = emptyList(),
+    val chartType: ChartType = ChartType.PIE,
     val isLoading: Boolean = true
 )
 
@@ -26,6 +29,10 @@ class CategoryExpenseReportViewModel : ViewModel() {
 
     init {
         loadCategoryExpenses()
+    }
+
+    fun onChartTypeChange(newType: ChartType) {
+        _uiState.value = _uiState.value.copy(chartType = newType)
     }
 
     private fun loadCategoryExpenses() {

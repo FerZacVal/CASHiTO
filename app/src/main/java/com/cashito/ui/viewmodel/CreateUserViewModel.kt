@@ -18,7 +18,7 @@ data class CreateUserUiState(
     val nombreError: String? = null,
     val emailError: String? = null,
     val passwordError: String? = null,
-    val registrationError: String? = null, // For general registration errors
+    val registrationError: String? = null,
     val isRegistrationSuccess: Boolean = false
 )
 

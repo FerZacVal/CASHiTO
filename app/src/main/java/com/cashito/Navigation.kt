@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.cashito.ui.screens.category_form.CategoryFormScreen
 import com.cashito.ui.screens.dashboard.DashboardScreen
 import com.cashito.ui.screens.goal_detail.GoalDetailScreen
 import com.cashito.ui.screens.goal_form.GoalFormScreen
@@ -25,12 +26,10 @@ import com.cashito.ui.screens.splash.SplashScreen
 import com.cashito.ui.screens.transactions.TransactionsScreen
 
 object Routes {
-    // New Routes
     const val SPLASH = "splash"
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val DASHBOARD = "dashboard"
-    const val HOME = "dashboard" // Alias for the main screen
     const val GOAL_DETAIL = "goal_detail/{goalId}"
     const val GOAL_FORM = "goal_form"
     const val GOALS = "goals"
@@ -41,17 +40,8 @@ object Routes {
     const val CATEGORY_EXPENSE_REPORT = "category_expense_report"
     const val INCOME_REPORT = "income_report"
     const val BALANCE_REPORT = "balance_report"
-    const val INSIGHTS = "insights"
     const val PROFILE = "profile"
-    const val NOTIFICATIONS = "notifications"
-
-    // Legacy Routes for Dev Menu
-    const val AUTH = "auth_legacy"
-    const val CATEGORY = "category_legacy"
-    const val EXPENSE = "expense_legacy"
-    const val RECOMMENDATION = "recommendation_legacy"
-    const val REPORT = "report_legacy"
-    const val SAVINGS = "savings_legacy"
+    const val CATEGORY_FORM = "category_form"
 }
 
 @Composable
@@ -60,7 +50,6 @@ fun AppNavHost(
     startDestination: String = Routes.SPLASH
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
-        // New Cashito screens
         composable(Routes.SPLASH) { SplashScreen(navController) }
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.REGISTER) { CreateUserScreen(navController) }
@@ -69,22 +58,26 @@ fun AppNavHost(
             route = Routes.GOAL_DETAIL,
             arguments = listOf(navArgument("goalId") { type = NavType.StringType })
         ) {
-            Log.d("FlowDebug", "Navigation: Go detailScrreen.")
             GoalDetailScreen(navController = navController)
         }
         composable(Routes.GOALS) { GoalsScreen(navController) }
         composable(Routes.TRANSACTIONS) { TransactionsScreen(navController) }
-        composable(Routes.QUICK_SAVE) {
-            Log.d("FlowDebug", "Navigation: QUICK_SAVE SCREEN.")
-            QuickSaveScreen(navController) }
+        composable(Routes.QUICK_SAVE) { QuickSaveScreen(navController) }
         composable(Routes.QUICK_OUT) { QuickOutScreen(navController) }
         composable(Routes.REPORTS) { ReportsScreen(navController) }
         composable(Routes.CATEGORY_EXPENSE_REPORT) { CategoryExpenseReportScreen(navController) }
         composable(Routes.INCOME_REPORT) { IncomeReportScreen(navController) }
         composable(Routes.BALANCE_REPORT) { BalanceScreen(navController) }
-        composable(Routes.GOAL_FORM) { GoalFormScreen(navController) }
+        composable(
+            route = "${Routes.GOAL_FORM}?goalId={goalId}",
+            arguments = listOf(navArgument("goalId") {
+                type = NavType.StringType
+                nullable = true
+            })
+        ) { 
+            GoalFormScreen(navController = navController) 
+        }
         composable(Routes.PROFILE) { ProfileScreen(navController) }
-
-        // TODO: Add composables for legacy routes if they need to be displayed
+        composable(Routes.CATEGORY_FORM) { CategoryFormScreen(navController) }
     }
 }
