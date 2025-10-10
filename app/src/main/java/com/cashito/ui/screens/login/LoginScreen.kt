@@ -27,24 +27,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
-import com.cashito.ui.viewmodel.LoginViewModel
+import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.viewmodel.LoginUiState
+import com.cashito.ui.viewmodel.LoginViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = koinViewModel(),
-    onNavigateToDashboard: () -> Unit = { navController.navigate("dashboard") },
-    onNavigateToRegister: () -> Unit = { navController.navigate("register") }
+    viewModel: LoginViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val onNavigateToDashboard: () -> Unit = { navController.navigate("dashboard") }
 
     LaunchedEffect(uiState.isLoginSuccess) {
         if (uiState.isLoginSuccess) {
@@ -52,10 +55,31 @@ fun LoginScreen(
         }
     }
 
+    LoginScreenContent(
+        uiState = uiState,
+        onEmailChange = viewModel::onEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onRememberMeChange = viewModel::onRememberMeChange,
+        onLoginClick = viewModel::onLoginClick,
+        onNavigateToRegister = { navController.navigate("register") },
+        onForgotPasswordClick = { /* TODO */ }
+    )
+}
+
+@Composable
+fun LoginScreenContent(
+    uiState: LoginUiState,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onRememberMeChange: (Boolean) -> Unit,
+    onLoginClick: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onForgotPasswordClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -70,14 +94,14 @@ fun LoginScreen(
                 modifier = Modifier
                     .size(80.dp)
                     .background(
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.primary,
                         shape = androidx.compose.foundation.shape.CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "💰",
-                    style = androidx.compose.material3.MaterialTheme.typography.displayLarge,
+                    style = MaterialTheme.typography.displayLarge,
                 )
             }
 
@@ -85,16 +109,16 @@ fun LoginScreen(
 
             Text(
                 text = "Iniciar sesión",
-                style = androidx.compose.material3.MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             CashitoTextField(
                 value = uiState.email,
-                onValueChange = viewModel::onEmailChange,
+                onValueChange = onEmailChange,
                 label = "Correo electrónico",
                 placeholder = "correo@ejemplo.com",
                 keyboardType = KeyboardType.Email,
@@ -106,7 +130,7 @@ fun LoginScreen(
 
             CashitoTextField(
                 value = uiState.password,
-                onValueChange = viewModel::onPasswordChange,
+                onValueChange = onPasswordChange,
                 label = "Contraseña",
                 placeholder = "Contraseña",
                 isPassword = true,
@@ -122,17 +146,17 @@ fun LoginScreen(
             ) {
                 Checkbox(
                     checked = uiState.rememberMe,
-                    onCheckedChange = viewModel::onRememberMeChange,
+                    onCheckedChange = onRememberMeChange,
                     colors = CheckboxDefaults.colors(
-                        checkedColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                        uncheckedColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                        checkmarkColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        checkmarkColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
                 Text(
                     text = "Mantener sesión",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -140,7 +164,7 @@ fun LoginScreen(
 
             PrimaryButton(
                 text = "Iniciar sesión",
-                onClick = viewModel::onLoginClick
+                onClick = onLoginClick
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
@@ -154,8 +178,8 @@ fun LoginScreen(
 
             Text(
                 text = "O continúa con",
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
             )
 
@@ -183,14 +207,30 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             TextButton(
-                onClick = { /* Handle forgot password */ }
+                onClick = onForgotPasswordClick
             ) {
                 Text(
                     text = "¿Olvidaste tu contraseña?",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    CASHiTOTheme {
+        LoginScreenContent(
+            uiState = LoginUiState(email = "test@cashito.com", passwordError = "Mínimo 6 caracteres"),
+            onEmailChange = {},
+            onPasswordChange = {},
+            onRememberMeChange = {},
+            onLoginClick = {},
+            onNavigateToRegister = {},
+            onForgotPasswordClick = {}
+        )
     }
 }

@@ -1,14 +1,18 @@
 package com.cashito.ui.viewmodel
 
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.cashito.ui.theme.primaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.Date
+import kotlinx.coroutines.flow.update
 
 // --- STATE ---
 data class GoalFormUiState(
+    val goalId: String? = null,
+    val isEditing: Boolean = false,
     val goalName: String = "",
     val targetAmount: String = "",
     val selectedDate: Long? = null,
@@ -25,54 +29,79 @@ data class GoalFormUiState(
 )
 
 // --- VIEWMODEL ---
-class GoalFormViewModel : ViewModel() {
+class GoalFormViewModel(
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GoalFormUiState())
     val uiState: StateFlow<GoalFormUiState> = _uiState.asStateFlow()
 
+    init {
+        val goalId: String? = savedStateHandle["goalId"]
+        if (goalId != null) {
+            loadGoalForEditing(goalId)
+        }
+    }
+
+    private fun loadGoalForEditing(goalId: String) {
+        // TODO: Fetch actual goal from repository using goalId
+        _uiState.update {
+            it.copy(
+                isEditing = true,
+                goalId = goalId,
+                goalName = "Viaje a Cusco",
+                targetAmount = "5000",
+                selectedDate = System.currentTimeMillis(),
+                selectedIcon = "✈️",
+                selectedColor = primaryLight
+            )
+        }
+        validateForm()
+    }
+    
     fun onGoalNameChange(name: String) {
-        _uiState.value = _uiState.value.copy(goalName = name, goalNameError = null)
+        _uiState.update { it.copy(goalName = name, goalNameError = null) }
         validateForm()
     }
 
     fun onTargetAmountChange(amount: String) {
-        _uiState.value = _uiState.value.copy(targetAmount = amount, targetAmountError = null)
+        _uiState.update { it.copy(targetAmount = amount, targetAmountError = null) }
         validateForm()
     }
 
     fun onDateSelected(date: Long?) {
-        _uiState.value = _uiState.value.copy(selectedDate = date)
+        _uiState.update { it.copy(selectedDate = date) }
         validateForm()
     }
 
     fun onIconSelected(icon: String) {
-        _uiState.value = _uiState.value.copy(selectedIcon = icon)
+        _uiState.update { it.copy(selectedIcon = icon) }
     }
 
     fun onColorSelected(color: Color) {
-        _uiState.value = _uiState.value.copy(selectedColor = color)
+        _uiState.update { it.copy(selectedColor = color) }
     }
 
     fun onRecurringEnabledChange(enabled: Boolean) {
-        _uiState.value = _uiState.value.copy(isRecurringEnabled = enabled)
+        _uiState.update { it.copy(isRecurringEnabled = enabled) }
     }
 
     fun onRecurringAmountChange(amount: String) {
-        _uiState.value = _uiState.value.copy(recurringAmount = amount)
+        _uiState.update { it.copy(recurringAmount = amount) }
     }
 
     fun onRecurringFrequencyChange(frequency: String) {
-        _uiState.value = _uiState.value.copy(recurringFrequency = frequency)
+        _uiState.update { it.copy(recurringFrequency = frequency) }
     }
 
     fun onDatePickerDismiss(show: Boolean) {
-        _uiState.value = _uiState.value.copy(showDatePicker = show)
+        _uiState.update { it.copy(showDatePicker = show) }
     }
 
     private fun validateForm() {
         val state = _uiState.value
         val isValid = state.goalName.isNotBlank() && state.targetAmount.isNotBlank() && state.selectedDate != null
-        _uiState.value = state.copy(isFormValid = isValid)
+        _uiState.update { it.copy(isFormValid = isValid) }
     }
 
     fun onSaveGoal() {
@@ -80,14 +109,20 @@ class GoalFormViewModel : ViewModel() {
         val nameError = if (state.goalName.isBlank()) "El nombre es requerido" else null
         val amountError = if (state.targetAmount.isBlank()) "El monto es requerido" else null
 
-        _uiState.value = _uiState.value.copy(
-            goalNameError = nameError,
-            targetAmountError = amountError
-        )
+        _uiState.update {
+            it.copy(
+                goalNameError = nameError,
+                targetAmountError = amountError
+            )
+        }
 
         if (nameError == null && amountError == null && state.selectedDate != null) {
-            // TODO: Implement actual save logic
-            _uiState.value = _uiState.value.copy(goalSaved = true)
+            if (state.isEditing) {
+                // TODO: Implement update logic
+            } else {
+                // TODO: Implement create logic
+            }
+            _uiState.update { it.copy(goalSaved = true) }
         }
     }
 }

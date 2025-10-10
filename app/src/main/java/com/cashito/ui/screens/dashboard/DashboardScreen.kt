@@ -41,60 +41,68 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.Routes
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
+import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
+import com.cashito.ui.theme.primaryLight
+import com.cashito.ui.theme.secondaryLight
 import com.cashito.ui.viewmodel.DashboardGoal
 import com.cashito.ui.viewmodel.DashboardTransaction
+import com.cashito.ui.viewmodel.DashboardUiState
 import com.cashito.ui.viewmodel.DashboardViewModel
-
-@Composable
-fun InsightsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-    ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            Text(
-                "💡 ¿Sabías que?",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Text(
-                "Ahorrar S/ 20 a la semana se convierte en más de S/ 1,000 al año.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-        }
-    }
-}
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun DashboardScreen(
     navController: NavController,
-    viewModel: DashboardViewModel = viewModel(),
-    onNavigateToGoalDetail: (String) -> Unit = { navController.navigate("goal_detail/$it") },
-    onNavigateToTransactions: () -> Unit = { navController.navigate("transactions") },
-    onNavigateToReports: () -> Unit = { navController.navigate("reports") },
-    onNavigateToGoals: () -> Unit = { navController.navigate("goals") },
-    onNavigateToProfile: () -> Unit = { navController.navigate("profile") },
-    onNavigateToQuickSave: () -> Unit = { navController.navigate("quick_save") }
+    viewModel: DashboardViewModel = koinViewModel() // CORREGIDO
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    DashboardScreenContent(
+        uiState = uiState,
+        onGoalClick = { goalId -> navController.navigate("goal_detail/$goalId") },
+        onTransactionsClick = { navController.navigate(Routes.TRANSACTIONS) },
+        onReportsClick = { navController.navigate(Routes.REPORTS) },
+        onGoalsClick = { navController.navigate(Routes.GOALS) },
+        onProfileClick = { navController.navigate(Routes.PROFILE) },
+        onQuickSaveClick = { navController.navigate(Routes.QUICK_SAVE) },
+        onQuickOutClick = { navController.navigate(Routes.QUICK_OUT) },
+        onAddCategoryClick = { navController.navigate(Routes.CATEGORY_FORM) },
+        onCreateGoalClick = { navController.navigate(Routes.GOAL_FORM) },
+        onNotificationClick = { /* TODO */ },
+        onTransactionItemClick = { /* TODO */ }
+    )
+}
+
+@Composable
+fun DashboardScreenContent(
+    uiState: DashboardUiState,
+    onGoalClick: (String) -> Unit,
+    onTransactionsClick: () -> Unit,
+    onReportsClick: () -> Unit,
+    onGoalsClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onQuickSaveClick: () -> Unit,
+    onQuickOutClick: () -> Unit,
+    onAddCategoryClick: () -> Unit,
+    onCreateGoalClick: () -> Unit,
+    onNotificationClick: () -> Unit,
+    onTransactionItemClick: (DashboardTransaction) -> Unit,
+) {
     Scaffold(
         topBar = {
             DashboardTopBar(
                 userName = uiState.userName,
-                onNotificationClick = { /* Handle notification */ },
-                onSettingsClick = { onNavigateToProfile() }
+                onNotificationClick = onNotificationClick,
+                onSettingsClick = onProfileClick
             )
         },
         bottomBar = {
@@ -103,19 +111,19 @@ fun DashboardScreen(
                 onNavigate = { route ->
                     when (route) {
                         "dashboard" -> { /* Already on this screen */ }
-                        "transactions" -> onNavigateToTransactions()
-                        "reports" -> onNavigateToReports()
-                        "goals" -> onNavigateToGoals()
-                        "profile" -> onNavigateToProfile()
+                        "transactions" -> onTransactionsClick()
+                        "reports" -> onReportsClick()
+                        "goals" -> onGoalsClick()
+                        "profile" -> onProfileClick()
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToQuickSave,
+                onClick = onAddCategoryClick,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Quick Save")
+                Icon(Icons.Default.Add, contentDescription = "Añadir categoría")
             }
         }
     ) { paddingValues ->
@@ -136,8 +144,8 @@ fun DashboardScreen(
                         totalBalance = uiState.totalBalance,
                         goalProgress = uiState.mainGoalProgressText,
                         progressPercentage = uiState.mainGoalProgressPercentage,
-                        onIncomeClick = onNavigateToQuickSave,
-                        onExpenseClick = { navController.navigate("quick_out") }
+                        onIncomeClick = onQuickSaveClick,
+                        onExpenseClick = onQuickOutClick
                     )
                 }
 
@@ -165,7 +173,7 @@ fun DashboardScreen(
                                 progress = goal.progress,
                                 icon = goal.icon,
                                 color = goal.color,
-                                onClick = { onNavigateToGoalDetail(goal.id) }
+                                onClick = { onGoalClick(goal.id) }
                             )
                         }
                     }
@@ -192,21 +200,21 @@ fun DashboardScreen(
                             text = "Ahorro rápido",
                             icon = "💰",
                             isPrimary = true,
-                            onClick = onNavigateToQuickSave,
+                            onClick = onQuickSaveClick,
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
                             text = "Gasto rápido",
                             icon = "💸",
                             isPrimary = false,
-                            onClick = { navController.navigate("quick_out") },
+                            onClick = onQuickOutClick,
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
-                            text = "Enviar",
-                            icon = "📤",
+                            text = "Crear Meta",
+                            icon = "🎯",
                             isPrimary = false,
-                            onClick = { /* Handle transfer */ },
+                            onClick = onCreateGoalClick,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -225,7 +233,7 @@ fun DashboardScreen(
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.SemiBold
                         )
-                        TextButton(onClick = onNavigateToTransactions) {
+                        TextButton(onClick = onTransactionsClick) {
                             Text(
                                 text = "Ver todos",
                                 color = MaterialTheme.colorScheme.primary
@@ -239,7 +247,7 @@ fun DashboardScreen(
                 items(uiState.transactions) { transaction ->
                     TransactionItem(
                         transaction = transaction,
-                        onClick = { /* Handle transaction click */ }
+                        onClick = { onTransactionItemClick(transaction) }
                     )
                     Spacer(modifier = Modifier.height(Spacing.sm))
                 }
@@ -250,6 +258,30 @@ fun DashboardScreen(
                     InsightsCard()
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun InsightsCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            Text(
+                "💡 ¿Sabías que?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            Text(
+                "Ahorrar S/ 20 a la semana se convierte en más de S/ 1,000 al año.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
         }
     }
 }
@@ -318,7 +350,6 @@ fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Log.d("FlowDebug", "DASHBOARDSCREEN: BOTTON quick save")
     Card(
         onClick = onClick,
         modifier = modifier.height(60.dp),
@@ -341,7 +372,6 @@ fun QuickActionButton(
             )
         }
     }
-
 }
 
 @Composable
@@ -351,7 +381,6 @@ fun TransactionItem(transaction: DashboardTransaction, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {
-
         Row(
             modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically
@@ -373,5 +402,40 @@ fun TransactionItem(transaction: DashboardTransaction, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DashboardScreenPreview() {
+    CASHiTOTheme {
+        DashboardScreenContent(
+            uiState = DashboardUiState(
+                userName = "Ana",
+                totalBalance = "S/ 3,420.50",
+                mainGoalProgressText = "Meta principal: Viaje a Cusco — 65%",
+                mainGoalProgressPercentage = 65,
+                goals = listOf(
+                    DashboardGoal("1", "Viaje a Cusco", "3,420", "5,000", 0.65f, "✈️", primaryLight),
+                    DashboardGoal("2", "Laptop nueva", "800", "4,500", 0.18f, "💻", secondaryLight)
+                ),
+                transactions = listOf(
+                    DashboardTransaction("Ingreso automático", "💰", primaryLight),
+                    DashboardTransaction("Compra en supermercado", "🛒", secondaryLight)
+                ),
+                isLoading = false
+            ),
+            onGoalClick = {},
+            onTransactionsClick = {},
+            onReportsClick = {},
+            onGoalsClick = {},
+            onProfileClick = {},
+            onQuickSaveClick = {},
+            onQuickOutClick = {},
+            onAddCategoryClick = {},
+            onCreateGoalClick = {},
+            onNotificationClick = {},
+            onTransactionItemClick = {}
+        )
     }
 }

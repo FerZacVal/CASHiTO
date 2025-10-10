@@ -1,22 +1,44 @@
 package com.cashito.di
 
+import com.cashito.ui.viewmodel.BalanceViewModel
+import com.cashito.ui.viewmodel.CategoryExpenseReportViewModel
+import com.cashito.ui.viewmodel.CategoryFormViewModel
 import com.cashito.ui.viewmodel.CreateUserViewModel
+import com.cashito.ui.viewmodel.DashboardViewModel
+import com.cashito.ui.viewmodel.GoalDetailViewModel
+import com.cashito.ui.viewmodel.GoalFormViewModel
+import com.cashito.ui.viewmodel.GoalsViewModel
+import com.cashito.ui.viewmodel.IncomeReportViewModel
 import com.cashito.ui.viewmodel.LoginViewModel
+import com.cashito.ui.viewmodel.ProfileViewModel
 import com.cashito.ui.viewmodel.QuickOutViewModel
 import com.cashito.ui.viewmodel.QuickSaveViewModel
+import com.cashito.ui.viewmodel.ReportsViewModel
 import com.cashito.ui.viewmodel.TransactionsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    // --- Auth ViewModels ---
+    // --- Auth ViewModels (necesitan UseCase) ---
     viewModel { LoginViewModel(get()) }
     viewModel { CreateUserViewModel(get()) }
+    viewModel { ProfileViewModel(get()) }
 
-    // --- Transaction ViewModels ---
+    // --- Transaction ViewModels (necesitan UseCase) ---
     viewModel { QuickOutViewModel(get()) }
     viewModel { QuickSaveViewModel(get()) }
-    viewModel { TransactionsViewModel(get()) } // Añadido
+    viewModel { TransactionsViewModel(get(), get()) }
 
-    // Aquí añadiríamos otros ViewModels a medida que los creemos
+    // --- Goal ViewModels (necesitan) ---
+    viewModel { GoalsViewModel() }
+    viewModel { GoalDetailViewModel(get()) }
+    viewModel { GoalFormViewModel(get()) }
+
+    // --- ViewModels sin dependencias ---
+    viewModel { CategoryFormViewModel() }
+    viewModel { ReportsViewModel() }
+    viewModel { CategoryExpenseReportViewModel() }
+    viewModel { IncomeReportViewModel() }
+    viewModel { BalanceViewModel() }
+    viewModel { DashboardViewModel(get()) } // CORREGIDO: Añadida dependencia
 }
