@@ -29,6 +29,9 @@ class FirebaseTransactionDataSource(
             throw IllegalStateException("Usuario no autenticado")
         }
 
+        // Asignar el userId al DTO antes de guardarlo
+        transactionDto.userId = userId
+
         Log.d("FlowDebug", "DataSource: Adding document to Firestore for user $userId.")
         firestore.collection("Usuarios").document(userId).collection("Transacciones").add(transactionDto).await()
         Log.d("FlowDebug", "DataSource: Document successfully added to Firestore.")

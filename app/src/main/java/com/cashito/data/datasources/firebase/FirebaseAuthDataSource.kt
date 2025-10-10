@@ -30,6 +30,7 @@ class FirebaseAuthDataSource(private val firebaseAuth: FirebaseAuth) {
      */
     suspend fun saveUserProfile(user: FirebaseUser, nombre: String) {
         val userProfile = hashMapOf(
+            "userId" to user.uid,
             "nombre" to nombre,
             "email" to user.email,
             "metodoAuth" to "email"

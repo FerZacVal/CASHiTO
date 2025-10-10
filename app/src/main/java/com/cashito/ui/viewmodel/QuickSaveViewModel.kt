@@ -91,6 +91,8 @@ class QuickSaveViewModel(
     fun onConfirmIncome() {
         if (!_uiState.value.isConfirmEnabled) return
 
+        _uiState.value = _uiState.value.copy(isConfirmEnabled = false)
+
         viewModelScope.launch {
             val state = _uiState.value
             val amount = state.customAmount.toDoubleOrNull() ?: state.selectedAmount.toDoubleOrNull() ?: 0.0
