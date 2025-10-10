@@ -1,7 +1,7 @@
 package com.cashito.di
 
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
-import com.cashito.data.repositories.auth.FirebaseAuthRepository
+import com.cashito.data.repositories.auth.AuthRepositoryImpl
 import com.cashito.domain.repositories.auth.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.dsl.module
@@ -16,7 +16,7 @@ val dataModule = module {
     single { FirebaseAuthDataSource(get()) }
 
     // Provee la implementación del repositorio. Cuando el dominio pida un `AuthRepository`,
-    // Koin le dará un `FirebaseAuthRepository`, pasándole el DataSource que ya sabe crear (get()).
-    single<AuthRepository> { FirebaseAuthRepository(get()) }
+    // Koin le dará un `AuthRepositoryImpl`, pasándole el DataSource que ya sabe crear (get()).
+    single<AuthRepository> { AuthRepositoryImpl(get()) }
 
 }
