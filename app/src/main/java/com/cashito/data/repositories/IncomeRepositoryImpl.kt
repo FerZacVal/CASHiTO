@@ -3,6 +3,7 @@ package com.cashito.data.repositories
 import android.util.Log
 import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
 import com.cashito.data.dto.TransactionDto
+import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.income.Income
 import com.cashito.domain.repositories.income.IncomeRepository
 
@@ -19,7 +20,9 @@ class IncomeRepositoryImpl(
     }
 
     override suspend fun getIncomes(): List<Income> {
-        return emptyList()
+        return dataSource.getTransactions()
+            .filter { it.type == "ingreso" }
+            .map { it.toIncome() }
     }
 }
 
@@ -32,5 +35,21 @@ private fun Income.toTransactionDto(): TransactionDto {
         categoryId = this.category?.id ?: "",
         categoryName = this.category?.name ?: "Sin categoría",
         categoryIcon = this.category?.icon ?: ""
+    )
+}
+
+private fun TransactionDto.toIncome(): Income {
+    return Income(
+        id = this.id,
+        description = this.description,
+        amount = this.amount,
+        date = this.date ?: java.util.Date(),
+        category = Category(
+            id = this.categoryId,
+            name = this.categoryName,
+            icon = this.categoryIcon,
+            // El color no se guarda en el DTO, se puede obtener de una fuente de categorías si es necesario
+            color = ""
+        )
     )
 }

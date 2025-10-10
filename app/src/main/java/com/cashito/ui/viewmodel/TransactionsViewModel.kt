@@ -2,11 +2,19 @@ package com.cashito.ui.viewmodel
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
-import com.cashito.ui.theme.primaryLight
+import androidx.lifecycle.viewModelScope
+import com.cashito.domain.entities.transaction.TransactionType
+import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import com.cashito.ui.theme.errorLight
+import com.cashito.ui.theme.primaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
+import com.cashito.domain.entities.transaction.Transaction as DomainTransaction
 
 // --- STATE ---
 data class Transaction(
@@ -16,9 +24,9 @@ data class Transaction(
     val amount: String,
     val amountColor: Color,
     val icon: String,
-    val color: Color,
-    val category: String = "",
-    val date: String
+    val color: Color, // Este color es para el icono
+    val category: String,
+    val date: String // Representación del grupo (e.g., "Hoy", "Ayer", "dd/MM/yyyy")
 )
 
 data class TransactionGroup(
@@ -27,48 +35,62 @@ data class TransactionGroup(
 )
 
 data class TransactionsUiState(
-    val transactions: List<Transaction> = emptyList(),
+    val allTransactions: List<Transaction> = emptyList(), // Lista plana con todas las transacciones de la UI
     val filteredTransactions: List<TransactionGroup> = emptyList(),
     val searchQuery: String = "",
     val selectedFilter: String = "Todos",
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val error: String? = null
 )
 
 // --- VIEWMODEL ---
-class TransactionsViewModel : ViewModel() {
+class TransactionsViewModel(
+    private val getTransactionsUseCase: GetTransactionsUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionsUiState())
     val uiState: StateFlow<TransactionsUiState> = _uiState.asStateFlow()
 
-    private val sampleTransactions = listOf(
-        Transaction("1", "Ingreso de sueldo", "Hoy, 09:30", "+S/ 2,500", primaryLight, "💰", primaryLight, "Trabajo principal", "Hoy"),
-        Transaction("2", "Compra en supermercado", "Hoy, 18:45", "-S/ 85.50", errorLight, "🛒", errorLight, "Comida", "Hoy"),
-        Transaction("3", "Ingreso freelance", "Ayer, 14:20", "+S/ 500", primaryLight, "📥", primaryLight, "Medio tiempo", "Ayer"),
-        Transaction("4", "Pago de servicios", "Ayer, 10:15", "-S/ 120", errorLight, "💡", errorLight, "Pagos", "Ayer")
-    )
-
     init {
-        _uiState.value = _uiState.value.copy(transactions = sampleTransactions)
-        filterTransactions()
+        loadTransactions()
+    }
+
+    private fun loadTransactions() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            getTransactionsUseCase().onSuccess { domainTransactions ->
+                val uiTransactions = domainTransactions.map { it.toUiTransaction() }
+                _uiState.update {
+                    it.copy(
+                        allTransactions = uiTransactions,
+                        isLoading = false
+                    )
+                }
+                filterTransactions() // Filtrar después de cargar
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, error = error.message) }
+            }
+        }
     }
 
     fun onSearchQueryChanged(query: String) {
-        _uiState.value = _uiState.value.copy(searchQuery = query)
+        _uiState.update { it.copy(searchQuery = query) }
         filterTransactions()
     }
 
     fun onFilterChanged(filter: String) {
-        _uiState.value = _uiState.value.copy(selectedFilter = filter)
+        _uiState.update { it.copy(selectedFilter = filter) }
         filterTransactions()
     }
 
     private fun filterTransactions() {
         val state = _uiState.value
-        val filtered = state.transactions.filter { transaction ->
+        val filtered = state.allTransactions.filter { transaction ->
             val matchesFilter = when (state.selectedFilter) {
                 "Ingresos" -> transaction.amount.startsWith("+")
                 "Gastos" -> transaction.amount.startsWith("-")
-                else -> true
+                else -> true // "Todos"
             }
             val matchesSearch = state.searchQuery.isEmpty() ||
                     transaction.title.contains(state.searchQuery, ignoreCase = true) ||
@@ -82,6 +104,26 @@ class TransactionsViewModel : ViewModel() {
             TransactionGroup(date, transactions)
         }
 
-        _uiState.value = _uiState.value.copy(filteredTransactions = grouped, isLoading = false)
+        _uiState.update { it.copy(filteredTransactions = grouped) }
     }
+}
+
+// --- MAPPERS ---
+
+private fun DomainTransaction.toUiTransaction(): Transaction {
+    val amountPrefix = if (this.type == TransactionType.INCOME) "+S/ " else "-S/ "
+    val amountColor = if (this.type == TransactionType.INCOME) primaryLight else errorLight
+    val iconColor = if (this.type == TransactionType.INCOME) primaryLight else errorLight
+
+    return Transaction(
+        id = this.id,
+        title = this.description,
+        subtitle = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(this.date),
+        amount = amountPrefix + String.format("%,.2f", this.amount),
+        amountColor = amountColor,
+        icon = this.category?.icon ?: "❓",
+        color = iconColor,
+        category = this.category?.name ?: "Sin categoría",
+        date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(this.date) // Usaremos una fecha formateada para agrupar
+    )
 }

@@ -19,8 +19,9 @@ val dataModule = module {
     single { FirebaseFirestore.getInstance() }
 
     // --- DataSources ---
+    // CORRECCIÓN: FirebaseAuthDataSource solo necesita UNA dependencia (FirebaseAuth).
     single { FirebaseAuthDataSource(get()) }
-    // Se corrige: Se proveen las dos dependencias que necesita el constructor
+    // FirebaseTransactionDataSource necesita DOS dependencias (Firestore y Auth).
     single { FirebaseTransactionDataSource(get(), get()) }
 
     // --- Repositories ---

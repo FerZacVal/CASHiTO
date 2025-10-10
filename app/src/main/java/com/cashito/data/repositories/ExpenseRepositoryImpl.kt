@@ -2,6 +2,7 @@ package com.cashito.data.repositories
 
 import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
 import com.cashito.data.dto.TransactionDto
+import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.expense.Expense
 import com.cashito.domain.repositories.expense.ExpenseRepository
 
@@ -15,7 +16,9 @@ class ExpenseRepositoryImpl(
     }
 
     override suspend fun getExpenses(): List<Expense> {
-        return emptyList()
+        return dataSource.getTransactions()
+            .filter { it.type == "gasto" }
+            .map { it.toExpense() }
     }
 }
 
@@ -27,5 +30,21 @@ private fun Expense.toTransactionDto(): TransactionDto {
         categoryId = this.category?.id ?: "",
         categoryName = this.category?.name ?: "Sin categoría",
         categoryIcon = this.category?.icon ?: ""
+    )
+}
+
+private fun TransactionDto.toExpense(): Expense {
+    return Expense(
+        id = this.id,
+        description = this.description,
+        amount = this.amount,
+        date = this.date ?: java.util.Date(),
+        category = Category(
+            id = this.categoryId,
+            name = this.categoryName,
+            icon = this.categoryIcon,
+            // El color no se guarda en el DTO, se puede obtener de una fuente de categorías si es necesario
+            color = ""
+        )
     )
 }
