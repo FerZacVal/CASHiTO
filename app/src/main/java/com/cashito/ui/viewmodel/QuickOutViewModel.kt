@@ -12,6 +12,7 @@ import com.cashito.ui.theme.tertiaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -27,8 +28,8 @@ data class QuickOutCategory(
 data class QuickOutUiState(
     val presetAmounts: List<String> = listOf("5", "10", "20", "50"),
     val categories: List<QuickOutCategory> = emptyList(),
-    val selectedAmount: String = "",
-    val customAmount: String = "",
+    val amount: String = "",
+    val selectedPresetAmount: String? = null,
     val selectedCategoryId: String = "",
     val isConfirmEnabled: Boolean = false,
     val expenseConfirmed: Boolean = false
@@ -47,61 +48,68 @@ class QuickOutViewModel(
     }
 
     private fun loadCategories() {
-        _uiState.value = _uiState.value.copy(
-            categories = listOf(
-                QuickOutCategory("1", "Comida", "🍔", primaryLight, "#FF6F00"),
-                QuickOutCategory("2", "Transporte", "🚌", secondaryLight, "#FFAB00"),
-                QuickOutCategory("3", "Compras", "🛒", tertiaryLight, "#00BFA5"),
-                QuickOutCategory("4", "Ocio", "🎉", Color(0xFFF59E0B), "#F59E0B")
+        _uiState.update {
+            it.copy(
+                categories = listOf(
+                    QuickOutCategory("1", "Comida", "🍔", primaryLight, "#FF6F00"),
+                    QuickOutCategory("2", "Transporte", "🚌", secondaryLight, "#FFAB00"),
+                    QuickOutCategory("3", "Compras", "🛒", tertiaryLight, "#00BFA5"),
+                    QuickOutCategory("4", "Ocio", "🎉", Color(0xFFF59E0B), "#F59E0B")
+                )
             )
-        )
+        }
     }
 
-    fun onPresetAmountSelected(amount: String) {
-        _uiState.value = _uiState.value.copy(
-            selectedAmount = amount,
-            customAmount = ""
-        )
+    fun onPresetAmountSelected(preset: String) {
+        _uiState.update {
+            it.copy(
+                amount = preset,
+                selectedPresetAmount = preset
+            )
+        }
         validateConfirmButton()
     }
 
-    fun onCustomAmountChanged(amount: String) {
-        _uiState.value = _uiState.value.copy(
-            customAmount = amount,
-            selectedAmount = ""
-        )
+    fun onAmountChanged(newAmount: String) {
+        _uiState.update {
+            it.copy(
+                amount = newAmount,
+                selectedPresetAmount = if (it.presetAmounts.contains(newAmount)) newAmount else null
+            )
+        }
         validateConfirmButton()
     }
 
     fun onCategorySelected(categoryId: String) {
-        _uiState.value = _uiState.value.copy(selectedCategoryId = categoryId)
+        _uiState.update { it.copy(selectedCategoryId = categoryId) }
         validateConfirmButton()
     }
 
     private fun validateConfirmButton() {
-        val state = _uiState.value
-        val amount = state.customAmount.toDoubleOrNull() ?: state.selectedAmount.toDoubleOrNull() ?: 0.0
-        val isEnabled = amount > 0 && state.selectedCategoryId.isNotEmpty()
-        _uiState.value = state.copy(isConfirmEnabled = isEnabled)
+        _uiState.update { state ->
+            val amountValue = state.amount.toDoubleOrNull() ?: 0.0
+            val isEnabled = amountValue > 0 && state.selectedCategoryId.isNotEmpty()
+            state.copy(isConfirmEnabled = isEnabled)
+        }
     }
 
     fun onConfirmExpense() {
         if (!_uiState.value.isConfirmEnabled) return
 
-        _uiState.value = _uiState.value.copy(isConfirmEnabled = false)
+        _uiState.update { it.copy(isConfirmEnabled = false) }
 
         viewModelScope.launch {
             val state = _uiState.value
-            val amount = state.customAmount.toDoubleOrNull() ?: state.selectedAmount.toDoubleOrNull() ?: 0.0
+            val amountValue = state.amount.toDoubleOrNull() ?: 0.0
             val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
 
             if (selectedCategory != null) {
                 val expense = Expense(
                     id = "", // Firestore will generate the ID
                     description = selectedCategory.title,
-                    amount = amount,
+                    amount = amountValue,
                     date = Date(),
-                    category = Category( // Creating the domain category object
+                    category = Category(
                         id = selectedCategory.id,
                         name = selectedCategory.title,
                         icon = selectedCategory.icon,
@@ -109,7 +117,7 @@ class QuickOutViewModel(
                     )
                 )
                 addExpenseUseCase(expense)
-                _uiState.value = _uiState.value.copy(expenseConfirmed = true)
+                _uiState.update { it.copy(expenseConfirmed = true) }
             }
         }
     }

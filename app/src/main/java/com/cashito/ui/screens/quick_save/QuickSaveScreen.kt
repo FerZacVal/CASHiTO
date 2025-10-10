@@ -1,6 +1,8 @@
 package com.cashito.ui.screens.quick_save
 
-import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,6 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,29 +48,55 @@ import com.cashito.ui.theme.Radius
 import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.QuickSaveCategory
 import com.cashito.ui.viewmodel.QuickSaveViewModel
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun QuickSaveScreen(
     navController: NavController,
-    viewModel: QuickSaveViewModel = koinViewModel(),
-    onNavigateBack: () -> Unit = { navController.popBackStack() }
+    viewModel: QuickSaveViewModel = koinViewModel()
 ) {
-    Log.d("FlowDebug", "QuickSaveScreen: Composable - INICIO de la función. Si este log no aparece, el crash ocurre en la inyección del ViewModel.")
-
-    Log.d("FlowDebug", "QuickSaveScreen: Declarando uiState...")
     val uiState by viewModel.uiState.collectAsState()
-    Log.d("FlowDebug", "QuickSaveScreen: uiState declarado.")
+    var showSuccessPopup by remember { mutableStateOf(false) }
 
-    Log.d("FlowDebug", "QuickSaveScreen: Declarando LaunchedEffect...")
     LaunchedEffect(uiState.incomeConfirmed) {
-        Log.d("FlowDebug", "QuickSaveScreen: LaunchedEffect - INICIO del bloque. incomeConfirmed: ${uiState.incomeConfirmed}")
         if (uiState.incomeConfirmed) {
-            onNavigateBack()
+            showSuccessPopup = true
+            delay(2000)
+            navController.popBackStack()
         }
     }
-    Log.d("FlowDebug", "QuickSaveScreen: LaunchedEffect declarado.")
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        QuickSaveScreenContent(
+            uiState = uiState,
+            onPresetAmountSelected = viewModel::onPresetAmountSelected,
+            onAmountChanged = viewModel::onAmountChanged,
+            onCategorySelected = viewModel::onCategorySelected,
+            onConfirmIncome = viewModel::onConfirmIncome,
+            onNavigateBack = { navController.popBackStack() }
+        )
+
+        AnimatedVisibility(
+            visible = showSuccessPopup,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.Center)
+        ) {
+            SuccessPopup()
+        }
+    }
+}
+
+@Composable
+fun QuickSaveScreenContent(
+    uiState: com.cashito.ui.viewmodel.QuickSaveUiState,
+    onPresetAmountSelected: (String) -> Unit,
+    onAmountChanged: (String) -> Unit,
+    onCategorySelected: (String) -> Unit,
+    onConfirmIncome: () -> Unit,
+    onNavigateBack: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -115,14 +147,12 @@ fun QuickSaveScreen(
 
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     items(uiState.presetAmounts) { amount ->
                         PresetAmountButton(
                             amount = "S/ $amount",
-                            isSelected = uiState.selectedAmount == amount,
-                            onClick = { viewModel.onPresetAmountSelected(amount) }
+                            isSelected = uiState.selectedPresetAmount == amount,
+                            onClick = { onPresetAmountSelected(amount) }
                         )
                     }
                 }
@@ -130,8 +160,8 @@ fun QuickSaveScreen(
                 Spacer(modifier = Modifier.height(Spacing.lg))
 
                 CashitoTextField(
-                    value = uiState.customAmount,
-                    onValueChange = viewModel::onCustomAmountChanged,
+                    value = uiState.amount,
+                    onValueChange = onAmountChanged,
                     label = "Monto personalizado",
                     placeholder = "S/ 0.00",
                     keyboardType = KeyboardType.Number,
@@ -149,14 +179,12 @@ fun QuickSaveScreen(
 
                 Spacer(modifier = Modifier.height(Spacing.md))
 
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     items(uiState.categories) { category ->
                         IncomeCategoryChip(
                             category = category,
                             isSelected = uiState.selectedCategoryId == category.id,
-                            onClick = { viewModel.onCategorySelected(category.id) }
+                            onClick = { onCategorySelected(category.id) }
                         )
                     }
                 }
@@ -165,7 +193,7 @@ fun QuickSaveScreen(
 
                 PrimaryButton(
                     text = "Confirmar ingreso",
-                    onClick = viewModel::onConfirmIncome,
+                    onClick = onConfirmIncome,
                     enabled = uiState.isConfirmEnabled
                 )
             }
@@ -182,8 +210,7 @@ fun PresetAmountButton(
     SmallButton(
         text = amount,
         onClick = onClick,
-        isPrimary = isSelected,
-        modifier = Modifier.width(80.dp)
+        isPrimary = isSelected
     )
 }
 
@@ -220,6 +247,24 @@ fun IncomeCategoryChip(
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimary else category.color,
                 textAlign = TextAlign.Center
             )
+        }
+    }
+}
+
+@Composable
+fun SuccessPopup() {
+    Card(
+        shape = RoundedCornerShape(Radius.lg),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(Spacing.lg),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Default.CheckCircle, "Success", tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            Spacer(modifier = Modifier.width(Spacing.md))
+            Text("Ingreso guardado con éxito", color = MaterialTheme.colorScheme.onSecondaryContainer, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
         }
     }
 }
