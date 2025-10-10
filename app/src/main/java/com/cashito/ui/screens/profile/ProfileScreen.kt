@@ -1,6 +1,7 @@
 package com.cashito.ui.screens.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,9 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Lock
@@ -30,6 +33,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -43,27 +48,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.SecondaryButton
-import com.cashito.ui.components.list.CashitoListItem
-import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
-import com.cashito.ui.viewmodel.ProfileUiState
 import com.cashito.ui.viewmodel.ProfileViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(),
+    onNavigateBack: () -> Unit = { navController.popBackStack() },
+    onNavigateToLogin: () -> Unit = { navController.navigate("login") { popUpTo(navController.graph.id) { inclusive = true } } }
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    val onNavigateToLogin: () -> Unit = { navController.navigate("login") { popUpTo(navController.graph.id) { inclusive = true } } }
 
     LaunchedEffect(uiState.loggedOut) {
         if (uiState.loggedOut) {
@@ -71,26 +75,6 @@ fun ProfileScreen(
         }
     }
 
-    ProfileScreenContent(
-        uiState = uiState,
-        onBiometricChange = viewModel::onBiometricEnabledChange,
-        onNotificationsChange = viewModel::onNotificationsEnabledChange,
-        onRemindersChange = viewModel::onRemindersEnabledChange,
-        onLogoutClick = viewModel::onLogoutClick,
-        onNavigateBack = { navController.popBackStack() }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProfileScreenContent(
-    uiState: ProfileUiState,
-    onBiometricChange: (Boolean) -> Unit,
-    onNotificationsChange: (Boolean) -> Unit,
-    onRemindersChange: (Boolean) -> Unit,
-    onLogoutClick: () -> Unit,
-    onNavigateBack: () -> Unit
-) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -120,31 +104,31 @@ fun ProfileScreenContent(
 
                 item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-                item {
+                item { 
                     SecuritySection(
                         biometricEnabled = uiState.biometricEnabled,
-                        onBiometricChange = onBiometricChange
+                        onBiometricChange = viewModel::onBiometricEnabledChange
                     )
                 }
 
                 item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-                item {
+                item { 
                     NotificationsSection(
                         notificationsEnabled = uiState.notificationsEnabled,
                         remindersEnabled = uiState.remindersEnabled,
-                        onNotificationsChange = onNotificationsChange,
-                        onRemindersChange = onRemindersChange
+                        onNotificationsChange = viewModel::onNotificationsEnabledChange,
+                        onRemindersChange = viewModel::onRemindersEnabledChange
                     )
                 }
-
+                
                 item { Spacer(modifier = Modifier.height(Spacing.xl)) }
-
+                
                 item { SupportSection() }
 
                 item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-                item { SecondaryButton(text = "Cerrar sesión", onClick = onLogoutClick) }
+                item { SecondaryButton(text = "Cerrar sesión", onClick = viewModel::onLogoutClick) }
             }
         }
     }
@@ -188,8 +172,18 @@ fun AccountSection() {
     ProfileSection(
         title = "Cuenta",
         items = listOf(
-            ProfileItemData(Icons.Default.Person, "Información personal", "Editar perfil y datos", onClick = {}),
-            ProfileItemData(Icons.Default.CreditCard, "Cuentas vinculadas", "Tarjetas y bancos", onClick = {})
+            ProfileItemData(
+                icon = Icons.Default.Person,
+                title = "Información personal",
+                subtitle = "Editar perfil y datos",
+                onClick = { /* Handle edit profile */ }
+            ),
+            ProfileItemData(
+                icon = Icons.Default.CreditCard,
+                title = "Cuentas vinculadas",
+                subtitle = "Tarjetas y bancos",
+                onClick = { /* Handle linked accounts */ }
+            )
         )
     )
 }
@@ -199,8 +193,19 @@ fun SecuritySection(biometricEnabled: Boolean, onBiometricChange: (Boolean) -> U
     ProfileSection(
         title = "Seguridad",
         items = listOf(
-            ProfileItemData(Icons.Default.Lock, "Cambiar contraseña", "Actualizar tu contraseña", onClick = {}),
-            ProfileItemData(Icons.Default.Settings, "Autenticación biométrica", "Usar huella dactilar o Face ID", trailing = { Switch(checked = biometricEnabled, onCheckedChange = onBiometricChange, colors = switchColors()) }, onClick = { onBiometricChange(!biometricEnabled) })
+            ProfileItemData(
+                icon = Icons.Default.Lock,
+                title = "Cambiar contraseña",
+                subtitle = "Actualizar tu contraseña",
+                onClick = { /* Handle change password */ }
+            ),
+            ProfileItemData(
+                icon = Icons.Default.Settings,
+                title = "Autenticación biométrica",
+                subtitle = "Usar huella dactilar o Face ID",
+                trailing = { Switch(checked = biometricEnabled, onCheckedChange = onBiometricChange, colors = switchColors()) },
+                onClick = { onBiometricChange(!biometricEnabled) }
+            )
         )
     )
 }
@@ -210,8 +215,20 @@ fun NotificationsSection(notificationsEnabled: Boolean, remindersEnabled: Boolea
      ProfileSection(
         title = "Notificaciones",
         items = listOf(
-            ProfileItemData(Icons.Default.Notifications, "Notificaciones push", "Recibir notificaciones en el dispositivo", trailing = { Switch(checked = notificationsEnabled, onCheckedChange = onNotificationsChange, colors = switchColors()) }, onClick = { onNotificationsChange(!notificationsEnabled) }),
-            ProfileItemData(Icons.Default.Settings, "Recordatorios de metas", "Notificaciones sobre progreso de ahorros", trailing = { Switch(checked = remindersEnabled, onCheckedChange = onRemindersChange, colors = switchColors()) }, onClick = { onRemindersChange(!remindersEnabled) })
+            ProfileItemData(
+                icon = Icons.Default.Notifications,
+                title = "Notificaciones push",
+                subtitle = "Recibir notificaciones en el dispositivo",
+                trailing = { Switch(checked = notificationsEnabled, onCheckedChange = onNotificationsChange, colors = switchColors()) },
+                onClick = { onNotificationsChange(!notificationsEnabled) }
+            ),
+            ProfileItemData(
+                icon = Icons.Default.Settings,
+                title = "Recordatorios de metas",
+                subtitle = "Notificaciones sobre progreso de ahorros",
+                trailing = { Switch(checked = remindersEnabled, onCheckedChange = onRemindersChange, colors = switchColors()) },
+                onClick = { onRemindersChange(!remindersEnabled) }
+            )
         )
     )
 }
@@ -221,8 +238,18 @@ fun SupportSection() {
     ProfileSection(
         title = "Soporte",
         items = listOf(
-            ProfileItemData(Icons.AutoMirrored.Filled.Help, "Preguntas frecuentes", "Encuentra respuestas rápidas", onClick = {}),
-            ProfileItemData(Icons.Default.Support, "Contactar soporte", "Obtén ayuda personalizada", onClick = {})
+            ProfileItemData(
+                icon = Icons.AutoMirrored.Filled.Help,
+                title = "Preguntas frecuentes",
+                subtitle = "Encuentra respuestas rápidas",
+                onClick = { /* Handle FAQ */ }
+            ),
+            ProfileItemData(
+                icon = Icons.Default.Support,
+                title = "Contactar soporte",
+                subtitle = "Obtén ayuda personalizada",
+                onClick = { /* Handle support */ }
+            )
         )
     )
 }
@@ -244,12 +271,13 @@ fun ProfileSection(title: String, items: List<ProfileItemData>) {
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             items.forEachIndexed { index, item ->
-                CashitoListItem(
-                    headline = item.title,
-                    supportingText = item.subtitle,
-                    leadingIcon = item.icon,
+                ListItem(
+                    headlineContent = { Text(item.title, fontWeight = FontWeight.Medium) },
+                    supportingContent = { Text(item.subtitle, style = MaterialTheme.typography.bodySmall) },
+                    leadingContent = { Icon(item.icon, contentDescription = item.title, tint = MaterialTheme.colorScheme.primary) },
                     trailingContent = item.trailing,
-                    onClick = item.onClick
+                    modifier = Modifier.clickable(onClick = item.onClick),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
                 if (index < items.lastIndex) {
                     HorizontalDivider(modifier = Modifier.padding(horizontal = Spacing.md))
@@ -266,23 +294,3 @@ private fun switchColors() = SwitchDefaults.colors(
     uncheckedThumbColor = MaterialTheme.colorScheme.outline,
     uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
 )
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    CASHiTOTheme {
-        ProfileScreenContent(
-            uiState = ProfileUiState(
-                userName = "Ana García",
-                userEmail = "ana.garcia@email.com",
-                userInitial = "A",
-                isLoading = false
-            ),
-            onBiometricChange = {},
-            onNotificationsChange = {},
-            onRemindersChange = {},
-            onLogoutClick = {},
-            onNavigateBack = {}
-        )
-    }
-}

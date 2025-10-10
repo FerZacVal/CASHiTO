@@ -40,65 +40,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
-import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
-import com.cashito.ui.theme.primaryLight
-import com.cashito.ui.theme.secondaryLight
 import com.cashito.ui.viewmodel.DashboardGoal
 import com.cashito.ui.viewmodel.DashboardTransaction
-import com.cashito.ui.viewmodel.DashboardUiState
 import com.cashito.ui.viewmodel.DashboardViewModel
+
+@Composable
+fun InsightsCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(Spacing.lg)) {
+            Text(
+                "💡 ¿Sabías que?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            Text(
+                "Ahorrar S/ 20 a la semana se convierte en más de S/ 1,000 al año.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+        }
+    }
+}
 
 @Composable
 fun DashboardScreen(
     navController: NavController,
-    viewModel: DashboardViewModel = viewModel()
+    viewModel: DashboardViewModel = viewModel(),
+    onNavigateToGoalDetail: (String) -> Unit = { navController.navigate("goal_detail/$it") },
+    onNavigateToTransactions: () -> Unit = { navController.navigate("transactions") },
+    onNavigateToReports: () -> Unit = { navController.navigate("reports") },
+    onNavigateToGoals: () -> Unit = { navController.navigate("goals") },
+    onNavigateToProfile: () -> Unit = { navController.navigate("profile") },
+    onNavigateToQuickSave: () -> Unit = { navController.navigate("quick_save") }
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    DashboardScreenContent(
-        uiState = uiState,
-        onGoalClick = { goalId -> navController.navigate("goal_detail/$goalId") },
-        onTransactionsClick = { navController.navigate("transactions") },
-        onReportsClick = { navController.navigate("reports") },
-        onGoalsClick = { navController.navigate("goals") },
-        onProfileClick = { navController.navigate("profile") },
-        onQuickSaveClick = { navController.navigate("quick_save") },
-        onQuickOutClick = { navController.navigate("quick_out") },
-        onNotificationClick = { /* TODO */ },
-        onTransferClick = { /* TODO */ },
-        onTransactionItemClick = { /* TODO */ }
-    )
-}
-
-@Composable
-fun DashboardScreenContent(
-    uiState: DashboardUiState,
-    onGoalClick: (String) -> Unit,
-    onTransactionsClick: () -> Unit,
-    onReportsClick: () -> Unit,
-    onGoalsClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    onQuickSaveClick: () -> Unit,
-    onQuickOutClick: () -> Unit,
-    onNotificationClick: () -> Unit,
-    onTransferClick: () -> Unit,
-    onTransactionItemClick: (DashboardTransaction) -> Unit,
-) {
     Scaffold(
         topBar = {
             DashboardTopBar(
                 userName = uiState.userName,
-                onNotificationClick = onNotificationClick,
-                onSettingsClick = onProfileClick
+                onNotificationClick = { /* Handle notification */ },
+                onSettingsClick = { onNavigateToProfile() }
             )
         },
         bottomBar = {
@@ -107,17 +102,17 @@ fun DashboardScreenContent(
                 onNavigate = { route ->
                     when (route) {
                         "dashboard" -> { /* Already on this screen */ }
-                        "transactions" -> onTransactionsClick()
-                        "reports" -> onReportsClick()
-                        "goals" -> onGoalsClick()
-                        "profile" -> onProfileClick()
+                        "transactions" -> onNavigateToTransactions()
+                        "reports" -> onNavigateToReports()
+                        "goals" -> onNavigateToGoals()
+                        "profile" -> onNavigateToProfile()
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onQuickSaveClick,
+                onClick = onNavigateToQuickSave,
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Quick Save")
             }
@@ -140,8 +135,8 @@ fun DashboardScreenContent(
                         totalBalance = uiState.totalBalance,
                         goalProgress = uiState.mainGoalProgressText,
                         progressPercentage = uiState.mainGoalProgressPercentage,
-                        onIncomeClick = onQuickSaveClick,
-                        onExpenseClick = onQuickOutClick
+                        onIncomeClick = onNavigateToQuickSave,
+                        onExpenseClick = { navController.navigate("quick_out") }
                     )
                 }
 
@@ -169,7 +164,7 @@ fun DashboardScreenContent(
                                 progress = goal.progress,
                                 icon = goal.icon,
                                 color = goal.color,
-                                onClick = { onGoalClick(goal.id) }
+                                onClick = { onNavigateToGoalDetail(goal.id) }
                             )
                         }
                     }
@@ -196,21 +191,21 @@ fun DashboardScreenContent(
                             text = "Ahorro rápido",
                             icon = "💰",
                             isPrimary = true,
-                            onClick = onQuickSaveClick,
+                            onClick = onNavigateToQuickSave,
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
                             text = "Gasto rápido",
                             icon = "💸",
                             isPrimary = false,
-                            onClick = onQuickOutClick,
+                            onClick = { navController.navigate("quick_out") },
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
                             text = "Enviar",
                             icon = "📤",
                             isPrimary = false,
-                            onClick = onTransferClick,
+                            onClick = { /* Handle transfer */ },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -229,7 +224,7 @@ fun DashboardScreenContent(
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.SemiBold
                         )
-                        TextButton(onClick = onTransactionsClick) {
+                        TextButton(onClick = onNavigateToTransactions) {
                             Text(
                                 text = "Ver todos",
                                 color = MaterialTheme.colorScheme.primary
@@ -243,7 +238,7 @@ fun DashboardScreenContent(
                 items(uiState.transactions) { transaction ->
                     TransactionItem(
                         transaction = transaction,
-                        onClick = { onTransactionItemClick(transaction) }
+                        onClick = { /* Handle transaction click */ }
                     )
                     Spacer(modifier = Modifier.height(Spacing.sm))
                 }
@@ -254,30 +249,6 @@ fun DashboardScreenContent(
                     InsightsCard()
                 }
             }
-        }
-    }
-}
-
-
-@Composable
-fun InsightsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-    ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            Text(
-                "💡 ¿Sabías que?",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Text(
-                "Ahorrar S/ 20 a la semana se convierte en más de S/ 1,000 al año.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
         }
     }
 }
@@ -398,39 +369,5 @@ fun TransactionItem(transaction: DashboardTransaction, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DashboardScreenPreview() {
-    CASHiTOTheme {
-        DashboardScreenContent(
-            uiState = DashboardUiState(
-                userName = "Ana",
-                totalBalance = "S/ 3,420.50",
-                mainGoalProgressText = "Meta principal: Viaje a Cusco — 65%",
-                mainGoalProgressPercentage = 65,
-                goals = listOf(
-                    DashboardGoal("1", "Viaje a Cusco", "3,420", "5,000", 0.65f, "✈️", primaryLight),
-                    DashboardGoal("2", "Laptop nueva", "800", "4,500", 0.18f, "💻", secondaryLight)
-                ),
-                transactions = listOf(
-                    DashboardTransaction("Ingreso automático", "💰", primaryLight),
-                    DashboardTransaction("Compra en supermercado", "🛒", secondaryLight)
-                ),
-                isLoading = false
-            ),
-            onGoalClick = {},
-            onTransactionsClick = {},
-            onReportsClick = {},
-            onGoalsClick = {},
-            onProfileClick = {},
-            onQuickSaveClick = {},
-            onQuickOutClick = {},
-            onNotificationClick = {},
-            onTransferClick = {},
-            onTransactionItemClick = {}
-        )
     }
 }

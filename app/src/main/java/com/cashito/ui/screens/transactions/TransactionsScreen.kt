@@ -44,48 +44,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.inputs.CashitoSearchField
-import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
-import com.cashito.ui.theme.errorLight
-import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.viewmodel.Transaction
 import com.cashito.ui.viewmodel.TransactionGroup
-import com.cashito.ui.viewmodel.TransactionsUiState
 import com.cashito.ui.viewmodel.TransactionsViewModel
-
-@Composable
-fun TransactionsScreen(
-    navController: NavController,
-    viewModel: TransactionsViewModel = viewModel()
-) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    TransactionsScreenContent(
-        uiState = uiState,
-        onSearchQueryChanged = viewModel::onSearchQueryChanged,
-        onFilterChanged = viewModel::onFilterChanged,
-        onNavigateBack = { navController.popBackStack() },
-        onNavigateToNewTransaction = { navController.navigate("quick_save") },
-        onTransactionClick = { /* TODO */ }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionsScreenContent(
-    uiState: TransactionsUiState,
-    onSearchQueryChanged: (String) -> Unit,
-    onFilterChanged: (String) -> Unit,
-    onNavigateBack: () -> Unit,
-    onNavigateToNewTransaction: () -> Unit,
-    onTransactionClick: (Transaction) -> Unit
+fun TransactionsScreen(
+    navController: NavController,
+    viewModel: TransactionsViewModel = viewModel(),
+    onNavigateBack: () -> Unit = { navController.popBackStack() },
+    onNavigateToNewTransaction: () -> Unit = { navController.navigate("quick_save") } // Or a more general screen
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val filters = listOf("Todos", "Ingresos", "Gastos")
 
     Scaffold(
@@ -94,7 +71,10 @@ fun TransactionsScreenContent(
                 title = { Text("Movimientos", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
                 actions = { IconButton(onClick = { /* TODO: Show filter dialog */ }) { Icon(Icons.Default.FilterList, contentDescription = "Filter") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         },
         floatingActionButton = {
@@ -112,7 +92,7 @@ fun TransactionsScreenContent(
         ) {
             CashitoSearchField(
                 value = uiState.searchQuery,
-                onValueChange = onSearchQueryChanged,
+                onValueChange = viewModel::onSearchQueryChanged,
                 placeholder = "Buscar...",
                 modifier = Modifier.fillMaxWidth()
             )
@@ -124,7 +104,7 @@ fun TransactionsScreenContent(
                     CustomFilterChip(
                         text = filter,
                         isSelected = uiState.selectedFilter == filter,
-                        onClick = { onFilterChanged(filter) }
+                        onClick = { viewModel.onFilterChanged(filter) }
                     )
                 }
             }
@@ -138,7 +118,7 @@ fun TransactionsScreenContent(
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
                     items(uiState.filteredTransactions) { group ->
-                        TransactionGroup(group = group, onTransactionClick = onTransactionClick)
+                        TransactionGroup(group = group, onTransactionClick = { /* Handle click */ })
                     }
                 }
             }
@@ -206,35 +186,5 @@ fun TransactionItem(transaction: Transaction, onClick: () -> Unit) {
                 Text(transaction.category, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TransactionsScreenPreview() {
-    val sampleTransactions = listOf(
-        Transaction("1", "Ingreso de sueldo", "Hoy, 09:30", "+S/ 2,500", primaryLight, "💰", primaryLight, "Trabajo principal", "Hoy"),
-        Transaction("2", "Compra en supermercado", "Hoy, 18:45", "-S/ 85.50", errorLight, "🛒", errorLight, "Comida", "Hoy"),
-        Transaction("3", "Ingreso freelance", "Ayer, 14:20", "+S/ 500", primaryLight, "📥", primaryLight, "Medio tiempo", "Ayer"),
-        Transaction("4", "Pago de servicios", "Ayer, 10:15", "-S/ 120", errorLight, "💡", errorLight, "Pagos", "Ayer")
-    )
-
-    CASHiTOTheme {
-        TransactionsScreenContent(
-            uiState = TransactionsUiState(
-                searchQuery = "Sueldo",
-                selectedFilter = "Ingresos",
-                filteredTransactions = sampleTransactions
-                    .filter { it.amount.startsWith("+") && it.title.contains("Sueldo", ignoreCase = true) }
-                    .groupBy { it.date }
-                    .map { (date, transactions) -> TransactionGroup(date, transactions) },
-                isLoading = false
-            ),
-            onSearchQueryChanged = {},
-            onFilterChanged = {},
-            onNavigateBack = {},
-            onNavigateToNewTransaction = {},
-            onTransactionClick = {}
-        )
     }
 }

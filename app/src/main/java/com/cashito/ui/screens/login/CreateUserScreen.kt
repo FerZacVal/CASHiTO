@@ -22,24 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
-import com.cashito.ui.theme.CASHiTOTheme
-import com.cashito.ui.theme.Spacing
-import com.cashito.ui.viewmodel.CreateUserUiState
 import com.cashito.ui.viewmodel.CreateUserViewModel
+import com.cashito.ui.theme.Spacing
 
 @Composable
 fun CreateUserScreen(
     navController: NavController,
-    viewModel: CreateUserViewModel = viewModel()
+    viewModel: CreateUserViewModel = viewModel(),
+    onNavigateToLogin: () -> Unit = { navController.navigate("login") }
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    val onNavigateToLogin: () -> Unit = { navController.navigate("login") }
 
     LaunchedEffect(uiState.isRegistrationSuccess) {
         if (uiState.isRegistrationSuccess) {
@@ -47,25 +43,6 @@ fun CreateUserScreen(
         }
     }
 
-    CreateUserScreenContent(
-        uiState = uiState,
-        onNameChange = viewModel::onNameChange,
-        onEmailChange = viewModel::onEmailChange,
-        onPasswordChange = viewModel::onPasswordChange,
-        onRegisterClick = viewModel::onRegisterClick,
-        onNavigateToLogin = onNavigateToLogin
-    )
-}
-
-@Composable
-fun CreateUserScreenContent(
-    uiState: CreateUserUiState,
-    onNameChange: (String) -> Unit,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onRegisterClick: () -> Unit,
-    onNavigateToLogin: () -> Unit
-) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +67,7 @@ fun CreateUserScreenContent(
 
             CashitoTextField(
                 value = uiState.name,
-                onValueChange = onNameChange,
+                onValueChange = viewModel::onNameChange,
                 label = "Nombre",
                 placeholder = "Tu nombre completo",
                 isError = uiState.nameError != null,
@@ -101,7 +78,7 @@ fun CreateUserScreenContent(
 
             CashitoTextField(
                 value = uiState.email,
-                onValueChange = onEmailChange,
+                onValueChange = viewModel::onEmailChange,
                 label = "Correo electrónico",
                 placeholder = "correo@ejemplo.com",
                 keyboardType = KeyboardType.Email,
@@ -113,7 +90,7 @@ fun CreateUserScreenContent(
 
             CashitoTextField(
                 value = uiState.password,
-                onValueChange = onPasswordChange,
+                onValueChange = viewModel::onPasswordChange,
                 label = "Contraseña",
                 placeholder = "Crea una contraseña segura",
                 isPassword = true,
@@ -125,7 +102,7 @@ fun CreateUserScreenContent(
 
             PrimaryButton(
                 text = "Crear cuenta",
-                onClick = onRegisterClick
+                onClick = viewModel::onRegisterClick
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
@@ -141,20 +118,5 @@ fun CreateUserScreenContent(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CreateUserScreenPreview() {
-    CASHiTOTheme {
-        CreateUserScreenContent(
-            uiState = CreateUserUiState(nameError = "El nombre es requerido"),
-            onNameChange = {},
-            onEmailChange = {},
-            onPasswordChange = {},
-            onRegisterClick = {},
-            onNavigateToLogin = {}
-        )
     }
 }

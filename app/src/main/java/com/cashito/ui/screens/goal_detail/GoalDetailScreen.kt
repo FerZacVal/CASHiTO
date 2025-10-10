@@ -1,6 +1,7 @@
 package com.cashito.ui.screens.goal_detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -22,12 +25,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -36,53 +39,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
-import com.cashito.ui.components.list.CashitoListItem
-import com.cashito.ui.theme.CASHiTOTheme
+import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
-import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.viewmodel.GoalDetail
-import com.cashito.ui.viewmodel.GoalDetailUiState
 import com.cashito.ui.viewmodel.GoalDetailViewModel
 import com.cashito.ui.viewmodel.GoalTransaction
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalDetailScreen(
     navController: NavController,
-    viewModel: GoalDetailViewModel = viewModel()
+    viewModel: GoalDetailViewModel = viewModel(),
+    onNavigateBack: () -> Unit = { navController.popBackStack() },
+    onNavigateToIncome: () -> Unit = { navController.navigate("quick_save") },
+    onNavigateToEdit: () -> Unit = { navController.navigate("goal_form") }
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    GoalDetailScreenContent(
-        uiState = uiState,
-        onNavigateBack = { navController.popBackStack() },
-        onNavigateToIncome = { navController.navigate("quick_save") },
-        onNavigateToEdit = { navController.navigate("goal_form") },
-        onShowMenu = viewModel::onShowMenu,
-        onRecurringChanged = viewModel::onRecurringChanged,
-        onTransactionClick = { /* TODO */ }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GoalDetailScreenContent(
-    uiState: GoalDetailUiState,
-    onNavigateBack: () -> Unit,
-    onNavigateToIncome: () -> Unit,
-    onNavigateToEdit: () -> Unit,
-    onShowMenu: (Boolean) -> Unit,
-    onRecurringChanged: (Boolean) -> Unit,
-    onTransactionClick: (GoalTransaction) -> Unit
-) {
     val goal = uiState.goal
 
     Scaffold(
@@ -102,23 +82,33 @@ fun GoalDetailScreenContent(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { onShowMenu(true) }) {
+                        IconButton(onClick = { viewModel.onShowMenu(true) }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More")
                         }
                         DropdownMenu(
                             expanded = uiState.showMenu,
-                            onDismissRequest = { onShowMenu(false) }
+                            onDismissRequest = { viewModel.onShowMenu(false) }
                         ) {
                             DropdownMenuItem(
                                 text = { Text("Editar meta") },
                                 onClick = {
-                                    onShowMenu(false)
+                                    viewModel.onShowMenu(false)
                                     onNavigateToEdit()
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Eliminar meta", color = MaterialTheme.colorScheme.error) },
-                                onClick = { onShowMenu(false) }
+                                text = { Text("Compartir meta") },
+                                onClick = { viewModel.onShowMenu(false) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Pausar autoahorro") },
+                                onClick = { viewModel.onShowMenu(false) }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Eliminar meta", color = MaterialTheme.colorScheme.error)
+                                },
+                                onClick = { viewModel.onShowMenu(false) }
                             )
                         }
                     },
@@ -140,10 +130,11 @@ fun GoalDetailScreenContent(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .padding(paddingValues),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
             ) {
                 item { GoalSummary(goal = goal) }
+
+                item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
                 item {
                     Row(
@@ -163,12 +154,16 @@ fun GoalDetailScreenContent(
                     }
                 }
 
-                item { 
-                    SavingsPlanSection(
+                item { Spacer(modifier = Modifier.height(Spacing.xl)) }
+
+                item {
+                    SavingsPlanCard(
                         isRecurringEnabled = uiState.isRecurringEnabled,
-                        onRecurringChanged = onRecurringChanged
+                        onRecurringChanged = viewModel::onRecurringChanged
                     )
                 }
+
+                item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
                 item {
                     Text(
@@ -179,8 +174,14 @@ fun GoalDetailScreenContent(
                     )
                 }
 
+                item { Spacer(modifier = Modifier.height(Spacing.md)) }
+
                 items(uiState.transactions) { transaction ->
-                     TransactionItem(transaction = transaction, onClick = { onTransactionClick(transaction) })
+                    TransactionItem(
+                        transaction = transaction,
+                        onClick = { /* Handle transaction click */ }
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                 }
             }
         }
@@ -201,7 +202,7 @@ private fun GoalSummary(goal: GoalDetail) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier.size(160.dp),
+                modifier = Modifier.size(ComponentSize.largeDonutSize),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
@@ -242,65 +243,139 @@ private fun GoalSummary(goal: GoalDetail) {
 }
 
 @Composable
-private fun SavingsPlanSection(isRecurringEnabled: Boolean, onRecurringChanged: (Boolean) -> Unit) {
-    Column {
-        Text(text = "Plan de Ahorro", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = Spacing.sm))
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+private fun SavingsPlanCard(isRecurringEnabled: Boolean, onRecurringChanged: (Boolean) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.lg)
         ) {
-            CashitoListItem(
-                headline = "Aporte recurrente",
-                supportingText = "S/ 50.00 Semanal",
-                trailingContent = { Switch(checked = isRecurringEnabled, onCheckedChange = onRecurringChanged) },
-                onClick = { onRecurringChanged(!isRecurringEnabled) }
+            Text(
+                text = "Plan de ahorro",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Aporte recurrente",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Switch(
+                    checked = isRecurringEnabled,
+                    onCheckedChange = onRecurringChanged,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                )
+            }
+
+            if (isRecurringEnabled) {
+                Spacer(modifier = Modifier.height(Spacing.md))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Frecuencia",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Semanal",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = "Monto",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.End
+                        )
+                        Text(
+                            text = "S/ 50.00",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.End
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun TransactionItem(transaction: GoalTransaction, onClick: () -> Unit) {
-    CashitoListItem(
-        headline = transaction.title,
-        supportingText = transaction.subtitle,
-        leadingIcon = null, // TODO: Map transaction type to icon
+fun TransactionItem(
+    transaction: GoalTransaction,
+    onClick: () -> Unit
+) {
+    Card(
         onClick = onClick,
-        trailingContent = {
-            Text(transaction.amount, color = transaction.amountColor, fontWeight = FontWeight.SemiBold)
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(ComponentSize.iconSize)
+                    .clip(CircleShape)
+                    .background(transaction.color.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = transaction.icon,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = transaction.color
+                )
+            }
+            Spacer(modifier = Modifier.width(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = transaction.subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = transaction.amount,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = transaction.amountColor
+            )
         }
-    )
-    HorizontalDivider()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GoalDetailScreenPreview() {
-    CASHiTOTheme {
-        GoalDetailScreenContent(
-            uiState = GoalDetailUiState(
-                goal = GoalDetail(
-                    id = "1",
-                    title = "Viaje a Cusco",
-                    savedAmount = "3,420",
-                    targetAmount = "5,000",
-                    progress = 0.65f,
-                    icon = "✈️",
-                    color = primaryLight,
-                    targetDate = "15 Oct 2024"
-                ),
-                transactions = listOf(
-                    GoalTransaction("1", "Ingreso automático", "Hoy, 09:30", "+S/ 200", primaryLight, "💰", primaryLight),
-                    GoalTransaction("2", "Ingreso extra", "Ayer, 14:20", "+S/ 50", primaryLight, "💸", primaryLight)
-                ),
-                isLoading = false
-            ),
-            onNavigateBack = {},
-            onNavigateToIncome = {},
-            onNavigateToEdit = {},
-            onShowMenu = {},
-            onRecurringChanged = {},
-            onTransactionClick = {}
-        )
     }
 }

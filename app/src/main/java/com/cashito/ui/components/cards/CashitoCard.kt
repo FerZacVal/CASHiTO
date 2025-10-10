@@ -14,11 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -229,30 +226,6 @@ fun GoalCard(
                 color = color,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
-        }
-    }
-}
-
-@Composable
-fun ReportNavigationCard(title: String, subtitle: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Navigate")
         }
     }
 }
