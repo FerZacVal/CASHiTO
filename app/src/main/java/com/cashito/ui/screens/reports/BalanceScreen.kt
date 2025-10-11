@@ -50,11 +50,13 @@ import com.cashito.ui.viewmodel.BalanceUiState
 import com.cashito.ui.viewmodel.BalanceViewModel
 import java.text.NumberFormat
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material3.Icon as Icon1
 
 @Composable
 fun BalanceScreen(
     navController: NavController,
-    viewModel: BalanceViewModel = viewModel()
+    viewModel: BalanceViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

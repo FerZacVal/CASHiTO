@@ -1,3 +1,4 @@
+// domain/usecases/transaction/GetTransactionsUseCase.kt
 package com.cashito.domain.usecases.transaction
 
 import com.cashito.domain.entities.transaction.Transaction
@@ -5,7 +6,8 @@ import com.cashito.domain.entities.transaction.TransactionType
 import com.cashito.domain.repositories.expense.ExpenseRepository
 import com.cashito.domain.repositories.income.IncomeRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class GetTransactionsUseCase(
@@ -13,16 +15,11 @@ class GetTransactionsUseCase(
     private val expenseRepository: ExpenseRepository
 ) {
 
-    suspend operator fun invoke(): Result<List<Transaction>> = withContext(Dispatchers.IO) {
+    operator fun invoke(): Flow<Result<List<Transaction>>> = flow {
         try {
-            // Obtener ingresos y gastos en paralelo para mayor eficiencia
-            val incomesDeferred = async { incomeRepository.getIncomes() }
-            val expensesDeferred = async { expenseRepository.getExpenses() }
+            val incomes = withContext(Dispatchers.IO) { incomeRepository.getIncomes() }
+            val expenses = withContext(Dispatchers.IO) { expenseRepository.getExpenses() }
 
-            val incomes = incomesDeferred.await()
-            val expenses = expensesDeferred.await()
-
-            // Mapear a la entidad de dominio Transaction
             val incomeTransactions = incomes.map {
                 Transaction(
                     id = it.id,
@@ -33,6 +30,7 @@ class GetTransactionsUseCase(
                     type = TransactionType.INCOME
                 )
             }
+
             val expenseTransactions = expenses.map {
                 Transaction(
                     id = it.id,
@@ -44,11 +42,13 @@ class GetTransactionsUseCase(
                 )
             }
 
-            // Combinar, ordenar por fecha descendente y devolver
-            val allTransactions = (incomeTransactions + expenseTransactions).sortedByDescending { it.date }
-            Result.success(allTransactions)
+            val allTransactions = (incomeTransactions + expenseTransactions)
+                .sortedByDescending { it.date }
+
+            emit(Result.success(allTransactions))
         } catch (e: Exception) {
-            Result.failure(e)
+            emit(Result.failure(e))
         }
     }
 }
+

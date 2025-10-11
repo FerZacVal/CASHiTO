@@ -24,10 +24,10 @@ data class Transaction(
     val amount: String,
     val amountColor: Color,
     val icon: String,
-    val color: Color, // Este color es para el icono
+    val color: Color, // Color del icono
     val category: String,
-    val date: String, // Representación del grupo (e.g., "Hoy", "Ayer", "dd/MM/yyyy")
-    val type: TransactionType // Needed to know if it's income or expense for deletion/edition
+    val date: String, // Agrupación: "Hoy", "Ayer", "dd/MM/yyyy"
+    val type: TransactionType
 )
 
 data class TransactionGroup(
@@ -42,9 +42,9 @@ data class TransactionsUiState(
     val selectedFilter: String = "Todos",
     val isLoading: Boolean = true,
     val error: String? = null,
-    val selectedTransaction: Transaction? = null, // Transaction currently selected by long press
-    val showOptionsDialog: Boolean = false, // To show Edit/Delete options
-    val showDeleteConfirmDialog: Boolean = false // To show the final delete confirmation
+    val selectedTransaction: Transaction? = null,
+    val showOptionsDialog: Boolean = false,
+    val showDeleteConfirmDialog: Boolean = false
 )
 
 // --- VIEWMODEL ---
@@ -63,21 +63,30 @@ class TransactionsViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            getTransactionsUseCase().onSuccess { domainTransactions ->
-                val uiTransactions = domainTransactions.map { it.toUiTransaction() }
-                _uiState.update {
-                    it.copy(
-                        allTransactions = uiTransactions,
-                        isLoading = false
-                    )
+            try {
+                // Aquí recolectamos el Flow que devuelve Result<List<DomainTransaction>>
+                getTransactionsUseCase().collect { result ->
+                    result.onSuccess { domainTransactions ->
+                        val uiTransactions = domainTransactions.map { it.toUiTransaction() }
+                        _uiState.update {
+                            it.copy(
+                                allTransactions = uiTransactions,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
+                        filterTransactions()
+                    }.onFailure { e ->
+                        _uiState.update { it.copy(isLoading = false, error = e.message) }
+                    }
                 }
-                filterTransactions() // Filtrar después de cargar
-            }.onFailure { error ->
-                _uiState.update { it.copy(isLoading = false, error = error.message) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
+    // --- Filtros y búsqueda ---
     fun onSearchQueryChanged(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
         filterTransactions()
@@ -88,8 +97,7 @@ class TransactionsViewModel(
         filterTransactions()
     }
 
-    // --- Actions for Long Press ---
-
+    // --- Long press actions ---
     fun onTransactionLongPressed(transaction: Transaction) {
         _uiState.update { it.copy(selectedTransaction = transaction, showOptionsDialog = true) }
     }
@@ -105,19 +113,11 @@ class TransactionsViewModel(
     fun onDeleteConfirm() {
         val transactionId = _uiState.value.selectedTransaction?.id
         if (transactionId != null) {
-            // TODO: Call actual DeleteTransactionUseCase
-
-            // For now, just remove it from the local list for immediate feedback
+            // TODO: Llamar DeleteTransactionUseCase si existe
             val updatedTransactions = _uiState.value.allTransactions.filterNot { it.id == transactionId }
-            _uiState.update { state ->
-                state.copy(
-                    allTransactions = updatedTransactions,
-                )
-            }
-            // After updating the list, we need to re-apply filters and grouping
+            _uiState.update { it.copy(allTransactions = updatedTransactions) }
             filterTransactions()
         }
-        // Hide all dialogs regardless
         onDismissDialogs()
     }
 
@@ -127,8 +127,9 @@ class TransactionsViewModel(
             val matchesFilter = when (state.selectedFilter) {
                 "Ingresos" -> transaction.amount.startsWith("+")
                 "Gastos" -> transaction.amount.startsWith("-")
-                else -> true // "Todos"
+                else -> true
             }
+
             val matchesSearch = state.searchQuery.isEmpty() ||
                     transaction.title.contains(state.searchQuery, ignoreCase = true) ||
                     transaction.amount.contains(state.searchQuery, ignoreCase = true) ||
@@ -143,25 +144,27 @@ class TransactionsViewModel(
 
         _uiState.update { it.copy(filteredTransactions = grouped) }
     }
+
+    // --- Mapper ---
+    // Mapper a nivel de archivo, visible desde cualquier lugar
+    private fun DomainTransaction.toUiTransaction(): Transaction {
+        val amountPrefix = if (this.type == TransactionType.INCOME) "+S/ " else "-S/ "
+        val amountColor = if (this.type == TransactionType.INCOME) primaryLight else errorLight
+        val iconColor = if (this.type == TransactionType.INCOME) primaryLight else errorLight
+
+        return Transaction(
+            id = this.id,
+            title = this.description,
+            subtitle = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(this.date),
+            amount = amountPrefix + String.format("%,.2f", this.amount),
+            amountColor = amountColor,
+            icon = this.category?.icon ?: "❓",
+            color = iconColor,
+            category = this.category?.name ?: "Sin categoría",
+            date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(this.date),
+            type = this.type
+        )
+    }
 }
 
-// --- MAPPERS ---
 
-private fun DomainTransaction.toUiTransaction(): Transaction {
-    val amountPrefix = if (this.type == TransactionType.INCOME) "+S/ " else "-S/ "
-    val amountColor = if (this.type == TransactionType.INCOME) primaryLight else errorLight
-    val iconColor = if (this.type == TransactionType.INCOME) primaryLight else errorLight
-
-    return Transaction(
-        id = this.id,
-        title = this.description,
-        subtitle = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(this.date),
-        amount = amountPrefix + String.format("%,.2f", this.amount),
-        amountColor = amountColor,
-        icon = this.category?.icon ?: "❓",
-        color = iconColor,
-        category = this.category?.name ?: "Sin categoría",
-        date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(this.date), // Usaremos una fecha formateada para agrupar
-        type = this.type
-    )
-}
