@@ -11,6 +11,7 @@ import com.cashito.domain.repositories.income.IncomeRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.koin.dsl.module
+import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 
 val dataModule = module {
 
@@ -28,5 +29,6 @@ val dataModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get()) }
     single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
+    single { GetTransactionsUseCase(get(), get()) }
 
 }

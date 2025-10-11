@@ -1,59 +1,95 @@
 package com.cashito.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlin.random.Random
+import androidx.lifecycle.viewModelScope
+import com.cashito.domain.entities.transaction.TransactionType
+import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.time.ZoneId
+import java.time.temporal.WeekFields
+import java.util.Locale
 
-// --- STATE ---
 data class BalanceEntry(val label: String, val balance: Float)
 data class BalanceSummary(val currentBalance: Float, val change: Float, val periodLabel: String)
-
 data class BalanceUiState(
     val selectedPeriod: String = "Semanal",
     val balanceData: List<BalanceEntry> = emptyList(),
     val summary: BalanceSummary = BalanceSummary(0f, 0f, ""),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val error: String? = null
 )
 
-// --- VIEWMODEL ---
-class BalanceViewModel : ViewModel() {
+class BalanceViewModel(
+    getTransactionsUseCase: GetTransactionsUseCase
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(BalanceUiState())
-    val uiState: StateFlow<BalanceUiState> = _uiState.asStateFlow()
+    private val selectedPeriod = MutableStateFlow("Semanal")
 
-    init {
-        loadBalanceData()
-    }
+    val uiState: StateFlow<BalanceUiState> = combine(
+        getTransactionsUseCase(),
+        selectedPeriod
+    ) { result, period ->
+        result.fold(
+            onSuccess = { transactions ->
+                val grouped = when (period) {
+                    "Diario" -> transactions.groupBy { it.date.toInstant().atZone(ZoneId.systemDefault()).dayOfMonth }
+                    "Semanal" -> transactions.groupBy {
+                        it.date.toInstant().atZone(ZoneId.systemDefault())
+                            .get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+                    }
+                    "Mensual" -> transactions.groupBy { it.date.toInstant().atZone(ZoneId.systemDefault()).monthValue }
+                    else -> emptyMap()
+                }
+
+                val entries = grouped.map { (key, list) ->
+                    BalanceEntry(
+                        label = when (period) {
+                            "Diario" -> "Día $key"
+                            "Semanal" -> "Sem $key"
+                            "Mensual" -> "Mes $key"
+                            else -> key.toString()
+                        },
+                        balance = list.sumOf {
+                            if (it.type == TransactionType.INCOME) it.amount else -it.amount
+                        }.toFloat()
+                    )
+                }
+
+                val current = entries.lastOrNull()?.balance ?: 0f
+                val previous = if (entries.size > 1) entries[entries.size - 2].balance else 0f
+
+                BalanceUiState(
+                    selectedPeriod = period,
+                    balanceData = entries,
+                    summary = BalanceSummary(
+                        currentBalance = current,
+                        change = current - previous,
+                        periodLabel = when (period) {
+                            "Diario" -> "día anterior"
+                            "Semanal" -> "semana anterior"
+                            "Mensual" -> "mes anterior"
+                            else -> ""
+                        }
+                    ),
+                    isLoading = false
+                )
+            },
+            onFailure = { e ->
+                BalanceUiState(
+                    selectedPeriod = period,
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = BalanceUiState(isLoading = true)
+    )
 
     fun onPeriodSelected(period: String) {
-        _uiState.value = _uiState.value.copy(selectedPeriod = period, isLoading = true)
-        loadBalanceData()
-    }
-
-    private fun loadBalanceData() {
-        // TODO: Replace with actual data fetching from a repository
-        val period = _uiState.value.selectedPeriod
-
-        val data = when (period) {
-            "Diario" -> (1..7).map { BalanceEntry("Día $it", Random.nextFloat() * 200 + 2000) }
-            "Semanal" -> (1..4).map { BalanceEntry("Sem $it", Random.nextFloat() * 1000 + 5000) }
-            "Mensual" -> (1..6).map { BalanceEntry("Mes $it", Random.nextFloat() * 3000 + 10000) }
-            else -> emptyList()
-        }
-
-        val summary = when (period) {
-            "Diario" -> BalanceSummary(2345.67f, -15.20f, "día anterior")
-            "Semanal" -> BalanceSummary(8765.43f, 250.75f, "semana anterior")
-            "Mensual" -> BalanceSummary(25432.10f, 1200.50f, "mes anterior")
-            else -> BalanceSummary(0f, 0f, "")
-        }
-
-        _uiState.value = _uiState.value.copy(
-            balanceData = data,
-            summary = summary,
-            isLoading = false
-        )
+        selectedPeriod.value = period
     }
 }

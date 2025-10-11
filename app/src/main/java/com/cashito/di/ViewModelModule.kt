@@ -40,7 +40,7 @@ val viewModelModule = module {
     viewModel { ReportsViewModel() }
     viewModel { CategoryExpenseReportViewModel() }
     viewModel { IncomeReportViewModel() }
-    viewModel { BalanceViewModel() }
+    viewModel { BalanceViewModel(get()) }
     viewModel { DashboardViewModel(get()) }
     viewModel { ProfileViewModel(get()) }
 }
