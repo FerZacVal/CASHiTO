@@ -5,6 +5,7 @@ import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
 import com.cashito.domain.usecases.income.AddIncomeUseCase
+import com.cashito.domain.usecases.transaction.DeleteTransactionUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionByIdUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import com.cashito.domain.usecases.transaction.UpdateTransactionUseCase
@@ -24,6 +25,7 @@ val domainModule = module {
     // Transaction
     factory { GetTransactionsUseCase(get(), get()) }
     factory { GetTransactionByIdUseCase(get()) }
-    factory { UpdateTransactionUseCase(get()) } // AÑADIDO
+    factory { UpdateTransactionUseCase(get()) }
+    factory { DeleteTransactionUseCase(get()) } // AÑADIDO
 
 }

@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.transaction.TransactionType
+import com.cashito.domain.usecases.transaction.DeleteTransactionUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import com.cashito.ui.theme.errorLight
 import com.cashito.ui.theme.primaryLight
@@ -24,9 +25,9 @@ data class Transaction(
     val amount: String,
     val amountColor: Color,
     val icon: String,
-    val color: Color, // Color del icono
+    val color: Color,
     val category: String,
-    val date: String, // Agrupación: "Hoy", "Ayer", "dd/MM/yyyy"
+    val date: String,
     val type: TransactionType
 )
 
@@ -49,7 +50,8 @@ data class TransactionsUiState(
 
 // --- VIEWMODEL ---
 class TransactionsViewModel(
-    private val getTransactionsUseCase: GetTransactionsUseCase
+    private val getTransactionsUseCase: GetTransactionsUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase // AÑADIDO
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionsUiState())
@@ -64,7 +66,6 @@ class TransactionsViewModel(
             _uiState.update { it.copy(isLoading = true) }
 
             try {
-                // Aquí recolectamos el Flow que devuelve Result<List<DomainTransaction>>
                 getTransactionsUseCase().collect { result ->
                     result.onSuccess { domainTransactions ->
                         val uiTransactions = domainTransactions.map { it.toUiTransaction() }
@@ -86,7 +87,6 @@ class TransactionsViewModel(
         }
     }
 
-    // --- Filtros y búsqueda ---
     fun onSearchQueryChanged(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
         filterTransactions()
@@ -97,7 +97,6 @@ class TransactionsViewModel(
         filterTransactions()
     }
 
-    // --- Long press actions ---
     fun onTransactionLongPressed(transaction: Transaction) {
         _uiState.update { it.copy(selectedTransaction = transaction, showOptionsDialog = true) }
     }
@@ -111,12 +110,17 @@ class TransactionsViewModel(
     }
 
     fun onDeleteConfirm() {
-        val transactionId = _uiState.value.selectedTransaction?.id
-        if (transactionId != null) {
-            // TODO: Llamar DeleteTransactionUseCase si existe
-            val updatedTransactions = _uiState.value.allTransactions.filterNot { it.id == transactionId }
-            _uiState.update { it.copy(allTransactions = updatedTransactions) }
-            filterTransactions()
+        val transactionToDelete = _uiState.value.selectedTransaction
+        if (transactionToDelete != null) {
+            viewModelScope.launch {
+                // LÓGICA REAL DE ELIMINACIÓN
+                deleteTransactionUseCase(transactionToDelete.id)
+
+                // Actualización optimista de la UI
+                val updatedTransactions = _uiState.value.allTransactions.filterNot { it.id == transactionToDelete.id }
+                _uiState.update { it.copy(allTransactions = updatedTransactions) }
+                filterTransactions()
+            }
         }
         onDismissDialogs()
     }
@@ -145,8 +149,6 @@ class TransactionsViewModel(
         _uiState.update { it.copy(filteredTransactions = grouped) }
     }
 
-    // --- Mapper ---
-    // Mapper a nivel de archivo, visible desde cualquier lugar
     private fun DomainTransaction.toUiTransaction(): Transaction {
         val amountPrefix = if (this.type == TransactionType.INCOME) "+S/ " else "-S/ "
         val amountColor = if (this.type == TransactionType.INCOME) primaryLight else errorLight
@@ -166,5 +168,3 @@ class TransactionsViewModel(
         )
     }
 }
-
-
