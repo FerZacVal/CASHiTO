@@ -3,6 +3,7 @@ package com.cashito.di
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
+import com.cashito.domain.usecases.balance.GetBalanceUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
 import com.cashito.domain.usecases.income.AddIncomeUseCase
 import com.cashito.domain.usecases.transaction.DeleteTransactionUseCase
@@ -26,6 +27,9 @@ val domainModule = module {
     factory { GetTransactionsUseCase(get(), get()) }
     factory { GetTransactionByIdUseCase(get()) }
     factory { UpdateTransactionUseCase(get()) }
-    factory { DeleteTransactionUseCase(get()) } // AÑADIDO
+    factory { DeleteTransactionUseCase(get()) }
+
+    // Balance
+    factory { GetBalanceUseCase(get(), get()) } // AÑADIDO
 
 }

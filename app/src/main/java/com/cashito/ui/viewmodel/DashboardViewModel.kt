@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
+import com.cashito.domain.usecases.balance.GetBalanceUseCase
 import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.theme.secondaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 // --- STATE ---
 data class DashboardGoal(
@@ -41,17 +44,18 @@ data class DashboardUiState(
 
 // --- VIEWMODEL ---
 class DashboardViewModel(
-    private val getCurrentUserUseCase: GetCurrentUserUseCase
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val getBalanceUseCase: GetBalanceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
-        loadDashboardData()
+        refreshData() // Llamamos a la nueva función al iniciar
     }
 
-    private fun loadDashboardData() {
+    fun refreshData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
@@ -59,11 +63,14 @@ class DashboardViewModel(
             val user = getCurrentUserUseCase()
             _uiState.update { it.copy(userName = user?.displayName ?: "") }
 
-            // TODO: Cargar el resto de los datos del dashboard (balance, metas, etc.)
-            // Por ahora, mantenemos los datos de ejemplo para el resto de la UI
+            // Cargar balance real
+            val balance = getBalanceUseCase()
+            val formattedBalance = NumberFormat.getCurrencyInstance(Locale("es", "PE")).format(balance)
+            _uiState.update { it.copy(totalBalance = formattedBalance) }
+
+            // TODO: Cargar el resto de los datos del dashboard (metas, transacciones recientes)
             _uiState.update { state ->
                 state.copy(
-                    totalBalance = "S/ 3,420",
                     mainGoalProgressText = "Meta principal: Viaje a Cusco — 65%",
                     mainGoalProgressPercentage = 65,
                     goals = listOf(
