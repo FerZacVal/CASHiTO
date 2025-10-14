@@ -6,6 +6,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 /**
  * Se encarga de la comunicación directa con Firestore para escribir y leer datos de transacciones.
@@ -42,29 +46,38 @@ class FirebaseTransactionDataSource(
      * Obtiene todos los documentos de transacción, incluyendo su ID, de la subcolección del usuario actual.
      * @return Una lista de TransactionDto, cada uno con su ID de documento asignado.
      */
-    suspend fun getTransactions(): List<TransactionDto> {
+    fun observeTransactions(): Flow<List<TransactionDto>> = callbackFlow {
         val userId = auth.currentUser?.uid ?: run {
-            Log.e("FlowDebug", "DataSource: User is not authenticated. Cannot get transactions.")
-            return emptyList()
+            Log.e("FlowDebug", "DataSource: User is not authenticated. Cannot observe transactions.")
+            trySend(emptyList())
+            close()
+            return@callbackFlow
         }
 
-        return try {
-            val snapshot = firestore.collection("Usuarios")
-                .document(userId)
-                .collection("Transacciones")
-                .orderBy("date", Query.Direction.DESCENDING)
-                .get()
-                .await()
+        val collectionRef = firestore.collection("Usuarios")
+            .document(userId)
+            .collection("Transacciones")
+            .orderBy("date", Query.Direction.DESCENDING)
 
-            // Mapear manualmente para incluir el ID del documento
-            snapshot.documents.mapNotNull { document ->
-                val transaction = document.toObject(TransactionDto::class.java)
-                transaction?.id = document.id // Asignar el ID del documento al DTO
-                transaction
+        val listenerRegistration: ListenerRegistration = collectionRef.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.e("FlowDebug", "DataSource: Error observing transactions.", e)
+                trySend(emptyList())
+                return@addSnapshotListener
             }
-        } catch (e: Exception) {
-            Log.e("FlowDebug", "DataSource: Error getting transactions from Firestore.", e)
-            emptyList()
+
+            if (snapshot != null) {
+                val transactions = snapshot.documents.mapNotNull { document ->
+                    val transaction = document.toObject(TransactionDto::class.java)
+                    transaction?.id = document.id
+                    transaction
+                }
+                trySend(transactions)
+            } else {
+                trySend(emptyList())
+            }
         }
+
+        awaitClose { listenerRegistration.remove() }
     }
 }

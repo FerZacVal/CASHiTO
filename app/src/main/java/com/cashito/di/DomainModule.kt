@@ -7,6 +7,7 @@ import com.cashito.domain.usecases.expense.AddExpenseUseCase
 import com.cashito.domain.usecases.income.AddIncomeUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import org.koin.dsl.module
+import com.cashito.domain.usecases.reports.ObserveExpenseReportUseCase
 
 val domainModule = module {
 
@@ -21,5 +22,6 @@ val domainModule = module {
 
     // Transaction
     factory { GetTransactionsUseCase(get(), get()) }
+    factory { ObserveExpenseReportUseCase(get()) }
 
 }

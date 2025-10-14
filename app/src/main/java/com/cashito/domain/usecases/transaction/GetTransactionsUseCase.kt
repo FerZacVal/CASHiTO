@@ -7,18 +7,19 @@ import com.cashito.domain.repositories.expense.ExpenseRepository
 import com.cashito.domain.repositories.income.IncomeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.catch
 
 class GetTransactionsUseCase(
     private val incomeRepository: IncomeRepository,
     private val expenseRepository: ExpenseRepository
 ) {
 
-    operator fun invoke(): Flow<Result<List<Transaction>>> = flow {
-        try {
-            val incomes = withContext(Dispatchers.IO) { incomeRepository.getIncomes() }
-            val expenses = withContext(Dispatchers.IO) { expenseRepository.getExpenses() }
+    operator fun invoke(): Flow<Result<List<Transaction>>> =
+        combine(
+            incomeRepository.observeIncomes(),
+            expenseRepository.observeExpenses()
+        ) { incomes, expenses ->
 
             val incomeTransactions = incomes.map {
                 Transaction(
@@ -42,13 +43,9 @@ class GetTransactionsUseCase(
                 )
             }
 
-            val allTransactions = (incomeTransactions + expenseTransactions)
-                .sortedByDescending { it.date }
-
-            emit(Result.success(allTransactions))
-        } catch (e: Exception) {
+            Result.success((incomeTransactions + expenseTransactions).sortedByDescending { it.date })
+        }.catch { e ->
             emit(Result.failure(e))
         }
-    }
 }
 

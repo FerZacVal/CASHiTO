@@ -39,11 +39,12 @@ import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.ReportsUiState
 import com.cashito.ui.viewmodel.ReportsViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ReportsScreen(
     navController: NavController,
-    viewModel: ReportsViewModel = viewModel()
+    viewModel: ReportsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

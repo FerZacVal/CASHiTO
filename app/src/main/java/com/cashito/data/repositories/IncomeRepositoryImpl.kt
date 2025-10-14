@@ -6,6 +6,8 @@ import com.cashito.data.dto.TransactionDto
 import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.income.Income
 import com.cashito.domain.repositories.income.IncomeRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class IncomeRepositoryImpl(
     private val dataSource: FirebaseTransactionDataSource
@@ -19,10 +21,12 @@ class IncomeRepositoryImpl(
         dataSource.addTransaction(transactionDto)
     }
 
-    override suspend fun getIncomes(): List<Income> {
-        return dataSource.getTransactions()
-            .filter { it.type == "ingreso" }
-            .map { it.toIncome() }
+    override fun observeIncomes(): Flow<List<Income>> {
+        return dataSource.observeTransactions()
+            .map { list ->
+                list.filter { it.type == "ingreso" }
+                    .map { it.toIncome() }
+            }
     }
 }
 

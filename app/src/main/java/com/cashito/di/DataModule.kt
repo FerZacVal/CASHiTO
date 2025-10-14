@@ -12,6 +12,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.koin.dsl.module
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
+import com.cashito.domain.usecases.reports.ObserveReportsUseCase
+import com.cashito.domain.usecases.reports.ObserveIncomeReportUseCase
 
 val dataModule = module {
 
@@ -30,5 +32,7 @@ val dataModule = module {
     single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
     single { GetTransactionsUseCase(get(), get()) }
+    single { ObserveReportsUseCase(get(), get()) }
+    single { ObserveIncomeReportUseCase(get()) }
 
 }
