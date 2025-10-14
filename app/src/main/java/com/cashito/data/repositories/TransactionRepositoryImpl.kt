@@ -23,9 +23,12 @@ class TransactionRepositoryImpl(
             "categoryId" to (transaction.category?.id ?: ""),
             "categoryName" to (transaction.category?.name ?: ""),
             "categoryIcon" to (transaction.category?.icon ?: "")
-            // Nota: El 'tipo' de transacción no se puede editar.
         )
         dataSource.updateTransaction(transactionId, updatedData)
+    }
+
+    override suspend fun deleteTransaction(transactionId: String) {
+        dataSource.deleteTransaction(transactionId)
     }
 }
 

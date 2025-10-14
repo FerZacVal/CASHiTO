@@ -27,8 +27,8 @@ val viewModelModule = module {
     // --- Transaction ViewModels (necesitan UseCase y/o SavedStateHandle) ---
     viewModel { QuickOutViewModel(get(), get()) }
     viewModel { QuickSaveViewModel(get(), get()) }
-    viewModel { TransactionsViewModel(get()) }
-    viewModel { TransactionEditViewModel(get(), get(), get()) } // CORREGIDO
+    viewModel { TransactionsViewModel(get(), get()) } // CORREGIDO
+    viewModel { TransactionEditViewModel(get(), get(), get()) }
 
     // --- Goal ViewModels (necesitan SavedStateHandle) ---
     viewModel { GoalsViewModel() }
