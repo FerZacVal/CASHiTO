@@ -4,7 +4,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cashito.domain.entities.category.Category
+import com.cashito.domain.entities.transaction.Transaction
 import com.cashito.domain.entities.transaction.TransactionType
+import com.cashito.domain.usecases.transaction.GetTransactionByIdUseCase
+import com.cashito.domain.usecases.transaction.UpdateTransactionUseCase
 import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.theme.secondaryLight
 import com.cashito.ui.theme.tertiaryLight
@@ -35,13 +39,15 @@ data class TransactionEditUiState(
     val selectedCategoryId: String = "",
     val isConfirmEnabled: Boolean = false,
     val transactionUpdated: Boolean = false,
-    val screenTitle: String = "Editar Gasto"
+    val screenTitle: String = "Editar Transacción",
+    val isLoading: Boolean = true // Empezamos en modo carga
 )
 
 // --- VIEWMODEL ---
 class TransactionEditViewModel(
-    savedStateHandle: SavedStateHandle
-    // Use cases will be added later
+    savedStateHandle: SavedStateHandle,
+    private val getTransactionByIdUseCase: GetTransactionByIdUseCase,
+    private val updateTransactionUseCase: UpdateTransactionUseCase // AÑADIDO
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionEditUiState())
@@ -55,23 +61,29 @@ class TransactionEditViewModel(
     }
 
     private fun loadTransactionForEditing(transactionId: String) {
-        // TODO: Implement GetTransactionByIdUseCase to get real data
-        // For now, using dummy data. Let's assume it's an EXPENSE
-        val type = TransactionType.EXPENSE // or INCOME based on what is passed.
-        
-        _uiState.update {
-            it.copy(
-                transactionId = transactionId,
-                transactionType = type,
-                amount = "123.45",
-                description = "Gasto de prueba",
-                selectedCategoryId = "2",
-                screenTitle = if (type == TransactionType.EXPENSE) "Editar Gasto" else "Editar Ingreso",
-                presetAmounts = if (type == TransactionType.EXPENSE) listOf("5", "10", "20", "50") else listOf("50", "100", "500", "1000"),
-                categories = getCategoriesForType(type)
-            )
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, transactionId = transactionId) }
+
+            val transaction = getTransactionByIdUseCase(transactionId)
+
+            if (transaction != null) {
+                _uiState.update {
+                    it.copy(
+                        transactionType = transaction.type,
+                        amount = transaction.amount.toString(),
+                        description = transaction.description,
+                        selectedCategoryId = transaction.category?.id ?: "",
+                        screenTitle = if (transaction.type == TransactionType.EXPENSE) "Editar Gasto" else "Editar Ingreso",
+                        presetAmounts = if (transaction.type == TransactionType.EXPENSE) listOf("5", "10", "20", "50") else listOf("50", "100", "500", "1000"),
+                        categories = getCategoriesForType(transaction.type),
+                        isLoading = false
+                    )
+                }
+                validateConfirmButton()
+            } else {
+                _uiState.update { it.copy(isLoading = false) } // TODO: Handle transaction not found
+            }
         }
-        validateConfirmButton()
     }
     
     private fun getCategoriesForType(type: TransactionType): List<TransactionEditCategory> {
@@ -93,12 +105,7 @@ class TransactionEditViewModel(
     }
 
     fun onAmountChanged(newAmount: String) {
-        _uiState.update {
-            it.copy(
-                amount = newAmount,
-                selectedPresetAmount = if (it.presetAmounts.contains(newAmount)) newAmount else null
-            )
-        }
+        _uiState.update { it.copy(amount = newAmount) }
         validateConfirmButton()
     }
     
@@ -122,8 +129,31 @@ class TransactionEditViewModel(
 
     fun onConfirmUpdate() {
         if (!_uiState.value.isConfirmEnabled) return
-        _uiState.update { it.copy(isConfirmEnabled = false) }
-        // TODO: Call UpdateTransactionUseCase
-        _uiState.update { it.copy(transactionUpdated = true) }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isConfirmEnabled = false) }
+
+            val state = _uiState.value
+            val transactionId = state.transactionId
+            val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
+
+            if (transactionId != null && selectedCategory != null) {
+                val updatedTransaction = Transaction(
+                    id = transactionId,
+                    description = state.description,
+                    amount = state.amount.toDoubleOrNull() ?: 0.0,
+                    date = Date(), // La fecha no es editable en esta UI, por lo que no se modifica.
+                    category = Category(
+                        id = selectedCategory.id,
+                        name = selectedCategory.title,
+                        icon = selectedCategory.icon,
+                        color = selectedCategory.colorHex
+                    ),
+                    type = state.transactionType
+                )
+                updateTransactionUseCase(transactionId, updatedTransaction)
+                _uiState.update { it.copy(transactionUpdated = true) }
+            }
+        }
     }
 }

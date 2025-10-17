@@ -25,10 +25,10 @@ val viewModelModule = module {
     viewModel { CreateUserViewModel(get()) }
 
     // --- Transaction ViewModels (necesitan UseCase y/o SavedStateHandle) ---
-    viewModel { QuickOutViewModel(get(), get()) }      // Modificado
-    viewModel { QuickSaveViewModel(get(), get()) }      // Modificado
-    viewModel { TransactionsViewModel(get()) }
-    viewModel { TransactionEditViewModel(get()) }
+    viewModel { QuickOutViewModel(get(), get()) }
+    viewModel { QuickSaveViewModel(get(), get()) }
+    viewModel { TransactionsViewModel(get(), get()) }
+    viewModel { TransactionEditViewModel(get(), get(), get()) }
 
     // --- Goal ViewModels (necesitan SavedStateHandle) ---
     viewModel { GoalsViewModel() }
@@ -41,6 +41,6 @@ val viewModelModule = module {
     viewModel { CategoryExpenseReportViewModel(get()) }
     viewModel { IncomeReportViewModel(get()) }
     viewModel { BalanceViewModel(get()) }
-    viewModel { DashboardViewModel(get()) }
+    viewModel { DashboardViewModel(get(), get()) } // CORREGIDO
     viewModel { ProfileViewModel(get()) }
 }
