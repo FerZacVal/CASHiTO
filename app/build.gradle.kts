@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.biometric.ktx)
+    implementation(libs.androidx.security.crypto)
     //implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

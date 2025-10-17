@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +47,12 @@ fun LoginScreen(
     viewModel: LoginViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Check for biometric availability when the screen is first composed
+    LaunchedEffect(Unit) {
+        viewModel.checkBiometricAuth(context)
+    }
 
     val onNavigateToDashboard: () -> Unit = { navController.navigate("dashboard") }
 
@@ -61,6 +68,7 @@ fun LoginScreen(
         onPasswordChange = viewModel::onPasswordChange,
         onRememberMeChange = viewModel::onRememberMeChange,
         onLoginClick = viewModel::onLoginClick,
+        onBiometricLoginClick = viewModel::onBiometricLoginClick, // Simplified call
         onNavigateToRegister = { navController.navigate("register") },
         onForgotPasswordClick = { /* TODO */ }
     )
@@ -73,6 +81,7 @@ fun LoginScreenContent(
     onPasswordChange: (String) -> Unit,
     onRememberMeChange: (Boolean) -> Unit,
     onLoginClick: () -> Unit,
+    onBiometricLoginClick: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
@@ -196,12 +205,14 @@ fun LoginScreenContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                SmallButton(
-                    text = "Apple",
-                    onClick = { /* Handle Apple login */ },
-                    isPrimary = false,
-                    modifier = Modifier.weight(1f)
-                )
+                if (uiState.isBiometricAuthAvailable) {
+                    SmallButton(
+                        text = "Huella",
+                        onClick = onBiometricLoginClick,
+                        isPrimary = false,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(Spacing.xl))
@@ -224,11 +235,12 @@ fun LoginScreenContent(
 fun LoginScreenPreview() {
     CASHiTOTheme {
         LoginScreenContent(
-            uiState = LoginUiState(email = "test@cashito.com", passwordError = "Mínimo 6 caracteres"),
+            uiState = LoginUiState(email = "test@cashito.com", passwordError = "Mínimo 6 caracteres", isBiometricAuthAvailable = true),
             onEmailChange = {},
             onPasswordChange = {},
             onRememberMeChange = {},
             onLoginClick = {},
+            onBiometricLoginClick = {},
             onNavigateToRegister = {},
             onForgotPasswordClick = {}
         )

@@ -1,5 +1,6 @@
 package com.cashito.di
 
+import com.cashito.core.CredentialsManager
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
 import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
 import com.cashito.data.repositories.AuthRepositoryImpl
@@ -12,9 +13,13 @@ import com.cashito.domain.repositories.income.IncomeRepository
 import com.cashito.domain.repositories.transaction.TransactionRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val dataModule = module {
+
+    // --- Managers ---
+    single { CredentialsManager(androidContext()) }
 
     // --- Firebase Instances ---
     single { FirebaseAuth.getInstance() }

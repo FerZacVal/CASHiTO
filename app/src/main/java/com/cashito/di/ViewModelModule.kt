@@ -20,8 +20,9 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
+
     // --- Auth ViewModels (necesitan UseCase) ---
-    viewModel { LoginViewModel(get()) }
+    viewModel { LoginViewModel(get(), get()) } // Updated to include CredentialsManager
     viewModel { CreateUserViewModel(get()) }
 
     // --- Transaction ViewModels (necesitan UseCase y/o SavedStateHandle) ---
