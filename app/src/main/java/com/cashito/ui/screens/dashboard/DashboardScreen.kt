@@ -1,6 +1,5 @@
 package com.cashito.ui.screens.dashboard
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,11 +38,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.Routes
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.components.cards.HeroCard
@@ -123,7 +123,7 @@ fun DashboardScreenContent(
             FloatingActionButton(
                 onClick = onAddCategoryClick,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir categoría")
+                Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.dashboard_add_category_button_description))
             }
         }
     ) { paddingValues ->
@@ -153,7 +153,7 @@ fun DashboardScreenContent(
 
                 item {
                     Text(
-                        text = "Tus metas",
+                        text = stringResource(id = R.string.dashboard_goals_title),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -183,7 +183,7 @@ fun DashboardScreenContent(
 
                 item {
                     Text(
-                        text = "Acciones rápidas",
+                        text = stringResource(id = R.string.dashboard_quick_actions_title),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -197,21 +197,21 @@ fun DashboardScreenContent(
                         horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
                         QuickActionButton(
-                            text = "Ahorro rápido",
+                            text = stringResource(id = R.string.dashboard_quick_action_save),
                             icon = "💰",
                             isPrimary = true,
                             onClick = onQuickSaveClick,
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
-                            text = "Gasto rápido",
+                            text = stringResource(id = R.string.dashboard_quick_action_spend),
                             icon = "💸",
                             isPrimary = false,
                             onClick = onQuickOutClick,
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
-                            text = "Crear Meta",
+                            text = stringResource(id = R.string.dashboard_quick_action_create_goal),
                             icon = "🎯",
                             isPrimary = false,
                             onClick = onCreateGoalClick,
@@ -229,13 +229,13 @@ fun DashboardScreenContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Movimientos recientes",
+                            text = stringResource(id = R.string.dashboard_recent_transactions_title),
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.SemiBold
                         )
                         TextButton(onClick = onTransactionsClick) {
                             Text(
-                                text = "Ver todos",
+                                text = stringResource(id = R.string.dashboard_view_all_button),
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -271,14 +271,14 @@ fun InsightsCard() {
     ) {
         Column(modifier = Modifier.padding(Spacing.lg)) {
             Text(
-                "💡 ¿Sabías que?",
+                stringResource(id = R.string.dashboard_insights_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
             Spacer(modifier = Modifier.height(Spacing.sm))
             Text(
-                "Ahorrar S/ 20 a la semana se convierte en más de S/ 1,000 al año.",
+                stringResource(id = R.string.dashboard_insights_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
@@ -318,7 +318,7 @@ fun DashboardTopBar(
             Spacer(modifier = Modifier.width(Spacing.md))
 
             Text(
-                text = "Hola, $userName 👋",
+                text = stringResource(id = R.string.dashboard_welcome_message, userName),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground
@@ -332,11 +332,11 @@ fun DashboardTopBar(
                 }
             ) {
                 IconButton(onClick = onNotificationClick) {
-                    Icon(Icons.Default.Notifications, contentDescription = "Notifications")
+                    Icon(Icons.Default.Notifications, contentDescription = stringResource(id = R.string.dashboard_notifications_button_description))
                 }
             }
             IconButton(onClick = onSettingsClick) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings")
+                Icon(Icons.Default.Settings, contentDescription = stringResource(id = R.string.dashboard_settings_button_description))
             }
         }
     }

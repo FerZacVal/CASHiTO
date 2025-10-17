@@ -36,11 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.screens.goal_form.getGoalColors
@@ -114,9 +116,9 @@ fun CategoryFormScreenContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Nueva Categoría", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(id = R.string.category_form_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.Close, "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.Close, stringResource(id = R.string.category_form_close_button_description), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
@@ -127,13 +129,13 @@ fun CategoryFormScreenContent(
                         shape = RoundedCornerShape(topStart = Radius.round, bottomStart = Radius.round),
                         selected = uiState.categoryType == CategoryType.INCOME,
                         onClick = { onCategoryTypeChange(CategoryType.INCOME) },
-                        label = { Text("Ingreso") }
+                        label = { Text(stringResource(id = R.string.category_form_type_income)) }
                     )
                     SegmentedButton(
                         shape = RoundedCornerShape(topEnd = Radius.round, bottomEnd = Radius.round),
                         selected = uiState.categoryType == CategoryType.EXPENSE,
                         onClick = { onCategoryTypeChange(CategoryType.EXPENSE) },
-                        label = { Text("Gasto") }
+                        label = { Text(stringResource(id = R.string.category_form_type_expense)) }
                     )
                 }
                 
@@ -142,14 +144,14 @@ fun CategoryFormScreenContent(
                 CashitoTextField(
                     value = uiState.categoryName,
                     onValueChange = onCategoryNameChange,
-                    label = "Nombre de la categoría",
-                    placeholder = "Ej: Comida, Sueldo, etc.",
+                    label = stringResource(id = R.string.category_form_name_label),
+                    placeholder = stringResource(id = R.string.category_form_name_placeholder),
                     isError = uiState.categoryNameError != null,
                     errorMessage = uiState.categoryNameError
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                Text("Icono", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(id = R.string.category_form_icon_label), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     items(categoryIcons) { icon ->
@@ -158,7 +160,7 @@ fun CategoryFormScreenContent(
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                Text("Color", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(id = R.string.category_form_color_label), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(Spacing.sm))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     items(categoryColors) { color ->
@@ -168,7 +170,7 @@ fun CategoryFormScreenContent(
                 
                 Spacer(modifier = Modifier.height(Spacing.xxxl))
                 
-                PrimaryButton(text = "Guardar Categoría", onClick = onSaveCategory, enabled = uiState.isFormValid)
+                PrimaryButton(text = stringResource(id = R.string.category_form_save_button), onClick = onSaveCategory, enabled = uiState.isFormValid)
             }
         }
     }

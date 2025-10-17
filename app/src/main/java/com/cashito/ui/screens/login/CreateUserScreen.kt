@@ -19,10 +19,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.viewmodel.CreateUserViewModel
@@ -57,7 +59,7 @@ fun CreateUserScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Crear cuenta",
+                text = stringResource(id = R.string.create_user_title),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -68,8 +70,8 @@ fun CreateUserScreen(
             CashitoTextField(
                 value = uiState.nombre,
                 onValueChange = viewModel::onNombreChange,
-                label = "Nombre",
-                placeholder = "Tu nombre completo",
+                label = stringResource(id = R.string.create_user_name_label),
+                placeholder = stringResource(id = R.string.create_user_name_placeholder),
                 isError = uiState.nombreError != null,
                 errorMessage = uiState.nombreError
             )
@@ -79,8 +81,8 @@ fun CreateUserScreen(
             CashitoTextField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
-                label = "Correo electrónico",
-                placeholder = "correo@ejemplo.com",
+                label = stringResource(id = R.string.create_user_email_label),
+                placeholder = stringResource(id = R.string.create_user_email_placeholder),
                 keyboardType = KeyboardType.Email,
                 isError = uiState.emailError != null,
                 errorMessage = uiState.emailError
@@ -91,8 +93,8 @@ fun CreateUserScreen(
             CashitoTextField(
                 value = uiState.password,
                 onValueChange = viewModel::onPasswordChange,
-                label = "Contraseña",
-                placeholder = "Crea una contraseña segura",
+                label = stringResource(id = R.string.create_user_password_label),
+                placeholder = stringResource(id = R.string.create_user_password_placeholder),
                 isPassword = true,
                 isError = uiState.passwordError != null,
                 errorMessage = uiState.passwordError
@@ -101,7 +103,7 @@ fun CreateUserScreen(
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             PrimaryButton(
-                text = "Crear cuenta",
+                text = stringResource(id = R.string.create_user_create_account_button),
                 onClick = viewModel::onRegisterClick
             )
 
@@ -111,7 +113,7 @@ fun CreateUserScreen(
                 onClick = onNavigateToLogin
             ) {
                 Text(
-                    text = "¿Ya tienes una cuenta? Iniciar sesión",
+                    text = stringResource(id = R.string.create_user_login_prompt),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center

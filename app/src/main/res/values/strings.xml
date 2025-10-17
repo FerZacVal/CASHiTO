@@ -1,3 +1,179 @@
 <resources>
     <string name="app_name">CASHiTO</string>
+
+    <!-- CategoryFormScreen -->
+    <string name="category_form_title">Nueva Categoría</string>
+    <string name="category_form_close_button_description">Close</string>
+    <string name="category_form_type_income">Ingreso</string>
+    <string name="category_form_type_expense">Gasto</string>
+    <string name="category_form_name_label">Nombre de la categoría</string>
+    <string name="category_form_name_placeholder">Ej: Comida, Sueldo, etc.</string>
+    <string name="category_form_icon_label">Icono</string>
+    <string name="category_form_color_label">Color</string>
+    <string name="category_form_save_button">Guardar Categoría</string>
+
+    <!-- CategoryExpenseReportScreen -->
+    <string name="category_expense_report_title">Gastos por Categoría</string>
+    <string name="category_expense_report_back_button_description">Atrás</string>
+    <string name="category_expense_report_distribution_title">Distribución de tus gastos</string>
+    <string name="category_expense_report_chart_type_pie">Torta</string>
+    <string name="category_expense_report_chart_type_bar">Barras</string>
+    <string name="category_expense_report_empty_chart_message">Sin gastos</string>
+    <string name="category_expense_report_empty_legend_message">No hay datos de gastos para mostrar.</string>
+
+    <!-- DashboardScreen -->
+    <string name="dashboard_add_category_button_description">Añadir categoría</string>
+    <string name="dashboard_goals_title">Tus metas</string>
+    <string name="dashboard_quick_actions_title">Acciones rápidas</string>
+    <string name="dashboard_quick_action_save">Ahorro rápido</string>
+    <string name="dashboard_quick_action_spend">Gasto rápido</string>
+    <string name="dashboard_quick_action_create_goal">Crear Meta</string>
+    <string name="dashboard_recent_transactions_title">Movimientos recientes</string>
+    <string name="dashboard_view_all_button">Ver todos</string>
+    <string name="dashboard_insights_title">¿Sabías que?</string>
+    <string name="dashboard_insights_message">Ahorrar S/ 20 a la semana se convierte en más de S/ 1,000 al año.</string>
+    <string name="dashboard_welcome_message">Hola, %1$s</string>
+    <string name="dashboard_notifications_button_description">Notificaciones</string>
+    <string name="dashboard_settings_button_description">Ajustes</string>
+
+    <!-- GoalDetailScreen -->
+    <string name="goal_detail_back_button_description">Atrás</string>
+    <string name="goal_detail_more_button_description">Más</string>
+    <string name="goal_detail_edit_goal_menu_item">Editar meta</string>
+    <string name="goal_detail_delete_goal_menu_item">Eliminar meta</string>
+    <string name="goal_detail_saved_amount">Ahorrado S/ %1$s / S/ %2$s</string>
+    <string name="goal_detail_target_date">Meta: %1$s</string>
+    <string name="goal_detail_deposit_button">Ingresar</string>
+    <string name="goal_detail_edit_goal_button">Editar meta</string>
+    <string name="goal_detail_savings_plan_title">Plan de Ahorro</string>
+    <string name="goal_detail_recurring_deposit_title">Aporte recurrente</string>
+    <string name="goal_detail_recurring_deposit_subtitle">S/ 50.00 Semanal</string>
+    <string name="goal_detail_contributions_history_title">Historial de aportes</string>
+
+    <!-- GoalFormScreen -->
+    <string name="goal_form_edit_title">Editar meta</string>
+    <string name="goal_form_create_title">Crear meta</string>
+    <string name="goal_form_back_button_description">Atrás</string>
+    <string name="goal_form_name_label">Nombre de la meta</string>
+    <string name="goal_form_name_placeholder">Viaje a Cusco</string>
+    <string name="goal_form_target_amount_label">Monto objetivo</string>
+    <string name="goal_form_target_amount_placeholder">S/ 4,000</string>
+    <string name="goal_form_target_date_label">Fecha objetivo</string>
+    <string name="goal_form_select_date_placeholder">Seleccionar fecha</string>
+    <string name="goal_form_date_picker_ok_button">OK</string>
+    <string name="goal_form_date_picker_cancel_button">Cancelar</string>
+    <string name="goal_form_icon_label">Icono de la meta</string>
+    <string name="goal_form_color_label">Color de la meta</string>
+    <string name="goal_form_save_changes_button">Guardar cambios</string>
+    <string name="goal_form_create_goal_button">Crear meta</string>
+
+    <!-- GoalsScreen -->
+    <string name="goals_screen_title">Tus Metas</string>
+    <string name="goals_screen_back_button_description">Atrás</string>
+    <string name="goals_screen_create_goal_button_description">Crear nueva meta</string>
+
+    <!-- CreateUserScreen -->
+    <string name="create_user_title">Crear cuenta</string>
+    <string name="create_user_name_label">Nombre</string>
+    <string name="create_user_name_placeholder">Tu nombre completo</string>
+    <string name="create_user_email_label">Correo electrónico</string>
+    <string name="create_user_email_placeholder">correo@ejemplo.com</string>
+    <string name="create_user_password_label">Contraseña</string>
+    <string name="create_user_password_placeholder">Crea una contraseña segura</string>
+    <string name="create_user_create_account_button">Crear cuenta</string>
+    <string name="create_user_login_prompt">¿Ya tienes una cuenta? Iniciar sesión</string>
+
+    <!-- LoginScreen -->
+    <string name="login_title">Iniciar sesión</string>
+    <string name="login_email_label">Correo electrónico</string>
+    <string name="login_email_placeholder">correo@ejemplo.com</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_placeholder">Contraseña</string>
+    <string name="login_remember_me_checkbox">Mantener sesión</string>
+    <string name="login_login_button">Iniciar sesión</string>
+    <string name="login_create_account_button">Crear cuenta</string>
+    <string name="login_or_continue_with">O continúa con</string>
+    <string name="login_google_button">Google</string>
+    <string name="login_fingerprint_button">Huella</string>
+    <string name="login_forgot_password_prompt">¿Olvidaste tu contraseña?</string>
+
+    <!-- ProfileScreen -->
+    <string name="profile_title">Perfil</string>
+    <string name="profile_back_button_description">Atrás</string>
+    <string name="profile_account_section_title">Cuenta</string>
+    <string name="profile_personal_info_title">Información personal</string>
+    <string name="profile_personal_info_subtitle">Editar perfil y datos</string>
+    <string name="profile_linked_accounts_title">Cuentas vinculadas</string>
+    <string name="profile_linked_accounts_subtitle">Tarjetas y bancos</string>
+    <string name="profile_security_section_title">Seguridad</string>
+    <string name="profile_change_password_title">Cambiar contraseña</string>
+    <string name="profile_change_password_subtitle">Actualizar tu contraseña</string>
+    <string name="profile_biometric_auth_title">Autenticación biométrica</string>
+    <string name="profile_biometric_auth_subtitle">Usar huella dactilar o Face ID</string>
+    <string name="profile_notifications_section_title">Notificaciones</string>
+    <string name="profile_push_notifications_title">Notificaciones push</string>
+    <string name="profile_push_notifications_subtitle">Recibir notificaciones en el dispositivo</string>
+    <string name="profile_goal_reminders_title">Recordatorios de metas</string>
+    <string name="profile_goal_reminders_subtitle">Notificaciones sobre progreso de ahorros</string>
+    <string name="profile_support_section_title">Soporte</string>
+    <string name="profile_faq_title">Preguntas frecuentes</string>
+    <string name="profile_faq_subtitle">Encuentra respuestas rápidas</string>
+    <string name="profile_contact_support_title">Contactar soporte</string>
+    <string name="profile_contact_support_subtitle">Obtén ayuda personalizada</string>
+    <string name="profile_logout_button">Cerrar sesión</string>
+
+    <!-- QuickOutScreen -->
+    <string name="quick_out_title">Gasto rápido</string>
+    <string name="quick_out_close_button_description">Cerrar</string>
+    <string name="quick_out_select_amount_title">Selecciona un monto</string>
+    <string name="quick_out_custom_amount_label">Monto personalizado</string>
+    <string name="quick_out_custom_amount_placeholder">S/ 0.00</string>
+    <string name="quick_out_select_category_title">Selecciona una categoría de gasto</string>
+    <string name="quick_out_confirm_button">Confirmar gasto</string>
+    <string name="quick_out_success_message">Gasto guardado con éxito</string>
+    <string name="quick_out_success_icon_description">Éxito</string>
+
+    <!-- QuickSaveScreen -->
+    <string name="quick_save_title">Ingreso rápido</string>
+    <string name="quick_save_close_button_description">Cerrar</string>
+    <string name="quick_save_select_amount_title">Selecciona un monto</string>
+    <string name="quick_save_custom_amount_label">Monto personalizado</string>
+    <string name="quick_save_custom_amount_placeholder">S/ 0.00</string>
+    <string name="quick_save_select_category_title">Selecciona una categoría de ingreso</string>
+    <string name="quick_save_confirm_button">Confirmar ingreso</string>
+    <string name="quick_save_success_message">Ingreso guardado con éxito</string>
+    <string name="quick_save_success_icon_description">Éxito</string>
+
+    <!-- TransactionsScreen -->
+    <string name="transactions_title">Movimientos</string>
+    <string name="transactions_back_button_description">Atrás</string>
+    <string name="transactions_filter_button_description">Filtrar</string>
+    <string name="transactions_add_transaction_button_description">Añadir transacción</string>
+    <string name="transactions_search_placeholder">Buscar…</string>
+    <string name="transactions_filter_all">Todos</string>
+    <string name="transactions_filter_income">Ingresos</string>
+    <string name="transactions_filter_expenses">Gastos</string>
+    <string name="transactions_delete_dialog_title">Eliminar Movimiento</string>
+    <string name="transactions_delete_dialog_message">¿Estás seguro de que quieres eliminar este movimiento? Esta acción no se puede deshacer.</string>
+    <string name="transactions_delete_dialog_confirm_button">Eliminar</string>
+    <string name="transactions_delete_dialog_cancel_button">Cancelar</string>
+    <string name="transactions_options_edit">Editar</string>
+    <string name="transactions_options_delete">Eliminar</string>
+
+    <!-- TransactionEditScreen -->
+    <string name="transaction_edit_back_button_description">Atrás</string>
+    <string name="transaction_edit_amount_label">Monto</string>
+    <string name="transaction_edit_amount_placeholder">S/ 0.00</string>
+    <string name="transaction_edit_description_label">Descripción</string>
+    <string name="transaction_edit_description_placeholder">Ej: Almuerzo de hoy</string>
+    <string name="transaction_edit_category_title">Categoría</string>
+    <string name="transaction_edit_save_button">Guardar Cambios</string>
+    <string name="transaction_edit_success_message">Cambios guardados</string>
+    <string name="transaction_edit_success_icon_description">Éxito</string>
+
+    <!-- SplashScreen -->
+    <string name="splash_title">Cashito</string>
+    <string name="splash_subtitle">Ahorra fácil. Llega a tus metas.</string>
+    <string name="splash_start_button">Comenzar</string>
+    <string name="splash_login_prompt">¿Ya tienes cuenta? Iniciar sesión</string>
 </resources>

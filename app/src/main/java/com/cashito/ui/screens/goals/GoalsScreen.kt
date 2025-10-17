@@ -26,10 +26,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.Routes
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.theme.CASHiTOTheme
@@ -66,10 +68,10 @@ fun GoalsScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tus Metas", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
+                title = { Text(stringResource(id = R.string.goals_screen_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.goals_screen_back_button_description))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -80,7 +82,7 @@ fun GoalsScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToCreateGoal) {
-                Icon(Icons.Default.Add, contentDescription = "Crear nueva meta")
+                Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.goals_screen_create_goal_button_description))
             }
         }
     ) { paddingValues ->

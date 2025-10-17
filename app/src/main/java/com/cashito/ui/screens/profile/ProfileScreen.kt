@@ -44,10 +44,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.components.list.CashitoListItem
 import com.cashito.ui.theme.CASHiTOTheme
@@ -94,8 +96,8 @@ fun ProfileScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Perfil", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
-                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(stringResource(id = R.string.profile_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
+                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.profile_back_button_description)) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
@@ -144,7 +146,7 @@ fun ProfileScreenContent(
 
                 item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
-                item { SecondaryButton(text = "Cerrar sesión", onClick = onLogoutClick) }
+                item { SecondaryButton(text = stringResource(id = R.string.profile_logout_button), onClick = onLogoutClick) }
             }
         }
     }
@@ -186,10 +188,10 @@ fun ProfileHeader(name: String, email: String, initial: String) {
 @Composable
 fun AccountSection() {
     ProfileSection(
-        title = "Cuenta",
+        title = stringResource(id = R.string.profile_account_section_title),
         items = listOf(
-            ProfileItemData(Icons.Default.Person, "Información personal", "Editar perfil y datos", onClick = {}),
-            ProfileItemData(Icons.Default.CreditCard, "Cuentas vinculadas", "Tarjetas y bancos", onClick = {})
+            ProfileItemData(Icons.Default.Person, stringResource(id = R.string.profile_personal_info_title), stringResource(id = R.string.profile_personal_info_subtitle), onClick = {}),
+            ProfileItemData(Icons.Default.CreditCard, stringResource(id = R.string.profile_linked_accounts_title), stringResource(id = R.string.profile_linked_accounts_subtitle), onClick = {})
         )
     )
 }
@@ -197,10 +199,10 @@ fun AccountSection() {
 @Composable
 fun SecuritySection(biometricEnabled: Boolean, onBiometricChange: (Boolean) -> Unit) {
     ProfileSection(
-        title = "Seguridad",
+        title = stringResource(id = R.string.profile_security_section_title),
         items = listOf(
-            ProfileItemData(Icons.Default.Lock, "Cambiar contraseña", "Actualizar tu contraseña", onClick = {}),
-            ProfileItemData(Icons.Default.Settings, "Autenticación biométrica", "Usar huella dactilar o Face ID", trailing = { Switch(checked = biometricEnabled, onCheckedChange = onBiometricChange, colors = switchColors()) }, onClick = { onBiometricChange(!biometricEnabled) })
+            ProfileItemData(Icons.Default.Lock, stringResource(id = R.string.profile_change_password_title), stringResource(id = R.string.profile_change_password_subtitle), onClick = {}),
+            ProfileItemData(Icons.Default.Settings, stringResource(id = R.string.profile_biometric_auth_title), stringResource(id = R.string.profile_biometric_auth_subtitle), trailing = { Switch(checked = biometricEnabled, onCheckedChange = onBiometricChange, colors = switchColors()) }, onClick = { onBiometricChange(!biometricEnabled) })
         )
     )
 }
@@ -208,10 +210,10 @@ fun SecuritySection(biometricEnabled: Boolean, onBiometricChange: (Boolean) -> U
 @Composable
 fun NotificationsSection(notificationsEnabled: Boolean, remindersEnabled: Boolean, onNotificationsChange: (Boolean) -> Unit, onRemindersChange: (Boolean) -> Unit) {
      ProfileSection(
-        title = "Notificaciones",
+        title = stringResource(id = R.string.profile_notifications_section_title),
         items = listOf(
-            ProfileItemData(Icons.Default.Notifications, "Notificaciones push", "Recibir notificaciones en el dispositivo", trailing = { Switch(checked = notificationsEnabled, onCheckedChange = onNotificationsChange, colors = switchColors()) }, onClick = { onNotificationsChange(!notificationsEnabled) }),
-            ProfileItemData(Icons.Default.Settings, "Recordatorios de metas", "Notificaciones sobre progreso de ahorros", trailing = { Switch(checked = remindersEnabled, onCheckedChange = onRemindersChange, colors = switchColors()) }, onClick = { onRemindersChange(!remindersEnabled) })
+            ProfileItemData(Icons.Default.Notifications, stringResource(id = R.string.profile_push_notifications_title), stringResource(id = R.string.profile_push_notifications_subtitle), trailing = { Switch(checked = notificationsEnabled, onCheckedChange = onNotificationsChange, colors = switchColors()) }, onClick = { onNotificationsChange(!notificationsEnabled) }),
+            ProfileItemData(Icons.Default.Settings, stringResource(id = R.string.profile_goal_reminders_title), stringResource(id = R.string.profile_goal_reminders_subtitle), trailing = { Switch(checked = remindersEnabled, onCheckedChange = onRemindersChange, colors = switchColors()) }, onClick = { onRemindersChange(!remindersEnabled) })
         )
     )
 }
@@ -219,10 +221,10 @@ fun NotificationsSection(notificationsEnabled: Boolean, remindersEnabled: Boolea
 @Composable
 fun SupportSection() {
     ProfileSection(
-        title = "Soporte",
+        title = stringResource(id = R.string.profile_support_section_title),
         items = listOf(
-            ProfileItemData(Icons.AutoMirrored.Filled.Help, "Preguntas frecuentes", "Encuentra respuestas rápidas", onClick = {}),
-            ProfileItemData(Icons.Default.Support, "Contactar soporte", "Obtén ayuda personalizada", onClick = {})
+            ProfileItemData(Icons.AutoMirrored.Filled.Help, stringResource(id = R.string.profile_faq_title), stringResource(id = R.string.profile_faq_subtitle), onClick = {}),
+            ProfileItemData(Icons.Default.Support, stringResource(id = R.string.profile_contact_support_title), stringResource(id = R.string.profile_contact_support_subtitle), onClick = {})
         )
     )
 }

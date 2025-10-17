@@ -18,11 +18,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.theme.CASHiTOTheme
 import com.cashito.ui.theme.Spacing
@@ -83,7 +85,7 @@ fun SplashScreenContent(onNavigateToLogin: () -> Unit) {
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             Text(
-                text = "Cashito",
+                text = stringResource(id = R.string.splash_title),
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -92,7 +94,7 @@ fun SplashScreenContent(onNavigateToLogin: () -> Unit) {
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             Text(
-                text = "Ahorra fácil. Llega a tus metas.",
+                text = stringResource(id = R.string.splash_subtitle),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -101,7 +103,7 @@ fun SplashScreenContent(onNavigateToLogin: () -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
 
             PrimaryButton(
-                text = "Comenzar",
+                text = stringResource(id = R.string.splash_start_button),
                 onClick = onNavigateToLogin,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -109,7 +111,7 @@ fun SplashScreenContent(onNavigateToLogin: () -> Unit) {
             Spacer(modifier = Modifier.height(Spacing.lg))
 
             Text(
-                text = "¿Ya tienes cuenta? Iniciar sesión",
+                text = stringResource(id = R.string.splash_login_prompt),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,

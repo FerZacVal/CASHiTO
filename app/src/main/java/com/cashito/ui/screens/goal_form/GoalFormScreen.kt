@@ -44,11 +44,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.theme.CASHiTOTheme
@@ -113,8 +115,8 @@ fun GoalFormScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (uiState.isEditing) "Editar meta" else "Crear meta", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
-                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(if (uiState.isEditing) stringResource(id = R.string.goal_form_edit_title) else stringResource(id = R.string.goal_form_create_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
+                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.goal_form_back_button_description)) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
@@ -130,8 +132,8 @@ fun GoalFormScreenContent(
             CashitoTextField(
                 value = uiState.goalName,
                 onValueChange = onGoalNameChange,
-                label = "Nombre de la meta",
-                placeholder = "Viaje a Cusco",
+                label = stringResource(id = R.string.goal_form_name_label),
+                placeholder = stringResource(id = R.string.goal_form_name_placeholder),
                 isError = uiState.goalNameError != null,
                 errorMessage = uiState.goalNameError,
                 modifier = Modifier.fillMaxWidth()
@@ -142,8 +144,8 @@ fun GoalFormScreenContent(
             CashitoTextField(
                 value = uiState.targetAmount,
                 onValueChange = onTargetAmountChange,
-                label = "Monto objetivo",
-                placeholder = "S/ 4,000",
+                label = stringResource(id = R.string.goal_form_target_amount_label),
+                placeholder = stringResource(id = R.string.goal_form_target_amount_placeholder),
                 keyboardType = KeyboardType.Number,
                 isError = uiState.targetAmountError != null,
                 errorMessage = uiState.targetAmountError,
@@ -152,7 +154,7 @@ fun GoalFormScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
-            Text("Fecha objetivo", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(id = R.string.goal_form_target_date_label), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             Card(
@@ -168,7 +170,7 @@ fun GoalFormScreenContent(
                     Icon(Icons.Default.DateRange, "Date", tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.width(Spacing.md))
                     Text(
-                        text = uiState.selectedDate?.let { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(it)) } ?: "Seleccionar fecha",
+                        text = uiState.selectedDate?.let { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(it)) } ?: stringResource(id = R.string.goal_form_select_date_placeholder),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (uiState.selectedDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -178,8 +180,8 @@ fun GoalFormScreenContent(
             if (uiState.showDatePicker) {
                 DatePickerDialog(
                     onDismissRequest = { onDatePickerDismiss(false) },
-                    confirmButton = { TextButton(onClick = { onDateSelected(datePickerState.selectedDateMillis) }) { Text("OK") } },
-                    dismissButton = { TextButton(onClick = { onDatePickerDismiss(false) }) { Text("Cancelar") } }
+                    confirmButton = { TextButton(onClick = { onDateSelected(datePickerState.selectedDateMillis) }) { Text(stringResource(id = R.string.goal_form_date_picker_ok_button)) } },
+                    dismissButton = { TextButton(onClick = { onDatePickerDismiss(false) }) { Text(stringResource(id = R.string.goal_form_date_picker_cancel_button)) } }
                 ) {
                     DatePicker(state = datePickerState)
                 }
@@ -187,7 +189,7 @@ fun GoalFormScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
-            Text("Icono de la meta", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(id = R.string.goal_form_icon_label), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -198,7 +200,7 @@ fun GoalFormScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
-            Text("Color de la meta", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(id = R.string.goal_form_color_label), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -209,7 +211,7 @@ fun GoalFormScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-            PrimaryButton(text = if (uiState.isEditing) "Guardar cambios" else "Crear meta", onClick = onSaveGoal, enabled = uiState.isFormValid)
+            PrimaryButton(text = if (uiState.isEditing) stringResource(id = R.string.goal_form_save_changes_button) else stringResource(id = R.string.goal_form_create_goal_button), onClick = onSaveGoal, enabled = uiState.isFormValid)
         }
     }
 }

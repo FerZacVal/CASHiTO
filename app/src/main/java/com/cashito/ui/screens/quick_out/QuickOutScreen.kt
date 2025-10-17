@@ -36,11 +36,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
@@ -123,7 +125,7 @@ fun QuickOutScreenContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Gasto rápido",
+                        text = stringResource(id = R.string.quick_out_title),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -131,7 +133,7 @@ fun QuickOutScreenContent(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.Default.Close,
-                            contentDescription = "Close",
+                            contentDescription = stringResource(id = R.string.quick_out_close_button_description),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -140,7 +142,7 @@ fun QuickOutScreenContent(
                 Spacer(modifier = Modifier.height(Spacing.xl))
 
                 Text(
-                    text = "Selecciona un monto",
+                    text = stringResource(id = R.string.quick_out_select_amount_title),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -163,8 +165,8 @@ fun QuickOutScreenContent(
                 CashitoTextField(
                     value = uiState.amount,
                     onValueChange = onAmountChanged,
-                    label = "Monto personalizado",
-                    placeholder = "S/ 0.00",
+                    label = stringResource(id = R.string.quick_out_custom_amount_label),
+                    placeholder = stringResource(id = R.string.quick_out_custom_amount_placeholder),
                     keyboardType = KeyboardType.Number,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -172,7 +174,7 @@ fun QuickOutScreenContent(
                 Spacer(modifier = Modifier.height(Spacing.xl))
 
                 Text(
-                    text = "Selecciona una categoría de gasto",
+                    text = stringResource(id = R.string.quick_out_select_category_title),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -193,7 +195,7 @@ fun QuickOutScreenContent(
                 Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                 PrimaryButton(
-                    text = "Confirmar gasto",
+                    text = stringResource(id = R.string.quick_out_confirm_button),
                     onClick = onConfirmExpense,
                     enabled = uiState.isConfirmEnabled
                 )
@@ -263,9 +265,9 @@ fun SuccessPopup() {
             modifier = Modifier.padding(Spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.CheckCircle, "Success", tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            Icon(Icons.Default.CheckCircle, stringResource(id = R.string.quick_out_success_icon_description), tint = MaterialTheme.colorScheme.onSecondaryContainer)
             Spacer(modifier = Modifier.width(Spacing.md))
-            Text("Gasto guardado con éxito", color = MaterialTheme.colorScheme.onSecondaryContainer, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+            Text(stringResource(id = R.string.quick_out_success_message), color = MaterialTheme.colorScheme.onSecondaryContainer, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
         }
     }
 }

@@ -25,12 +25,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.components.buttons.SmallButton
@@ -117,7 +119,7 @@ fun LoginScreenContent(
             Spacer(modifier = Modifier.height(Spacing.lg))
 
             Text(
-                text = "Iniciar sesión",
+                text = stringResource(id = R.string.login_title),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -128,8 +130,8 @@ fun LoginScreenContent(
             CashitoTextField(
                 value = uiState.email,
                 onValueChange = onEmailChange,
-                label = "Correo electrónico",
-                placeholder = "correo@ejemplo.com",
+                label = stringResource(id = R.string.login_email_label),
+                placeholder = stringResource(id = R.string.login_email_placeholder),
                 keyboardType = KeyboardType.Email,
                 isError = uiState.emailError != null,
                 errorMessage = uiState.emailError
@@ -140,8 +142,8 @@ fun LoginScreenContent(
             CashitoTextField(
                 value = uiState.password,
                 onValueChange = onPasswordChange,
-                label = "Contraseña",
-                placeholder = "Contraseña",
+                label = stringResource(id = R.string.login_password_label),
+                placeholder = stringResource(id = R.string.login_password_placeholder),
                 isPassword = true,
                 isError = uiState.passwordError != null,
                 errorMessage = uiState.passwordError
@@ -163,7 +165,7 @@ fun LoginScreenContent(
                     )
                 )
                 Text(
-                    text = "Mantener sesión",
+                    text = stringResource(id = R.string.login_remember_me_checkbox),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -172,21 +174,21 @@ fun LoginScreenContent(
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             PrimaryButton(
-                text = "Iniciar sesión",
+                text = stringResource(id = R.string.login_login_button),
                 onClick = onLoginClick
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
             SecondaryButton(
-                text = "Crear cuenta",
+                text = stringResource(id = R.string.login_create_account_button),
                 onClick = onNavigateToRegister
             )
 
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             Text(
-                text = "O continúa con",
+                text = stringResource(id = R.string.login_or_continue_with),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -199,7 +201,7 @@ fun LoginScreenContent(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
                 SmallButton(
-                    text = "Google",
+                    text = stringResource(id = R.string.login_google_button),
                     onClick = { /* Handle Google login */ },
                     isPrimary = false,
                     modifier = Modifier.weight(1f)
@@ -207,7 +209,7 @@ fun LoginScreenContent(
 
                 if (uiState.isBiometricAuthAvailable) {
                     SmallButton(
-                        text = "Huella",
+                        text = stringResource(id = R.string.login_fingerprint_button),
                         onClick = onBiometricLoginClick,
                         isPrimary = false,
                         modifier = Modifier.weight(1f)
@@ -221,7 +223,7 @@ fun LoginScreenContent(
                 onClick = onForgotPasswordClick
             ) {
                 Text(
-                    text = "¿Olvidaste tu contraseña?",
+                    text = stringResource(id = R.string.login_forgot_password_prompt),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

@@ -40,11 +40,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.charts.BarChart
 import com.cashito.ui.components.charts.BarChartEntry
 import com.cashito.ui.components.charts.PieChart
@@ -84,8 +86,8 @@ fun CategoryExpenseReportScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Gastos por Categoría", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold) },
-                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás") } },
+                title = { Text(stringResource(id = R.string.category_expense_report_title), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold) },
+                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.category_expense_report_back_button_description)) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
@@ -106,7 +108,7 @@ fun CategoryExpenseReportScreenContent(
                 }
             } else {
                 item {
-                    Text("Distribución de tus gastos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = Spacing.md))
+                    Text(stringResource(id = R.string.category_expense_report_distribution_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = Spacing.md))
                 }
                 item {
                     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -114,14 +116,14 @@ fun CategoryExpenseReportScreenContent(
                             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
                             selected = uiState.chartType == ChartType.PIE,
                             onClick = { onChartTypeChange(ChartType.PIE) },
-                            label = { Text("Torta") },
+                            label = { Text(stringResource(id = R.string.category_expense_report_chart_type_pie)) },
                             icon = { Icon(Icons.Default.PieChart, null) }
                         )
                         SegmentedButton(
                             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
                             selected = uiState.chartType == ChartType.BAR,
                             onClick = { onChartTypeChange(ChartType.BAR) },
-                            label = { Text("Barras") },
+                            label = { Text(stringResource(id = R.string.category_expense_report_chart_type_bar)) },
                             icon = { Icon(Icons.Default.BarChart, null) }
                         )
                     }
@@ -133,7 +135,7 @@ fun CategoryExpenseReportScreenContent(
                             ChartType.PIE -> PieChart(
                                 entries = uiState.expenses.map { PieChartEntry(it.amount, it.color) },
                                 modifier = Modifier.size(250.dp),
-                                emptyChartMessage = "Sin gastos"
+                                emptyChartMessage = stringResource(id = R.string.category_expense_report_empty_chart_message)
                             )
                             ChartType.BAR -> BarChart(
                                 entries = uiState.expenses.map { BarChartEntry(it.amount, it.color, it.categoryName) },
@@ -163,7 +165,7 @@ fun ExpenseCategoryLegend(expenses: List<CategoryExpense>) {
         Column(modifier = Modifier.padding(Spacing.md)) {
             if (totalAmount == 0f) {
                 Text(
-                    text = "No hay datos de gastos para mostrar.",
+                    text = stringResource(id = R.string.category_expense_report_empty_legend_message),
                     modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = Spacing.md),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

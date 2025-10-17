@@ -36,12 +36,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SecondaryButton
 import com.cashito.ui.components.list.CashitoListItem
@@ -98,26 +99,26 @@ fun GoalDetailScreenContent(
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.goal_detail_back_button_description))
                         }
                     },
                     actions = {
                         IconButton(onClick = { onShowMenu(true) }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.goal_detail_more_button_description))
                         }
                         DropdownMenu(
                             expanded = uiState.showMenu,
                             onDismissRequest = { onShowMenu(false) }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Editar meta") },
+                                text = { Text(stringResource(id = R.string.goal_detail_edit_goal_menu_item)) },
                                 onClick = {
                                     onShowMenu(false)
                                     uiState.goal.id.let(onNavigateToEdit)
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Eliminar meta", color = MaterialTheme.colorScheme.error) },
+                                text = { Text(stringResource(id = R.string.goal_detail_delete_goal_menu_item), color = MaterialTheme.colorScheme.error) },
                                 onClick = { onShowMenu(false) }
                             )
                         }
@@ -151,12 +152,12 @@ fun GoalDetailScreenContent(
                         horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
                         PrimaryButton(
-                            text = "Ingresar",
+                            text = stringResource(id = R.string.goal_detail_deposit_button),
                             onClick = onNavigateToIncome,
                             modifier = Modifier.weight(1f)
                         )
                         SecondaryButton(
-                            text = "Editar meta",
+                            text = stringResource(id = R.string.goal_detail_edit_goal_button),
                             onClick = { uiState.goal.id.let(onNavigateToEdit) },
                             modifier = Modifier.weight(1f)
                         )
@@ -172,7 +173,7 @@ fun GoalDetailScreenContent(
 
                 item {
                     Text(
-                        text = "Historial de aportes",
+                        text = stringResource(id = R.string.goal_detail_contributions_history_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -222,7 +223,7 @@ private fun GoalSummary(goal: GoalDetail) {
             Spacer(modifier = Modifier.height(Spacing.lg))
 
             Text(
-                text = "Ahorrado S/ ${goal.savedAmount} / S/ ${goal.targetAmount}",
+                text = stringResource(id = R.string.goal_detail_saved_amount, goal.savedAmount, goal.targetAmount),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -232,7 +233,7 @@ private fun GoalSummary(goal: GoalDetail) {
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             Text(
-                text = "Meta: ${goal.targetDate}",
+                text = stringResource(id = R.string.goal_detail_target_date, goal.targetDate),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -244,14 +245,14 @@ private fun GoalSummary(goal: GoalDetail) {
 @Composable
 private fun SavingsPlanSection(isRecurringEnabled: Boolean, onRecurringChanged: (Boolean) -> Unit) {
     Column {
-        Text(text = "Plan de Ahorro", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = Spacing.sm), color = MaterialTheme.colorScheme.onSurface)
+        Text(text = stringResource(id = R.string.goal_detail_savings_plan_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = Spacing.sm), color = MaterialTheme.colorScheme.onSurface)
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             CashitoListItem(
-                headline = "Aporte recurrente",
-                supportingText = "S/ 50.00 Semanal",
+                headline = stringResource(id = R.string.goal_detail_recurring_deposit_title),
+                supportingText = stringResource(id = R.string.goal_detail_recurring_deposit_subtitle),
                 trailingContent = { Switch(checked = isRecurringEnabled, onCheckedChange = onRecurringChanged) },
                 onClick = { onRecurringChanged(!isRecurringEnabled) }
             )

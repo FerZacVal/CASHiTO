@@ -52,11 +52,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.Routes
-import com.cashito.domain.entities.transaction.TransactionType
 import com.cashito.ui.components.inputs.CashitoSearchField
 import com.cashito.ui.theme.ComponentSize
 import com.cashito.ui.theme.Spacing
@@ -72,7 +73,11 @@ fun TransactionsScreen(
     viewModel: TransactionsViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val filters = listOf("Todos", "Ingresos", "Gastos")
+    val filters = listOf(
+        stringResource(id = R.string.transactions_filter_all),
+        stringResource(id = R.string.transactions_filter_income),
+        stringResource(id = R.string.transactions_filter_expenses)
+    )
     val sheetState = rememberModalBottomSheetState()
 
     val onNavigateToEdit: (Transaction) -> Unit = {
@@ -93,12 +98,12 @@ fun TransactionsScreen(
                         leadingContent = { Icon(Icons.AutoMirrored.Filled.Subject, null) }
                     )
                     ListItem(
-                        headlineContent = { Text("Editar") },
+                        headlineContent = { Text(stringResource(id = R.string.transactions_options_edit)) },
                         leadingContent = { Icon(Icons.Default.Edit, null) },
                         modifier = Modifier.clickable { onNavigateToEdit(transaction) }
                     )
                     ListItem(
-                        headlineContent = { Text("Eliminar", color = MaterialTheme.colorScheme.error) },
+                        headlineContent = { Text(stringResource(id = R.string.transactions_options_delete), color = MaterialTheme.colorScheme.error) },
                         leadingContent = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) },
                         modifier = Modifier.clickable(onClick = viewModel::onDeleteRequest)
                     )
@@ -111,16 +116,16 @@ fun TransactionsScreen(
     if (uiState.showDeleteConfirmDialog) {
         AlertDialog(
             onDismissRequest = viewModel::onDismissDialogs,
-            title = { Text("Eliminar Movimiento") },
-            text = { Text("¿Estás seguro de que quieres eliminar este movimiento? Esta acción no se puede deshacer.") },
+            title = { Text(stringResource(id = R.string.transactions_delete_dialog_title)) },
+            text = { Text(stringResource(id = R.string.transactions_delete_dialog_message)) },
             confirmButton = {
                 TextButton(onClick = viewModel::onDeleteConfirm) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(id = R.string.transactions_delete_dialog_confirm_button), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::onDismissDialogs) {
-                    Text("Cancelar")
+                    Text(stringResource(id = R.string.transactions_delete_dialog_cancel_button))
                 }
             }
         )
@@ -129,9 +134,9 @@ fun TransactionsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Movimientos", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
-                navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
-                actions = { IconButton(onClick = { /* TODO: Show filter dialog */ }) { Icon(Icons.Default.FilterList, contentDescription = "Filter") } },
+                title = { Text(stringResource(id = R.string.transactions_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
+                navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.transactions_back_button_description)) } },
+                actions = { IconButton(onClick = { /* TODO: Show filter dialog */ }) { Icon(Icons.Default.FilterList, contentDescription = stringResource(id = R.string.transactions_filter_button_description)) } },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
@@ -140,7 +145,7 @@ fun TransactionsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate(Routes.QUICK_SAVE) }) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir transacción")
+                Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.transactions_add_transaction_button_description))
             }
         }
     ) { paddingValues ->
@@ -154,7 +159,7 @@ fun TransactionsScreen(
             CashitoSearchField(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::onSearchQueryChanged,
-                placeholder = "Buscar...",
+                placeholder = stringResource(id = R.string.transactions_search_placeholder),
                 modifier = Modifier.fillMaxWidth()
             )
 

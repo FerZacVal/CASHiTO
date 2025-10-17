@@ -37,11 +37,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.inputs.CashitoTextField
 import com.cashito.ui.theme.Radius
@@ -105,7 +107,7 @@ fun TransactionEditScreenContent(
                 title = { Text(uiState.screenTitle, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = { 
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.transaction_edit_back_button_description))
                     }
                 }
             )
@@ -123,8 +125,8 @@ fun TransactionEditScreenContent(
             CashitoTextField(
                 value = uiState.amount,
                 onValueChange = onAmountChanged,
-                label = "Monto",
-                placeholder = "S/ 0.00",
+                label = stringResource(id = R.string.transaction_edit_amount_label),
+                placeholder = stringResource(id = R.string.transaction_edit_amount_placeholder),
                 keyboardType = KeyboardType.Number,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -134,15 +136,15 @@ fun TransactionEditScreenContent(
             CashitoTextField(
                 value = uiState.description,
                 onValueChange = onDescriptionChanged,
-                label = "Descripción",
-                placeholder = "Ej: Almuerzo de hoy",
+                label = stringResource(id = R.string.transaction_edit_description_label),
+                placeholder = stringResource(id = R.string.transaction_edit_description_placeholder),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             Text(
-                text = "Categoría",
+                text = stringResource(id = R.string.transaction_edit_category_title),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
@@ -163,7 +165,7 @@ fun TransactionEditScreenContent(
             Spacer(modifier = Modifier.weight(1f))
 
             PrimaryButton(
-                text = "Guardar Cambios",
+                text = stringResource(id = R.string.transaction_edit_save_button),
                 onClick = onConfirmUpdate,
                 enabled = uiState.isConfirmEnabled,
                 modifier = Modifier.fillMaxWidth()
@@ -222,9 +224,9 @@ fun SuccessPopup() {
             modifier = Modifier.padding(Spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.CheckCircle, "Success", tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            Icon(Icons.Default.CheckCircle, stringResource(id = R.string.transaction_edit_success_icon_description), tint = MaterialTheme.colorScheme.onSecondaryContainer)
             Spacer(modifier = Modifier.width(Spacing.md))
-            Text("Cambios guardados", color = MaterialTheme.colorScheme.onSecondaryContainer, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+            Text(stringResource(id = R.string.transaction_edit_success_message), color = MaterialTheme.colorScheme.onSecondaryContainer, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
         }
     }
 }
