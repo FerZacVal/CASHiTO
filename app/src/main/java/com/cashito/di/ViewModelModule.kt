@@ -38,10 +38,11 @@ val viewModelModule = module {
 
     // --- ViewModels sin dependencias ---
     viewModel { CategoryFormViewModel() }
-    viewModel { ReportsViewModel() }
-    viewModel { CategoryExpenseReportViewModel() }
-    viewModel { IncomeReportViewModel() }
+    viewModel { ReportsViewModel(get()) }
+    viewModel { CategoryExpenseReportViewModel(get()) }
+    viewModel { IncomeReportViewModel(get()) }
     viewModel { BalanceViewModel(get()) }
     viewModel { DashboardViewModel(get(), get()) } // CORREGIDO
     viewModel { ProfileViewModel(get()) }
+
 }

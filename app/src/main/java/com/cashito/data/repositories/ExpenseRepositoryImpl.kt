@@ -5,6 +5,8 @@ import com.cashito.data.dto.TransactionDto
 import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.expense.Expense
 import com.cashito.domain.repositories.expense.ExpenseRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class ExpenseRepositoryImpl(
     private val dataSource: FirebaseTransactionDataSource
@@ -13,6 +15,14 @@ class ExpenseRepositoryImpl(
     override suspend fun addExpense(expense: Expense) {
         val transactionDto = expense.toTransactionDto()
         dataSource.addTransaction(transactionDto)
+    }
+
+    override fun observeExpenses(): Flow<List<Expense>> {
+        return dataSource.observeTransactions()
+            .map { list ->
+                list.filter { it.type == "gasto" }
+                    .map { it.toExpense() }
+            }
     }
 
     override suspend fun getExpenses(): List<Expense> {

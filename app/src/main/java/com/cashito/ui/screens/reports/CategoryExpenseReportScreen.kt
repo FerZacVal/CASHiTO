@@ -61,11 +61,13 @@ import com.cashito.ui.viewmodel.CategoryExpense
 import com.cashito.ui.viewmodel.CategoryExpenseReportUiState
 import com.cashito.ui.viewmodel.CategoryExpenseReportViewModel
 import com.cashito.ui.viewmodel.ChartType
+import org.koin.androidx.compose.koinViewModel
+
 
 @Composable
 fun CategoryExpenseReportScreen(
     navController: NavController,
-    viewModel: CategoryExpenseReportViewModel = viewModel()
+    viewModel: CategoryExpenseReportViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

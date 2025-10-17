@@ -58,11 +58,12 @@ import com.cashito.ui.viewmodel.CategoryIncome
 import com.cashito.ui.viewmodel.ChartType
 import com.cashito.ui.viewmodel.IncomeReportUiState
 import com.cashito.ui.viewmodel.IncomeReportViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun IncomeReportScreen(
     navController: NavController,
-    viewModel: IncomeReportViewModel = viewModel()
+    viewModel: IncomeReportViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
