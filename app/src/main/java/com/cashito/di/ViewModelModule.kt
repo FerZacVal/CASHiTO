@@ -43,4 +43,5 @@ val viewModelModule = module {
     viewModel { BalanceViewModel(get()) }
     viewModel { DashboardViewModel(get(), get()) } // CORREGIDO
     viewModel { ProfileViewModel(get()) }
+
 }

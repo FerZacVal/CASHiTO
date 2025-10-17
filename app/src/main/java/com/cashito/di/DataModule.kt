@@ -14,6 +14,9 @@ import org.koin.dsl.module
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import com.cashito.domain.usecases.reports.ObserveReportsUseCase
 import com.cashito.domain.usecases.reports.ObserveIncomeReportUseCase
+import com.cashito.domain.usecases.reports.ObserveExpenseReportUseCase
+import com.cashito.domain.repositories.transaction.TransactionRepository
+import com.cashito.data.repositories.TransactionRepositoryImpl
 
 val dataModule = module {
 
@@ -31,8 +34,9 @@ val dataModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get()) }
     single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
+    single<TransactionRepository> { TransactionRepositoryImpl(get()) }
     single { GetTransactionsUseCase(get(), get()) }
     single { ObserveReportsUseCase(get(), get()) }
     single { ObserveIncomeReportUseCase(get()) }
-
+    single { ObserveExpenseReportUseCase(get()) }
 }

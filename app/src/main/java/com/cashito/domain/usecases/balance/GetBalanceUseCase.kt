@@ -6,6 +6,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 
+
+
 class GetBalanceUseCase(
     private val incomeRepository: IncomeRepository,
     private val expenseRepository: ExpenseRepository
@@ -20,4 +22,5 @@ class GetBalanceUseCase(
 
         return@withContext totalIncome - totalExpense
     }
+
 }

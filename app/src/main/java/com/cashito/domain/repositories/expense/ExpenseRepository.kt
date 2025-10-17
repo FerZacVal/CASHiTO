@@ -9,4 +9,6 @@ interface ExpenseRepository {
 
     // ⚡ Nuevo método para observar gastos en tiempo real
     fun observeExpenses(): Flow<List<Expense>>
+    suspend fun getExpenses(): List<Expense>
+
 }

@@ -28,6 +28,12 @@ class IncomeRepositoryImpl(
                     .map { it.toIncome() }
             }
     }
+
+    override suspend fun getIncomes(): List<Income> {
+        return dataSource.getTransactions()
+            .filter { it.type == "ingreso" }
+            .map { it.toIncome() }
+    }
 }
 
 private fun Income.toTransactionDto(): TransactionDto {

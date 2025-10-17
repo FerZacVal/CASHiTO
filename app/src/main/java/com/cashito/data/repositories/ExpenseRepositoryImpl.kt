@@ -24,6 +24,12 @@ class ExpenseRepositoryImpl(
                     .map { it.toExpense() }
             }
     }
+
+    override suspend fun getExpenses(): List<Expense> {
+        return dataSource.getTransactions()
+            .filter { it.type == "gasto" }
+            .map { it.toExpense() }
+    }
 }
 
 private fun Expense.toTransactionDto(): TransactionDto {

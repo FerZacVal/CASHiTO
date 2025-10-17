@@ -8,4 +8,7 @@ interface IncomeRepository {
 
     suspend fun addIncome(income: Income)
     fun observeIncomes(): Flow<List<Income>>
+    suspend fun getIncomes(): List<Income>
 }
+
+
