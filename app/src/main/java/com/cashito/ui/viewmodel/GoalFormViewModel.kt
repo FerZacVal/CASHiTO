@@ -1,13 +1,19 @@
 package com.cashito.ui.viewmodel
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cashito.domain.entities.goal.Goal
+import com.cashito.domain.usecases.goal.CreateGoalUseCase
 import com.cashito.ui.theme.primaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.Date
 
 // --- STATE ---
 data class GoalFormUiState(
@@ -17,7 +23,7 @@ data class GoalFormUiState(
     val targetAmount: String = "",
     val selectedDate: Long? = null,
     val selectedIcon: String = "💻",
-    val selectedColor: Color? = null,
+    val selectedColor: Color = primaryLight,
     val isRecurringEnabled: Boolean = false,
     val recurringAmount: String = "",
     val recurringFrequency: String = "Semanal",
@@ -30,7 +36,8 @@ data class GoalFormUiState(
 
 // --- VIEWMODEL ---
 class GoalFormViewModel(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val createGoalUseCase: CreateGoalUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GoalFormUiState())
@@ -117,12 +124,25 @@ class GoalFormViewModel(
         }
 
         if (nameError == null && amountError == null && state.selectedDate != null) {
-            if (state.isEditing) {
-                // TODO: Implement update logic
-            } else {
-                // TODO: Implement create logic
+            viewModelScope.launch {
+                if (state.isEditing) {
+                    // TODO: Implement update logic
+                } else {
+                    val newGoal = Goal(
+                        id = "", // Firestore lo genera
+                        userId = "", // El DataSource lo añade
+                        name = state.goalName,
+                        targetAmount = state.targetAmount.toDoubleOrNull() ?: 0.0,
+                        savedAmount = 0.0, // Siempre empieza en 0
+                        targetDate = Date(state.selectedDate),
+                        creationDate = Date(),
+                        icon = state.selectedIcon,
+                        colorHex = "#%06X".format(0xFFFFFF and state.selectedColor.toArgb())
+                    )
+                    createGoalUseCase(newGoal)
+                }
+                _uiState.update { it.copy(goalSaved = true) }
             }
-            _uiState.update { it.copy(goalSaved = true) }
         }
     }
 }

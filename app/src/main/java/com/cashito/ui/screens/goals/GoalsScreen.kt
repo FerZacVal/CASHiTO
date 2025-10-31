@@ -41,11 +41,12 @@ import com.cashito.ui.theme.secondaryLight
 import com.cashito.ui.viewmodel.Goal
 import com.cashito.ui.viewmodel.GoalsUiState
 import com.cashito.ui.viewmodel.GoalsViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun GoalsScreen(
     navController: NavController,
-    viewModel: GoalsViewModel = viewModel()
+    viewModel: GoalsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
