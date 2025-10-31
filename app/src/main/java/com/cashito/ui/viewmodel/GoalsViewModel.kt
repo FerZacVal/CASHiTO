@@ -2,12 +2,19 @@ package com.cashito.ui.viewmodel
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cashito.domain.usecases.goal.GetGoalsUseCase
 import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.theme.secondaryLight
 import com.cashito.ui.theme.tertiaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import com.cashito.domain.entities.goal.Goal as DomainGoal
 
 // --- STATE ---
 data class Goal(
@@ -22,28 +29,49 @@ data class Goal(
 
 data class GoalsUiState(
     val goals: List<Goal> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val error: String? = null
 )
 
 // --- VIEWMODEL ---
-class GoalsViewModel : ViewModel() {
+class GoalsViewModel(
+    private val getGoalsUseCase: GetGoalsUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GoalsUiState())
     val uiState: StateFlow<GoalsUiState> = _uiState.asStateFlow()
 
     init {
-        loadGoals()
+        observeGoals()
     }
 
-    private fun loadGoals() {
-        // TODO: Replace with actual data fetching
-        val sampleGoals = listOf(
-            Goal("1", "Viaje a Cusco", "3,420", "5,000", 0.65f, "✈️", primaryLight),
-            Goal("2", "Laptop nueva", "800", "4,500", 0.18f, "💻", secondaryLight),
-            Goal("3", "Ahorro de emergencia", "1,200", "10,000", 0.12f, "🛡️", tertiaryLight),
-            Goal("4", "Regalo de aniversario", "150", "500", 0.30f, "🎁", Color(0xFFEC4899))
-        )
-
-        _uiState.value = GoalsUiState(goals = sampleGoals, isLoading = false)
+    private fun observeGoals() {
+        viewModelScope.launch {
+            getGoalsUseCase()
+                .onStart { _uiState.update { it.copy(isLoading = true) } }
+                .catch { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }
+                .collect { domainGoals ->
+                    val uiGoals = domainGoals.map { it.toUiModel() }
+                    _uiState.update { it.copy(goals = uiGoals, isLoading = false) }
+                }
+        }
     }
+}
+
+// --- Mapper ---
+private fun DomainGoal.toUiModel(): Goal {
+    val progress = if (this.targetAmount > 0) (this.savedAmount / this.targetAmount).toFloat() else 0f
+    return Goal(
+        id = this.id,
+        title = this.name,
+        savedAmount = "S/ ${String.format("%,.2f", this.savedAmount)}",
+        targetAmount = "S/ ${String.format("%,.2f", this.targetAmount)}",
+        progress = progress,
+        icon = this.icon,
+        color = try {
+            Color(android.graphics.Color.parseColor(this.colorHex))
+        } catch (e: IllegalArgumentException) {
+            primaryLight // Color por defecto si el parseo falla
+        }
+    )
 }

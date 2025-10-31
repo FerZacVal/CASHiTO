@@ -22,7 +22,7 @@ import org.koin.dsl.module
 val viewModelModule = module {
 
     // --- Auth ViewModels (necesitan UseCase) ---
-    viewModel { LoginViewModel(get(), get()) } // Updated to include CredentialsManager
+    viewModel { LoginViewModel(get(), get()) }
     viewModel { CreateUserViewModel(get()) }
 
     // --- Transaction ViewModels (necesitan UseCase y/o SavedStateHandle) ---
@@ -32,9 +32,13 @@ val viewModelModule = module {
     viewModel { TransactionEditViewModel(get(), get(), get()) }
 
     // --- Goal ViewModels (necesitan SavedStateHandle) ---
-    viewModel { GoalsViewModel() }
+    viewModel { GoalsViewModel(get()) }
     viewModel { GoalDetailViewModel(get()) }
-    viewModel { GoalFormViewModel(get()) }
+    viewModel { GoalFormViewModel(get(), get()) }
+
+    // --- Dashboard & Profile ---
+    viewModel { DashboardViewModel(get(), get(), get()) } // CORREGIDO
+    viewModel { ProfileViewModel(get()) }
 
     // --- ViewModels sin dependencias ---
     viewModel { CategoryFormViewModel() }
@@ -42,7 +46,5 @@ val viewModelModule = module {
     viewModel { CategoryExpenseReportViewModel(get()) }
     viewModel { IncomeReportViewModel(get()) }
     viewModel { BalanceViewModel(get()) }
-    viewModel { DashboardViewModel(get(), get()) } // CORREGIDO
-    viewModel { ProfileViewModel(get()) }
 
 }
