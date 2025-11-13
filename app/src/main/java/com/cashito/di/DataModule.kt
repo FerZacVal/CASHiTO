@@ -1,9 +1,10 @@
 package com.cashito.di
 
-import com.cashito.core.CredentialsManager
+import androidx.room.Room
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
 import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
 import com.cashito.data.datasources.firebase.GoalDataSource
+import com.cashito.data.datasources.local.CashitoDatabase
 import com.cashito.data.repositories.AuthRepositoryImpl
 import com.cashito.data.repositories.ExpenseRepositoryImpl
 import com.cashito.data.repositories.GoalRepositoryImpl
@@ -21,8 +22,17 @@ import org.koin.dsl.module
 
 val dataModule = module {
 
-    // --- Managers ---
-    single { CredentialsManager(androidContext()) }
+    // --- Room Database ---
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            CashitoDatabase::class.java,
+            CashitoDatabase.DATABASE_NAME
+        ).build()
+    }
+
+    // --- DAOs ---
+    single { get<CashitoDatabase>().userCredentialsDao() }
 
     // --- Firebase Instances ---
     single { FirebaseAuth.getInstance() }
@@ -31,12 +41,13 @@ val dataModule = module {
     // --- DataSources ---
     single { FirebaseAuthDataSource(get()) }
     single { FirebaseTransactionDataSource(get(), get()) }
-    single { GoalDataSource(get(), get()) } // AÑADIDO
+    single { GoalDataSource(get(), get()) }
 
     // --- Repositories ---
-    single<AuthRepository> { AuthRepositoryImpl(get()) }
+    // AuthRepositoryImpl ahora recibe el DAO de Room además de su dependencia de Firebase
+    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
     single<TransactionRepository> { TransactionRepositoryImpl(get()) }
-    single<GoalRepository> { GoalRepositoryImpl(get()) } // AÑADIDO
+    single<GoalRepository> { GoalRepositoryImpl(get()) }
 }

@@ -14,12 +14,16 @@ import com.cashito.ui.viewmodel.ProfileViewModel
 import com.cashito.ui.viewmodel.QuickOutViewModel
 import com.cashito.ui.viewmodel.QuickSaveViewModel
 import com.cashito.ui.viewmodel.ReportsViewModel
+import com.cashito.ui.viewmodel.SplashViewModel
 import com.cashito.ui.viewmodel.TransactionEditViewModel
 import com.cashito.ui.viewmodel.TransactionsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
+
+    // --- Splash ---
+    viewModel { SplashViewModel(get()) } // AÑADIDO
 
     // --- Auth ViewModels (necesitan UseCase) ---
     viewModel { LoginViewModel(get(), get()) }
@@ -37,7 +41,7 @@ val viewModelModule = module {
     viewModel { GoalFormViewModel(get(), get()) }
 
     // --- Dashboard & Profile ---
-    viewModel { DashboardViewModel(get(), get(), get()) } // CORREGIDO
+    viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { ProfileViewModel(get()) }
 
     // --- ViewModels sin dependencias ---

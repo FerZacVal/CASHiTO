@@ -1,5 +1,6 @@
 package com.cashito.di
 
+import com.cashito.domain.usecases.auth.AutoLoginUseCase
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
@@ -23,6 +24,7 @@ val domainModule = module {
     factory { RegisterUseCase(get()) }
     factory { LoginUseCase(get()) }
     factory { GetCurrentUserUseCase(get()) }
+    factory { AutoLoginUseCase(get(), get()) } // AÑADIDO
 
     // Income & Expense
     factory { AddIncomeUseCase(get()) }
@@ -30,7 +32,7 @@ val domainModule = module {
 
     // Goal
     factory { CreateGoalUseCase(get()) }
-    factory { GetGoalsUseCase(get()) } // AÑADIDO
+    factory { GetGoalsUseCase(get()) }
 
     // Transaction
     factory { GetTransactionsUseCase(get(), get()) }

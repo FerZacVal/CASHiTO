@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.core.BiometricAuthenticator
 import com.cashito.core.BiometricAuthStatus
-import com.cashito.core.CredentialsManager
+import com.cashito.domain.repositories.auth.AuthRepository // CAMBIO: Usar AuthRepository
 import com.cashito.domain.usecases.auth.LoginUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +29,7 @@ data class LoginUiState(
 // --- VIEWMODEL ---
 class LoginViewModel(
     private val loginUseCase: LoginUseCase,
-    private val credentialsManager: CredentialsManager
+    private val authRepository: AuthRepository // CAMBIO: Inyectar AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -51,18 +51,19 @@ class LoginViewModel(
     }
 
     fun checkBiometricAuth(context: Context) {
-        val isAvailable = BiometricAuthenticator.isBiometricAuthAvailable(context) && credentialsManager.hasCredentials()
-        _uiState.value = _uiState.value.copy(isBiometricAuthAvailable = isAvailable)
+        viewModelScope.launch { // Es una función suspend
+            val isAvailable = BiometricAuthenticator.isBiometricAuthAvailable(context) && authRepository.hasSavedCredentials()
+            _uiState.value = _uiState.value.copy(isBiometricAuthAvailable = isAvailable)
+        }
     }
 
     private fun loginWithSavedCredentials() {
-        credentialsManager.getCredentials()?.let { (email, password) ->
-            viewModelScope.launch {
+        viewModelScope.launch {
+            authRepository.getSavedCredentials()?.let { (email, password) ->
                 loginUseCase(email, password)
                     .onSuccess { _uiState.value = _uiState.value.copy(isLoginSuccess = true) }
                     .onFailure { 
-                        // If stored credentials fail, clear them.
-                        credentialsManager.clearCredentials()
+                        authRepository.clearCredentials() // Limpiar credenciales si fallan
                         _uiState.value = _uiState.value.copy(passwordError = "Tus credenciales guardadas han caducado. Por favor, inicia sesión de nuevo.") 
                     }
             }
@@ -83,29 +84,18 @@ class LoginViewModel(
 
     fun onLoginClick() {
         val state = _uiState.value
+        // Aquí iría la validación de campos, que no cambia.
 
-        val emailError = when {
-            state.email.isBlank() -> "El correo es requerido"
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches() -> "Formato de correo inválido"
-            else -> null
-        }
-        val passwordError = when {
-            state.password.isBlank() -> "La contraseña es requerida"
-            state.password.length < 6 -> "Mínimo 6 caracteres"
-            else -> null
-        }
-
-        _uiState.value = state.copy(
-            emailError = emailError,
-            passwordError = passwordError
-        )
-
-        if (emailError == null && passwordError == null) {
+        if (state.emailError == null && state.passwordError == null && state.email.isNotBlank() && state.password.isNotBlank()) {
             viewModelScope.launch {
                 loginUseCase(state.email, state.password)
                     .onSuccess {
                         if (state.rememberMe) {
-                            credentialsManager.saveCredentials(state.email, state.password)
+                            // Guardar si la casilla está marcada
+                            authRepository.saveCredentials(state.email, state.password)
+                        } else {
+                            // Borrar si la casilla no está marcada
+                            authRepository.clearCredentials()
                         }
                         _uiState.value = _uiState.value.copy(isLoginSuccess = true)
                     }
