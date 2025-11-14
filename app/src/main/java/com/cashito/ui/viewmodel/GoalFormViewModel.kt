@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.goal.Goal
 import com.cashito.domain.usecases.goal.CreateGoalUseCase
+import com.cashito.domain.usecases.goal.GetGoalByIdUseCase
+import com.cashito.domain.usecases.goal.UpdateGoalUseCase
 import com.cashito.ui.theme.primaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -31,17 +34,22 @@ data class GoalFormUiState(
     val goalNameError: String? = null,
     val targetAmountError: String? = null,
     val isFormValid: Boolean = false,
-    val goalSaved: Boolean = false
+    val goalSaved: Boolean = false,
+    val isLoading: Boolean = false // Para mostrar feedback durante la carga
 )
 
 // --- VIEWMODEL ---
 class GoalFormViewModel(
     savedStateHandle: SavedStateHandle,
-    private val createGoalUseCase: CreateGoalUseCase
+    private val createGoalUseCase: CreateGoalUseCase, 
+    private val getGoalByIdUseCase: GetGoalByIdUseCase, // ARREGLADO: Inyectado
+    private val updateGoalUseCase: UpdateGoalUseCase  // ARREGLADO: Inyectado
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GoalFormUiState())
     val uiState: StateFlow<GoalFormUiState> = _uiState.asStateFlow()
+
+    private var initialGoal: Goal? = null
 
     init {
         val goalId: String? = savedStateHandle["goalId"]
@@ -51,19 +59,27 @@ class GoalFormViewModel(
     }
 
     private fun loadGoalForEditing(goalId: String) {
-        // TODO: Fetch actual goal from repository using goalId
-        _uiState.update {
-            it.copy(
-                isEditing = true,
-                goalId = goalId,
-                goalName = "Viaje a Cusco",
-                targetAmount = "5000",
-                selectedDate = System.currentTimeMillis(),
-                selectedIcon = "✈️",
-                selectedColor = primaryLight
-            )
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            // ARREGLADO: Se obtienen los datos reales de la meta
+            val goal = getGoalByIdUseCase(goalId).first() // Obtenemos la primera emisión del Flow
+            if (goal != null) {
+                initialGoal = goal // Guardamos el estado original para la actualización
+                _uiState.update {
+                    it.copy(
+                        isEditing = true,
+                        goalId = goal.id,
+                        goalName = goal.name,
+                        targetAmount = goal.targetAmount.toString(),
+                        selectedDate = goal.targetDate?.time, // ARREGLADO: Se usa una llamada segura
+                        selectedIcon = goal.icon,
+                        selectedColor = Color(android.graphics.Color.parseColor(goal.colorHex)),
+                        isLoading = false
+                    )
+                }
+                validateForm()
+            }
         }
-        validateForm()
     }
     
     fun onGoalNameChange(name: String) {
@@ -125,8 +141,16 @@ class GoalFormViewModel(
 
         if (nameError == null && amountError == null && state.selectedDate != null) {
             viewModelScope.launch {
-                if (state.isEditing) {
-                    // TODO: Implement update logic
+                if (state.isEditing && initialGoal != null) {
+                    // ARREGLADO: Implementada la lógica de actualización
+                    val updatedGoal = initialGoal!!.copy(
+                        name = state.goalName,
+                        targetAmount = state.targetAmount.toDoubleOrNull() ?: 0.0,
+                        targetDate = Date(state.selectedDate),
+                        icon = state.selectedIcon,
+                        colorHex = "#%06X".format(0xFFFFFF and state.selectedColor.toArgb())
+                    )
+                    updateGoalUseCase(updatedGoal)
                 } else {
                     val newGoal = Goal(
                         id = "", // Firestore lo genera
