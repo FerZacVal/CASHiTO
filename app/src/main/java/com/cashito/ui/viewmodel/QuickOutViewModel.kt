@@ -6,13 +6,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.expense.Expense
+import com.cashito.domain.repositories.category.CategoryRepository
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
-import com.cashito.ui.theme.primaryLight
-import com.cashito.ui.theme.secondaryLight
-import com.cashito.ui.theme.tertiaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -41,6 +43,7 @@ data class QuickOutUiState(
 // --- VIEWMODEL ---
 class QuickOutViewModel(
     private val addExpenseUseCase: AddExpenseUseCase,
+    private val categoryRepository: CategoryRepository, // AÑADIDO
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -48,24 +51,22 @@ class QuickOutViewModel(
     val uiState: StateFlow<QuickOutUiState> = _uiState.asStateFlow()
 
     init {
-        loadCategories()
+        observeCategories() // CAMBIADO
         val transactionId: String? = savedStateHandle["transactionId"]
         if (transactionId != null) {
             loadExpenseForEditing(transactionId)
         }
     }
 
-    private fun loadCategories() {
-        _uiState.update {
-            it.copy(
-                categories = listOf(
-                    QuickOutCategory("1", "Comida", "🍔", primaryLight, "#FF6F00"),
-                    QuickOutCategory("2", "Transporte", "🚌", secondaryLight, "#FFAB00"),
-                    QuickOutCategory("3", "Compras", "🛒", tertiaryLight, "#00BFA5"),
-                    QuickOutCategory("4", "Ocio", "🎉", Color(0xFFF59E0B), "#F59E0B")
-                )
-            )
-        }
+    private fun observeCategories() {
+        categoryRepository.observeCategories()
+            .map { domainCategories -> domainCategories.filter { it.budget != null } } // Filtramos para gastos
+            .onEach { categories ->
+                val uiCategories = categories.map { it.toQuickOutCategory() }
+                _uiState.update { it.copy(categories = uiCategories) }
+            }
+            .catch { /* TODO: Handle error */ }
+            .launchIn(viewModelScope)
     }
 
     private fun loadExpenseForEditing(transactionId: String) {
@@ -74,30 +75,20 @@ class QuickOutViewModel(
             it.copy(
                 transactionId = transactionId,
                 isEditing = true,
-                amount = "25.00", // Dato de ejemplo
-                selectedCategoryId = "2" // ID de "Transporte", dato de ejemplo
+                amount = "25.00",
+                selectedCategoryId = "2"
             )
         }
         validateConfirmButton()
     }
 
     fun onPresetAmountSelected(preset: String) {
-        _uiState.update {
-            it.copy(
-                amount = preset,
-                selectedPresetAmount = preset
-            )
-        }
+        _uiState.update { it.copy(amount = preset, selectedPresetAmount = preset) }
         validateConfirmButton()
     }
 
     fun onAmountChanged(newAmount: String) {
-        _uiState.update {
-            it.copy(
-                amount = newAmount,
-                selectedPresetAmount = if (it.presetAmounts.contains(newAmount)) newAmount else null
-            )
-        }
+        _uiState.update { it.copy(amount = newAmount, selectedPresetAmount = if (it.presetAmounts.contains(newAmount)) newAmount else null) }
         validateConfirmButton()
     }
 
@@ -116,12 +107,11 @@ class QuickOutViewModel(
 
     fun onConfirmExpense() {
         if (!_uiState.value.isConfirmEnabled) return
-
         _uiState.update { it.copy(isConfirmEnabled = false) }
 
         if (_uiState.value.isEditing) {
             // TODO: Llamar a UpdateExpenseUseCase
-            _uiState.update { it.copy(expenseConfirmed = true) } // Simular éxito por ahora
+            _uiState.update { it.copy(expenseConfirmed = true) }
         } else {
             viewModelScope.launch {
                 val state = _uiState.value
@@ -130,7 +120,7 @@ class QuickOutViewModel(
 
                 if (selectedCategory != null) {
                     val expense = Expense(
-                        id = "", // Firestore will generate the ID
+                        id = "",
                         description = selectedCategory.title,
                         amount = amountValue,
                         date = Date(),
@@ -138,7 +128,8 @@ class QuickOutViewModel(
                             id = selectedCategory.id,
                             name = selectedCategory.title,
                             icon = selectedCategory.icon,
-                            color = selectedCategory.colorHex
+                            color = selectedCategory.colorHex,
+                            budget = 0.0 // Presupuesto no es relevante aquí
                         )
                     )
                     addExpenseUseCase(expense)
@@ -147,4 +138,19 @@ class QuickOutViewModel(
             }
         }
     }
+}
+
+private fun Category.toQuickOutCategory(): QuickOutCategory {
+    val color = try {
+        Color(android.graphics.Color.parseColor(this.color))
+    } catch (e: Exception) {
+        Color.Gray
+    }
+    return QuickOutCategory(
+        id = this.id,
+        title = this.name,
+        icon = this.icon ?: "",
+        color = color,
+        colorHex = this.color ?: "#808080"
+    )
 }

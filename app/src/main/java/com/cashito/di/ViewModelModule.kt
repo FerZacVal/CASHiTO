@@ -1,6 +1,7 @@
 package com.cashito.di
 
 import com.cashito.ui.viewmodel.BalanceViewModel
+import com.cashito.ui.viewmodel.CategoriesViewModel
 import com.cashito.ui.viewmodel.CategoryExpenseReportViewModel
 import com.cashito.ui.viewmodel.CategoryFormViewModel
 import com.cashito.ui.viewmodel.CreateUserViewModel
@@ -23,19 +24,19 @@ import org.koin.dsl.module
 val viewModelModule = module {
 
     // --- Splash ---
-    viewModel { SplashViewModel(get()) } // AÑADIDO
+    viewModel { SplashViewModel(get()) }
 
-    // --- Auth ViewModels (necesitan UseCase) ---
+    // --- Auth ViewModels ---
     viewModel { LoginViewModel(get(), get()) }
     viewModel { CreateUserViewModel(get()) }
 
-    // --- Transaction ViewModels (necesitan UseCase y/o SavedStateHandle) ---
-    viewModel { QuickOutViewModel(get(), get()) }
-    viewModel { QuickSaveViewModel(get(), get()) }
+    // --- Transaction ViewModels ---
+    viewModel { QuickOutViewModel(get(), get(), get()) }
+    viewModel { QuickSaveViewModel(get(), get(), get()) }
     viewModel { TransactionsViewModel(get(), get()) }
     viewModel { TransactionEditViewModel(get(), get(), get()) }
 
-    // --- Goal ViewModels (necesitan SavedStateHandle) ---
+    // --- Goal ViewModels ---
     viewModel { GoalsViewModel(get()) }
     viewModel { GoalDetailViewModel(get()) }
     viewModel { GoalFormViewModel(get(), get()) }
@@ -44,11 +45,13 @@ val viewModelModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { ProfileViewModel(get()) }
 
-    // --- ViewModels sin dependencias ---
-    viewModel { CategoryFormViewModel() }
+    // --- Category ViewModels ---
+    viewModel { CategoryFormViewModel(get()) }
+    viewModel { CategoriesViewModel(get()) } // AÑADIDO
+
+    // --- Reports & Balance ViewModels ---
     viewModel { ReportsViewModel(get()) }
     viewModel { CategoryExpenseReportViewModel(get()) }
     viewModel { IncomeReportViewModel(get()) }
     viewModel { BalanceViewModel(get()) }
-
 }

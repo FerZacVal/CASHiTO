@@ -27,5 +27,11 @@ data class Category(
      * Un color en formato hexadecimal (ej. "#FF5733") para la categoría (opcional).
      * Mapea desde el campo `color` en el documento de Firestore.
      */
-    val color: String? = null
+    val color: String? = null,
+
+    /**
+     * El presupuesto mensual asignado a esta categoría (opcional).
+     * Si es null, la categoría no tiene un presupuesto asignado.
+     */
+    val budget: Double? = null
 )

@@ -8,6 +8,8 @@
     <string name="category_form_type_expense">Gasto</string>
     <string name="category_form_name_label">Nombre de la categoría</string>
     <string name="category_form_name_placeholder">Ej: Comida, Sueldo, etc.</string>
+    <string name="category_form_budget_label">Presupuesto mensual (opcional)</string>
+    <string name="category_form_budget_placeholder">Ej: 500</string>
     <string name="category_form_icon_label">Icono</string>
     <string name="category_form_color_label">Color</string>
     <string name="category_form_save_button">Guardar Categoría</string>
