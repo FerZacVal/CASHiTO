@@ -1,4 +1,3 @@
-
 package com.cashito.di
 
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
@@ -30,7 +29,8 @@ val domainModule = module {
     factory { GetCurrentUserUseCase(get()) }
 
     // Income & Expense
-    factory { AddIncomeUseCase(get()) }
+    // ARREGLADO: Se inyectan ambos repositorios (Income y Goal) para mantener la consistencia de datos.
+    factory { AddIncomeUseCase(get(), get()) }
     factory { AddExpenseUseCase(get()) }
 
     // Goal

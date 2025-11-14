@@ -1,4 +1,3 @@
-
 package com.cashito.data.datasources.firebase
 
 import android.util.Log
@@ -134,15 +133,23 @@ class FirebaseTransactionDataSource(
         }
     }
 
-    suspend fun updateTransaction(transactionId: String, updatedData: Map<String, Any>) {
+    /**
+     * ARREGLADO: Actualiza un documento de transacción completo en Firestore.
+     * Este método ahora acepta un DTO completo y usa `set` para reemplazar el documento,
+     * asegurando que todos los campos se actualicen de manera atómica y consistente.
+     */
+    suspend fun updateTransaction(transactionId: String, transactionDto: TransactionDto) {
         val userId = auth.currentUser?.uid ?: run {
             Log.e("FlowDebug", "DataSource: FATAL - User is not authenticated. Cannot update transaction.")
             throw IllegalStateException("Usuario no autenticado")
         }
+        
+        // Aseguramos que el userId esté en el DTO antes de guardarlo.
+        transactionDto.userId = userId
 
         Log.d("FlowDebug", "DataSource: Updating document $transactionId for user $userId.")
         firestore.collection("Usuarios").document(userId).collection("Transacciones").document(transactionId)
-            .update(updatedData).await()
+            .set(transactionDto).await() // Usamos .set() para sobrescribir el documento completo.
         Log.d("FlowDebug", "DataSource: Document successfully updated.")
     }
 

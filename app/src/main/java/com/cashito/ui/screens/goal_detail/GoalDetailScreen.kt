@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.goal_detail
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,6 +59,7 @@ import com.cashito.ui.viewmodel.GoalDetailUiState
 import com.cashito.ui.viewmodel.GoalDetailViewModel
 import com.cashito.ui.viewmodel.GoalTransaction
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.log10
 
 @Composable
 fun GoalDetailScreen(
@@ -72,13 +77,11 @@ fun GoalDetailScreen(
     GoalDetailScreenContent(
         uiState = uiState,
         onNavigateBack = { navController.popBackStack() },
-        // ACTUALIZADO: Pasamos el goalId al navegar al ingreso rápido
         onNavigateToIncome = { goalId -> navController.navigate("quick_save?goalId=$goalId") }, 
         onNavigateToEdit = { goalId -> navController.navigate("goal_form?goalId=$goalId") },
         onShowMenu = viewModel::onShowMenu,
         onDeleteGoal = viewModel::deleteGoal,
         onRecurringChanged = viewModel::onRecurringChanged,
-        // ACTUALIZADO: Navegamos a la pantalla de edición de transacciones
         onTransactionClick = { transaction -> navController.navigate("transaction_edit/${transaction.id}") }
     )
 }
@@ -88,7 +91,7 @@ fun GoalDetailScreen(
 fun GoalDetailScreenContent(
     uiState: GoalDetailUiState,
     onNavigateBack: () -> Unit,
-    onNavigateToIncome: (String) -> Unit, // ACTUALIZADO: Ahora recibe el goalId
+    onNavigateToIncome: (String) -> Unit,
     onNavigateToEdit: (String) -> Unit,
     onShowMenu: (Boolean) -> Unit,
     onDeleteGoal: () -> Unit,
@@ -101,13 +104,7 @@ fun GoalDetailScreenContent(
         topBar = {
             if (goal != null) {
                 TopAppBar(
-                    title = {
-                        Text(
-                            text = goal.title,
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    },
+                    title = { Text(goal.title, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.SemiBold) },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.goal_detail_back_button_description))
@@ -125,7 +122,7 @@ fun GoalDetailScreenContent(
                                 text = { Text(stringResource(id = R.string.goal_detail_edit_goal_menu_item)) },
                                 onClick = {
                                     onShowMenu(false)
-                                    uiState.goal.id.let(onNavigateToEdit)
+                                    onNavigateToEdit(goal.id)
                                 }
                             )
                             DropdownMenuItem(
@@ -167,13 +164,14 @@ fun GoalDetailScreenContent(
                     ) {
                         PrimaryButton(
                             text = stringResource(id = R.string.goal_detail_deposit_button),
-                            // ACTUALIZADO: Pasamos el goal.id a la función de navegación
-                            onClick = { onNavigateToIncome(goal.id) }, 
+                            onClick = { onNavigateToIncome(goal.id) },
+                            // ARREGLADO: El botón se deshabilita si la meta ya se ha completado (100% o más).
+                            enabled = goal.progress < 1.0f,
                             modifier = Modifier.weight(1f)
                         )
                         SecondaryButton(
                             text = stringResource(id = R.string.goal_detail_edit_goal_button),
-                            onClick = { uiState.goal.id.let(onNavigateToEdit) },
+                            onClick = { onNavigateToEdit(goal.id) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -214,39 +212,36 @@ private fun GoalSummary(goal: GoalDetail) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(Spacing.xl),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            Box(
-                modifier = Modifier.size(160.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    progress = { goal.progress },
-                    modifier = Modifier.fillMaxSize(),
+            Box(contentAlignment = Alignment.Center) {
+                DonutChart(
+                    progress = goal.progress,
                     color = goal.color,
-                    strokeWidth = 14.dp,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    modifier = Modifier.size(180.dp)
                 )
-                Text(
-                    text = "${(goal.progress * 100).toInt()}%",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = goal.color
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "${(goal.progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = goal.color
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.xs))
+                    Text(
+                        text = stringResource(
+                            id = R.string.goal_detail_progress_label,
+                            formatNumber(goal.savedAmount),
+                            formatNumber(goal.targetAmount)
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(Spacing.lg))
-
-            Text(
-                text = stringResource(id = R.string.goal_detail_saved_amount, goal.savedAmount, goal.targetAmount),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
+            
             Text(
                 text = stringResource(id = R.string.goal_detail_target_date, goal.targetDate),
                 style = MaterialTheme.typography.bodyLarge,
@@ -255,6 +250,41 @@ private fun GoalSummary(goal: GoalDetail) {
             )
         }
     }
+}
+
+@Composable
+fun DonutChart(
+    progress: Float,
+    color: Color,
+    modifier: Modifier = Modifier,
+    strokeWidth: Float = 24f
+) {
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+
+    Canvas(modifier = modifier) {
+        drawArc(
+            color = trackColor,
+            startAngle = 0f,
+            sweepAngle = 360f,
+            useCenter = false,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+        drawArc(
+            color = color,
+            startAngle = -90f,
+            sweepAngle = progress * 360f,
+            useCenter = false,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+    }
+}
+
+private fun formatNumber(number: Double): String {
+    if (number < 1000) return number.toInt().toString()
+    val exp = (log10(number) / 3.0).toInt()
+    val suffix = "kMGTPE"[exp - 1]
+    val value = number / Math.pow(10.0, (exp * 3).toDouble())
+    return String.format("%.1f%c", value, suffix)
 }
 
 @Composable
@@ -298,16 +328,15 @@ fun GoalDetailScreenPreview() {
                 goal = GoalDetail(
                     id = "1",
                     title = "Viaje a Cusco",
-                    savedAmount = "3,420",
-                    targetAmount = "5,000",
-                    progress = 0.65f,
+                    savedAmount = 3420.0,
+                    targetAmount = 5000.0,
+                    progress = 0.68f,
                     icon = "✈️",
                     color = primaryLight,
                     targetDate = "15 Oct 2024"
                 ),
                 transactions = listOf(
-                    GoalTransaction("1", "Ingreso automático", "Hoy, 09:30", "+S/ 200", primaryLight, "💰", primaryLight),
-                    GoalTransaction("2", "Ingreso extra", "Ayer, 14:20", "+S/ 50", primaryLight, "💸", primaryLight)
+                    GoalTransaction("1", "Ingreso automático", "Hoy, 09:30", "+S/ 200", primaryLight, "💰", primaryLight)
                 ),
                 isLoading = false
             ),
