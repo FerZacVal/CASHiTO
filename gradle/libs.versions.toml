@@ -1,8 +1,9 @@
+
 [versions]
-agp = "8.3.2"
-kotlin = "1.9.22"
-ksp = "1.9.22-1.0.17"
-composeCompiler = "1.5.8"
+agp = "8.9.1"
+kotlin = "1.9.23"
+ksp = "1.9.23-1.0.20"
+composeCompiler = "1.5.12"
 composeBom = "2024.05.00"
 coreKtx = "1.13.1"
 activityCompose = "1.9.0"
@@ -17,6 +18,7 @@ koin = "3.5.6"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+charts = "0.2.4-alpha"
 
 [libraries]
 # Core & Lifecycle
@@ -31,7 +33,7 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" } # AÑADIDO
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
@@ -52,6 +54,9 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 # Koin
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
+
+#Charts
+charts = { group = "com.github.tehras", name = "charts", version.ref = "charts" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

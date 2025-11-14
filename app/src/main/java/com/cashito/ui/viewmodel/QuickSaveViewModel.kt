@@ -8,9 +8,6 @@ import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.income.Income
 import com.cashito.domain.repositories.category.CategoryRepository
 import com.cashito.domain.usecases.income.AddIncomeUseCase
-import com.cashito.ui.theme.primaryLight
-import com.cashito.ui.theme.secondaryLight
-import com.cashito.ui.theme.tertiaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -139,8 +136,8 @@ class QuickSaveViewModel(
                             icon = selectedCategory.icon,
                             color = selectedCategory.colorHex,
                             budget = null
-                        )
-                        goalId = state.goalId // <-- AÑADIDO: Pasamos el goalId al crear el ingreso
+                        ),
+                        goalId = state.goalId // <-- CORREGIDO: Coma añadida
                     )
                     addIncomeUseCase(income)
                     _uiState.update { it.copy(incomeConfirmed = true) }

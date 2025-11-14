@@ -1,5 +1,6 @@
 package com.cashito.di
 
+import com.cashito.domain.usecases.auth.AutoLoginUseCase
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
