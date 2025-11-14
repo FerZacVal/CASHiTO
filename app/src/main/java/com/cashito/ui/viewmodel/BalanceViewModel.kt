@@ -6,9 +6,7 @@ import com.cashito.domain.entities.transaction.TransactionType
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.time.ZoneId
-import java.time.temporal.WeekFields
-import java.util.Locale
+import java.util.Calendar
 
 data class BalanceEntry(val label: String, val balance: Float)
 data class BalanceSummary(val currentBalance: Float, val change: Float, val periodLabel: String)
@@ -32,13 +30,21 @@ class BalanceViewModel(
     ) { result, period ->
         result.fold(
             onSuccess = { transactions ->
+                val calendar = Calendar.getInstance()
+
                 val grouped = when (period) {
-                    "Diario" -> transactions.groupBy { it.date.toInstant().atZone(ZoneId.systemDefault()).dayOfMonth }
-                    "Semanal" -> transactions.groupBy {
-                        it.date.toInstant().atZone(ZoneId.systemDefault())
-                            .get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+                    "Diario" -> transactions.groupBy { 
+                        calendar.time = it.date
+                        calendar.get(Calendar.DAY_OF_MONTH)
                     }
-                    "Mensual" -> transactions.groupBy { it.date.toInstant().atZone(ZoneId.systemDefault()).monthValue }
+                    "Semanal" -> transactions.groupBy { 
+                        calendar.time = it.date
+                        calendar.get(Calendar.WEEK_OF_YEAR)
+                    }
+                    "Mensual" -> transactions.groupBy { 
+                        calendar.time = it.date
+                        calendar.get(Calendar.MONTH)
+                    }
                     else -> emptyMap()
                 }
 

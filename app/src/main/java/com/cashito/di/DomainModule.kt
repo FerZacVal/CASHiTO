@@ -1,9 +1,12 @@
 package com.cashito.di
 
+import com.cashito.domain.usecases.auth.AutoLoginUseCase
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
 import com.cashito.domain.usecases.balance.GetBalanceUseCase
+import com.cashito.domain.usecases.category.GetCategoryByIdUseCase
+import com.cashito.domain.usecases.category.UpdateCategoryUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
 import com.cashito.domain.usecases.goal.CreateGoalUseCase
 import com.cashito.domain.usecases.goal.DeleteGoalUseCase
@@ -27,6 +30,7 @@ val domainModule = module {
     factory { RegisterUseCase(get()) }
     factory { LoginUseCase(get()) }
     factory { GetCurrentUserUseCase(get()) }
+    factory { AutoLoginUseCase(get(), get()) }
 
     // Income & Expense
     // ARREGLADO: Se inyectan ambos repositorios (Income y Goal) para mantener la consistencia de datos.
@@ -49,6 +53,10 @@ val domainModule = module {
 
     // Balance
     factory { GetBalanceUseCase(get(), get()) }
+
+    // Category
+    factory { GetCategoryByIdUseCase(get()) }
+    factory { UpdateCategoryUseCase(get()) } // ACTUALIZADO
 
     // Reports
     factory { ObserveReportsUseCase(get(), get()) }

@@ -1,5 +1,6 @@
 package com.cashito.ui.screens.category_form
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -38,9 +40,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.cashito.R
 import com.cashito.ui.components.buttons.PrimaryButton
@@ -54,11 +56,12 @@ import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.CategoryFormUiState
 import com.cashito.ui.viewmodel.CategoryFormViewModel
 import com.cashito.ui.viewmodel.CategoryType
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CategoryFormScreen(
     navController: NavController,
-    viewModel: CategoryFormViewModel = viewModel()
+    viewModel: CategoryFormViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -71,6 +74,7 @@ fun CategoryFormScreen(
     CategoryFormScreenContent(
         uiState = uiState,
         onCategoryNameChange = viewModel::onCategoryNameChange,
+        onBudgetChange = viewModel::onBudgetChange,
         onCategoryTypeChange = viewModel::onCategoryTypeChange,
         onIconSelected = viewModel::onIconSelected,
         onColorSelected = viewModel::onColorSelected,
@@ -84,6 +88,7 @@ fun CategoryFormScreen(
 fun CategoryFormScreenContent(
     uiState: CategoryFormUiState,
     onCategoryNameChange: (String) -> Unit,
+    onBudgetChange: (String) -> Unit,
     onCategoryTypeChange: (CategoryType) -> Unit,
     onIconSelected: (String) -> Unit,
     onColorSelected: (Color) -> Unit,
@@ -150,6 +155,19 @@ fun CategoryFormScreenContent(
                     errorMessage = uiState.categoryNameError
                 )
 
+                // --- Campo de Presupuesto (Aparece condicionalmente) ---
+                AnimatedVisibility(visible = uiState.categoryType == CategoryType.EXPENSE) {
+                    Column {
+                        Spacer(modifier = Modifier.height(Spacing.lg))
+                        CashitoTextField(
+                            value = uiState.budget,
+                            onValueChange = onBudgetChange,
+                            label = stringResource(id = R.string.category_form_budget_label),
+                            placeholder = stringResource(id = R.string.category_form_budget_placeholder)
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(Spacing.lg))
                 Text(stringResource(id = R.string.category_form_icon_label), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(Spacing.sm))
@@ -213,6 +231,7 @@ fun CategoryFormScreenPreview() {
         CategoryFormScreenContent(
             uiState = CategoryFormUiState(categoryType = CategoryType.EXPENSE, isFormValid = true),
             onCategoryNameChange = {},
+            onBudgetChange = {},
             onCategoryTypeChange = {},
             onIconSelected = {},
             onColorSelected = {},

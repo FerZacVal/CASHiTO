@@ -78,7 +78,8 @@ fun DashboardScreen(
         onAddCategoryClick = { navController.navigate(Routes.CATEGORY_FORM) },
         onCreateGoalClick = { navController.navigate(Routes.GOAL_FORM) },
         onNotificationClick = { /* TODO */ },
-        onTransactionItemClick = { /* TODO */ }
+        onTransactionItemClick = { /* TODO */ },
+        onCategoriesClick = { navController.navigate(Routes.CATEGORIES) }
     )
 }
 
@@ -96,6 +97,7 @@ fun DashboardScreenContent(
     onCreateGoalClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onTransactionItemClick: (DashboardTransaction) -> Unit,
+    onCategoriesClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -215,6 +217,13 @@ fun DashboardScreenContent(
                             icon = "🎯",
                             isPrimary = false,
                             onClick = onCreateGoalClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                        QuickActionButton(
+                            text = stringResource(id = R.string.dashboard_quick_action_categories),
+                            icon = "cat",
+                            isPrimary = false,
+                            onClick = onCategoriesClick,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -435,7 +444,8 @@ fun DashboardScreenPreview() {
             onAddCategoryClick = {},
             onCreateGoalClick = {},
             onNotificationClick = {},
-            onTransactionItemClick = {}
+            onTransactionItemClick = {},
+            onCategoriesClick = {}
         )
     }
 }

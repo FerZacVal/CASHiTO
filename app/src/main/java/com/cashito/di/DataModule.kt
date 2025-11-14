@@ -1,15 +1,19 @@
 package com.cashito.di
 
-import com.cashito.core.CredentialsManager
+import androidx.room.Room
+import com.cashito.data.datasources.firebase.CategoryDataSource
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
 import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
 import com.cashito.data.datasources.firebase.GoalDataSource
+import com.cashito.data.datasources.local.CashitoDatabase
 import com.cashito.data.repositories.AuthRepositoryImpl
+import com.cashito.data.repositories.CategoryRepositoryImpl
 import com.cashito.data.repositories.ExpenseRepositoryImpl
 import com.cashito.data.repositories.GoalRepositoryImpl
 import com.cashito.data.repositories.IncomeRepositoryImpl
 import com.cashito.data.repositories.TransactionRepositoryImpl
 import com.cashito.domain.repositories.auth.AuthRepository
+import com.cashito.domain.repositories.category.CategoryRepository
 import com.cashito.domain.repositories.expense.ExpenseRepository
 import com.cashito.domain.repositories.goal.GoalRepository
 import com.cashito.domain.repositories.income.IncomeRepository
@@ -21,8 +25,11 @@ import org.koin.dsl.module
 
 val dataModule = module {
 
-    // --- Managers ---
-    single { CredentialsManager(androidContext()) }
+    // --- Room Database ---
+    single { Room.databaseBuilder(androidContext(), CashitoDatabase::class.java, CashitoDatabase.DATABASE_NAME).build() }
+
+    // --- DAOs ---
+    single { get<CashitoDatabase>().userCredentialsDao() }
 
     // --- Firebase Instances ---
     single { FirebaseAuth.getInstance() }
@@ -31,12 +38,14 @@ val dataModule = module {
     // --- DataSources ---
     single { FirebaseAuthDataSource(get()) }
     single { FirebaseTransactionDataSource(get(), get()) }
-    single { GoalDataSource(get(), get()) } // AÑADIDO
+    single { GoalDataSource(get(), get()) }
+    single { CategoryDataSource(get(), get()) } // AÑADIDO
 
     // --- Repositories ---
-    single<AuthRepository> { AuthRepositoryImpl(get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<ExpenseRepository> { ExpenseRepositoryImpl(get()) }
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
     single<TransactionRepository> { TransactionRepositoryImpl(get()) }
-    single<GoalRepository> { GoalRepositoryImpl(get()) } // AÑADIDO
+    single<GoalRepository> { GoalRepositoryImpl(get()) }
+    single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) } // AÑADIDO
 }

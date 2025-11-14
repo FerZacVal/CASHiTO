@@ -1,6 +1,8 @@
 package com.cashito.data.repositories
 
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
+import com.cashito.data.datasources.local.UserCredentialEntity
+import com.cashito.data.datasources.local.UserCredentialsDao
 import com.cashito.data.mappers.toDomain
 import com.cashito.domain.entities.auth.User
 import com.cashito.domain.repositories.auth.AuthError
@@ -12,7 +14,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class AuthRepositoryImpl(
-    private val firebaseAuthDataSource: FirebaseAuthDataSource
+    private val firebaseAuthDataSource: FirebaseAuthDataSource,
+    private val userCredentialsDao: UserCredentialsDao // Inyectado
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): User {
@@ -40,11 +43,10 @@ class AuthRepositoryImpl(
     override suspend fun getCurrentUser(): User? {
         val userProfileMap = firebaseAuthDataSource.getUserProfile() ?: return null
 
-        // CORRECCIÓN: Usar los nombres de campo correctos de la entidad User y del Map de Firestore
         return User(
             uid = userProfileMap["userId"] as? String ?: "",
             email = userProfileMap["email"] as? String,
-            displayName = userProfileMap["nombre"] as? String // El campo en Firestore es "nombre"
+            displayName = userProfileMap["nombre"] as? String
         )
     }
 
@@ -56,5 +58,26 @@ class AuthRepositoryImpl(
 
     override suspend fun logout() {
         firebaseAuthDataSource.signOut()
+        clearCredentials() // Limpiar credenciales al cerrar sesión
+    }
+
+    // --- Implementación de los nuevos métodos ---
+
+    override suspend fun saveCredentials(email: String, password: String) {
+        val credentialEntity = UserCredentialEntity(email = email, password = password)
+        userCredentialsDao.insertOrUpdate(credentialEntity)
+    }
+
+    override suspend fun getSavedCredentials(): Pair<String, String>? {
+        val credentials = userCredentialsDao.getCredentials()
+        return credentials?.let { Pair(it.email, it.password) }
+    }
+
+    override suspend fun clearCredentials() {
+        userCredentialsDao.clearCredentials()
+    }
+
+    override suspend fun hasSavedCredentials(): Boolean {
+        return userCredentialsDao.getCredentials() != null
     }
 }

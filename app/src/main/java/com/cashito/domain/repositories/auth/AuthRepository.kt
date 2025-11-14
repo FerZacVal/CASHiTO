@@ -9,6 +9,12 @@ interface AuthRepository {
     suspend fun logout()
     fun getAuthState(): Flow<User?>
     suspend fun getCurrentUser(): User?
+
+    // --- Métodos para la gestión de credenciales ---
+    suspend fun saveCredentials(email: String, password: String)
+    suspend fun getSavedCredentials(): Pair<String, String>?
+    suspend fun clearCredentials()
+    suspend fun hasSavedCredentials(): Boolean
 }
 
 // --- ERROR HANDLING ---

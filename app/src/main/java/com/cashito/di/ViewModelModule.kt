@@ -1,6 +1,8 @@
 package com.cashito.di
 
 import com.cashito.ui.viewmodel.BalanceViewModel
+import com.cashito.ui.viewmodel.CategoriesViewModel
+import com.cashito.ui.viewmodel.CategoryEditViewModel
 import com.cashito.ui.viewmodel.CategoryExpenseReportViewModel
 import com.cashito.ui.viewmodel.CategoryFormViewModel
 import com.cashito.ui.viewmodel.CreateUserViewModel
@@ -14,6 +16,7 @@ import com.cashito.ui.viewmodel.ProfileViewModel
 import com.cashito.ui.viewmodel.QuickOutViewModel
 import com.cashito.ui.viewmodel.QuickSaveViewModel
 import com.cashito.ui.viewmodel.ReportsViewModel
+import com.cashito.ui.viewmodel.SplashViewModel
 import com.cashito.ui.viewmodel.TransactionEditViewModel
 import com.cashito.ui.viewmodel.TransactionsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -21,17 +24,20 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
 
-    // --- Auth ViewModels (necesitan UseCase) ---
+    // --- Splash ---
+    viewModel { SplashViewModel(get()) }
+
+    // --- Auth ViewModels ---
     viewModel { LoginViewModel(get(), get()) }
     viewModel { CreateUserViewModel(get()) }
 
-    // --- Transaction ViewModels (necesitan UseCase y/o SavedStateHandle) ---
-    viewModel { QuickOutViewModel(get(), get()) }
-    viewModel { QuickSaveViewModel(get(), get()) }
+    // --- Transaction ViewModels ---
+    viewModel { QuickOutViewModel(get(), get(), get()) }
+    viewModel { QuickSaveViewModel(get(), get(), get()) }
     viewModel { TransactionsViewModel(get(), get()) }
     viewModel { TransactionEditViewModel(get(), get(), get()) }
 
-    // --- Goal ViewModels (necesitan SavedStateHandle) ---
+    // --- Goal ViewModels ---
     viewModel { GoalsViewModel(get()) }
     viewModel { GoalDetailViewModel(get(), get(), get(), get()) }
     // ARREGLADO: Se inyectan los tres casos de uso necesarios para crear, leer y actualizar metas.
@@ -41,11 +47,14 @@ val viewModelModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { ProfileViewModel(get()) }
 
-    // --- ViewModels sin dependencias ---
-    viewModel { CategoryFormViewModel() }
+    // --- Category ViewModels ---
+    viewModel { CategoryFormViewModel(get()) }
+    viewModel { CategoriesViewModel(get()) }
+    viewModel { CategoryEditViewModel(get(), get(), get()) } // ACTUALIZADO
+
+    // --- Reports & Balance ViewModels ---
     viewModel { ReportsViewModel(get()) }
     viewModel { CategoryExpenseReportViewModel(get()) }
     viewModel { IncomeReportViewModel(get()) }
     viewModel { BalanceViewModel(get()) }
-
 }
