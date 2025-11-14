@@ -1,3 +1,4 @@
+
 package com.cashito.ui.screens.goal_detail
 
 import androidx.compose.foundation.background
@@ -32,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -62,12 +64,19 @@ fun GoalDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(uiState.goalDeleted) {
+        if (uiState.goalDeleted) {
+            navController.popBackStack()
+        }
+    }
+
     GoalDetailScreenContent(
         uiState = uiState,
         onNavigateBack = { navController.popBackStack() },
         onNavigateToIncome = { navController.navigate("quick_save") },
         onNavigateToEdit = { goalId -> navController.navigate("goal_form?goalId=$goalId") },
         onShowMenu = viewModel::onShowMenu,
+        onDeleteGoal = viewModel::deleteGoal,
         onRecurringChanged = viewModel::onRecurringChanged,
         onTransactionClick = { /* TODO */ }
     )
@@ -81,6 +90,7 @@ fun GoalDetailScreenContent(
     onNavigateToIncome: () -> Unit,
     onNavigateToEdit: (String) -> Unit,
     onShowMenu: (Boolean) -> Unit,
+    onDeleteGoal: () -> Unit,
     onRecurringChanged: (Boolean) -> Unit,
     onTransactionClick: (GoalTransaction) -> Unit
 ) {
@@ -119,7 +129,10 @@ fun GoalDetailScreenContent(
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(id = R.string.goal_detail_delete_goal_menu_item), color = MaterialTheme.colorScheme.error) },
-                                onClick = { onShowMenu(false) }
+                                onClick = {
+                                    onShowMenu(false)
+                                    onDeleteGoal()
+                                }
                             )
                         }
                     },
@@ -300,6 +313,7 @@ fun GoalDetailScreenPreview() {
             onNavigateToIncome = {},
             onNavigateToEdit = {},
             onShowMenu = {},
+            onDeleteGoal = {},
             onRecurringChanged = {},
             onTransactionClick = {}
         )

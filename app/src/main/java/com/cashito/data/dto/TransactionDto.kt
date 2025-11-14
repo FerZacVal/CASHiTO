@@ -1,3 +1,4 @@
+
 package com.cashito.data.dto
 
 import com.google.firebase.firestore.Exclude
@@ -6,7 +7,7 @@ import java.util.Date
 
 /**
  * Data Transfer Object (DTO) que representa la estructura de un documento
- * en la colección 'Transacciones' de Firestore.
+ * en la colección \'Transacciones\' de Firestore.
  */
 data class TransactionDto(
     @get:Exclude var id: String = "", // ID del documento de Firestore. Se excluye de la serialización.
@@ -18,5 +19,6 @@ data class TransactionDto(
     val type: String = "", // "ingreso" o "gasto"
     val categoryId: String = "",
     val categoryName: String = "",
-    val categoryIcon: String = ""
+    val categoryIcon: String = "",
+    val goalId: String? = null // ID de la meta a la que está asociada la transacción
 )

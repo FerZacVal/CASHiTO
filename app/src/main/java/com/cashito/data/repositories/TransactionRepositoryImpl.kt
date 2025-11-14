@@ -1,3 +1,4 @@
+
 package com.cashito.data.repositories
 
 import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
@@ -6,6 +7,8 @@ import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.transaction.Transaction
 import com.cashito.domain.entities.transaction.TransactionType
 import com.cashito.domain.repositories.transaction.TransactionRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class TransactionRepositoryImpl(
     private val dataSource: FirebaseTransactionDataSource
@@ -30,6 +33,12 @@ class TransactionRepositoryImpl(
     override suspend fun deleteTransaction(transactionId: String) {
         dataSource.deleteTransaction(transactionId)
     }
+
+    override suspend fun getTransactionsForGoal(goalId: String): Flow<List<Transaction>> {
+        return dataSource.observeTransactionsByGoal(goalId).map { dtoList ->
+            dtoList.map { it.toDomainTransaction() }
+        }
+    }
 }
 
 // Mapper function to convert DTO to Domain entity
@@ -45,6 +54,7 @@ private fun TransactionDto.toDomainTransaction(): Transaction {
             icon = this.categoryIcon,
             color = ""
         ),
-        type = if (this.type == "ingreso") TransactionType.INCOME else TransactionType.EXPENSE
+        type = if (this.type == "ingreso") TransactionType.INCOME else TransactionType.EXPENSE,
+        goalId = this.goalId
     )
 }
