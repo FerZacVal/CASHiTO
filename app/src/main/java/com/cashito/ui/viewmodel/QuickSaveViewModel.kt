@@ -8,6 +8,9 @@ import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.income.Income
 import com.cashito.domain.repositories.category.CategoryRepository
 import com.cashito.domain.usecases.income.AddIncomeUseCase
+import com.cashito.ui.theme.primaryLight
+import com.cashito.ui.theme.secondaryLight
+import com.cashito.ui.theme.tertiaryLight
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +33,7 @@ data class QuickSaveCategory(
 
 data class QuickSaveUiState(
     val transactionId: String? = null,
+    val goalId: String? = null, // <-- AÑADIDO: Para guardar el contexto de la meta
     val isEditing: Boolean = false,
     val presetAmounts: List<String> = listOf("50", "100", "500", "1000"),
     val categories: List<QuickSaveCategory> = emptyList(),
@@ -53,6 +57,10 @@ class QuickSaveViewModel(
     init {
         observeCategories() // CAMBIADO
         val transactionId: String? = savedStateHandle["transactionId"]
+        val goalId: String? = savedStateHandle["goalId"]
+
+        _uiState.update { it.copy(goalId = goalId) } // Guardamos el goalId en el estado
+
         if (transactionId != null) {
             loadIncomeForEditing(transactionId)
         }
@@ -107,6 +115,7 @@ class QuickSaveViewModel(
 
     fun onConfirmIncome() {
         if (!_uiState.value.isConfirmEnabled) return
+
         _uiState.update { it.copy(isConfirmEnabled = false) }
 
         if (_uiState.value.isEditing) {
@@ -131,6 +140,7 @@ class QuickSaveViewModel(
                             color = selectedCategory.colorHex,
                             budget = null
                         )
+                        goalId = state.goalId // <-- AÑADIDO: Pasamos el goalId al crear el ingreso
                     )
                     addIncomeUseCase(income)
                     _uiState.update { it.copy(incomeConfirmed = true) }

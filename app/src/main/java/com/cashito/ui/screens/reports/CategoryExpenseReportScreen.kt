@@ -63,6 +63,22 @@ import com.cashito.ui.viewmodel.CategoryExpenseReportViewModel
 import com.cashito.ui.viewmodel.ChartType
 import org.koin.androidx.compose.koinViewModel
 
+// --- Imports para Pie Chart ---
+import com.github.tehras.charts.piechart.PieChart
+import com.github.tehras.charts.piechart.PieChartData
+import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
+// Importamos la animación de pie y le ponemos un alias (apodo)
+import com.github.tehras.charts.piechart.animation.simpleChartAnimation as simplePieAnimation
+
+// --- Imports para Bar Chart ---
+import com.github.tehras.charts.bar.BarChart
+import com.github.tehras.charts.bar.BarChartData
+import com.github.tehras.charts.bar.renderer.bar.SimpleBarDrawer
+import com.github.tehras.charts.bar.renderer.xaxis.SimpleXAxisDrawer
+import com.github.tehras.charts.bar.renderer.yaxis.SimpleYAxisDrawer
+// Importamos la animación de barra y le ponemos un alias
+//import com.github.tehras.charts.Barchart.simpleChartAnimation as simpleBarAnimation
+
 
 @Composable
 fun CategoryExpenseReportScreen(
@@ -134,15 +150,49 @@ fun CategoryExpenseReportScreenContent(
                 item {
                     Crossfade(targetState = uiState.chartType, label = "chart-animation") { chartType ->
                         when(chartType) {
-                            ChartType.PIE -> PieChart(
-                                entries = uiState.expenses.map { PieChartEntry(it.amount, it.color) },
-                                modifier = Modifier.size(250.dp),
-                                emptyChartMessage = stringResource(id = R.string.category_expense_report_empty_chart_message)
-                            )
-                            ChartType.BAR -> BarChart(
-                                entries = uiState.expenses.map { BarChartEntry(it.amount, it.color, it.categoryName) },
-                                modifier = Modifier.height(250.dp).fillMaxWidth()
-                            )
+
+                            ChartType.PIE -> {
+                                // 1. Transformamos List<CategoryIncome> a List<PieChartData.Slice>
+                                val slices = uiState.expenses.map { expense ->
+                                    PieChartData.Slice(
+                                        value = expense.amount, // El valor
+                                        color = expense.color   // El color
+                                    )
+                                }
+                                // 2. Creamos el objeto de datos
+                                val pieChartData = PieChartData(slices = slices)
+
+                                // 3. Llamamos al Composable de YCharts
+                                PieChart(
+                                    pieChartData = pieChartData,
+                                    modifier = Modifier.size(250.dp),
+                                    animation = simplePieAnimation(), // Usamos el alias
+                                    sliceDrawer = SimpleSliceDrawer() // El "dibujador" de torta
+                                )
+                            }
+
+                            ChartType.BAR -> {
+                                // 1. Transformamos List<CategoryIncome> a List<BarChartData.Bar>
+                                val bars = uiState.expenses.map { expense ->
+                                    BarChartData.Bar(
+                                        value = expense.amount,
+                                        color = expense.color,
+                                        label = expense.categoryName // La etiqueta
+                                    )
+                                }
+                                // 2. Creamos el objeto de datos
+                                val barChartData = BarChartData(bars = bars)
+
+                                // 3. Llamamos al Composable de YCharts
+                                BarChart(
+                                    barChartData = barChartData,
+                                    modifier = Modifier.height(250.dp).fillMaxWidth(),
+                                    //animation = simpleBarAnimation(), // Usamos el alias
+                                    barDrawer = SimpleBarDrawer(), // El "dibujador" de barras
+                                    xAxisDrawer = SimpleXAxisDrawer(), // Dibujador de eje X
+                                    yAxisDrawer = SimpleYAxisDrawer()  // Dibujador de eje Y
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(Spacing.xl))

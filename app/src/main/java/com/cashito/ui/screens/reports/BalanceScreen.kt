@@ -52,6 +52,14 @@ import java.text.NumberFormat
 import java.util.Locale
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material3.Icon as Icon1
+import com.github.tehras.charts.line.LineChartData
+import com.github.tehras.charts.piechart.animation.simpleChartAnimation
+import com.github.tehras.charts.line.renderer.point.FilledCircularPointDrawer
+import com.github.tehras.charts.line.renderer.line.SolidLineDrawer
+import com.github.tehras.charts.line.LineChartData.Point
+import com.github.tehras.charts.line.renderer.xaxis.SimpleXAxisDrawer
+import com.github.tehras.charts.line.renderer.yaxis.SimpleYAxisDrawer
+import com.github.tehras.charts.line.LineChart
 
 @Composable
 fun BalanceScreen(
@@ -110,11 +118,47 @@ fun BalanceScreenContent(
                 }
                 item {
                     Card(
-                        modifier = Modifier.fillMaxWidth().height(250.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
                     ) {
                         if (uiState.balanceData.isNotEmpty()) {
-                            LineChart(data = uiState.balanceData, modifier = Modifier.padding(Spacing.lg).fillMaxSize())
+
+                            val points = uiState.balanceData.map { entry ->
+                                LineChartData.Point(value = entry.balance, label = entry.label)
+                            }
+
+                            // --- LA CLAVE ESTÁ AQUÍ ---
+
+                            // 1. LineChartData SOLO necesita 'points' y 'lineDrawer'
+                            val lineChartData = LineChartData(
+                                points = points,
+                                lineDrawer = SolidLineDrawer()
+                            )
+
+                            // 2. LineChart (el composable) recibe LOS OTROS drawers
+                            LineChart(
+                                linesChartData = listOf(lineChartData),
+                                modifier = Modifier
+                                    .padding(Spacing.lg)
+                                    .fillMaxSize(),
+
+                                // Parámetros del composable LineChart
+                                animation = simpleChartAnimation(),
+                                horizontalOffset = 5f,
+
+                                // ¡Estos 3 SÍ van aquí!
+                                pointDrawer = FilledCircularPointDrawer(),
+                                xAxisDrawer = SimpleXAxisDrawer(),
+                                yAxisDrawer = SimpleYAxisDrawer()
+                            )
+                            // --- FIN ---
+
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("No hay datos para mostrar")
+                            }
                         }
                     }
                 }

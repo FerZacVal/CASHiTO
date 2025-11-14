@@ -133,15 +133,23 @@ class FirebaseTransactionDataSource(
         }
     }
 
-    suspend fun updateTransaction(transactionId: String, updatedData: Map<String, Any>) {
+    /**
+     * ARREGLADO: Actualiza un documento de transacción completo en Firestore.
+     * Este método ahora acepta un DTO completo y usa `set` para reemplazar el documento,
+     * asegurando que todos los campos se actualicen de manera atómica y consistente.
+     */
+    suspend fun updateTransaction(transactionId: String, transactionDto: TransactionDto) {
         val userId = auth.currentUser?.uid ?: run {
             Log.e("FlowDebug", "DataSource: FATAL - User is not authenticated. Cannot update transaction.")
             throw IllegalStateException("Usuario no autenticado")
         }
+        
+        // Aseguramos que el userId esté en el DTO antes de guardarlo.
+        transactionDto.userId = userId
 
         Log.d("FlowDebug", "DataSource: Updating document $transactionId for user $userId.")
         firestore.collection("Usuarios").document(userId).collection("Transacciones").document(transactionId)
-            .update(updatedData).await()
+            .set(transactionDto).await() // Usamos .set() para sobrescribir el documento completo.
         Log.d("FlowDebug", "DataSource: Document successfully updated.")
     }
 
@@ -154,5 +162,33 @@ class FirebaseTransactionDataSource(
         Log.d("FlowDebug", "DataSource: Deleting document $transactionId for user $userId.")
         firestore.collection("Usuarios").document(userId).collection("Transacciones").document(transactionId).delete().await()
         Log.d("FlowDebug", "DataSource: Document successfully deleted.")
+    }
+
+    fun observeTransactionsByGoal(goalId: String): Flow<List<TransactionDto>> = callbackFlow {
+        val userId = auth.currentUser?.uid ?: run {
+            close(IllegalStateException("User not authenticated"))
+            return@callbackFlow
+        }
+
+        val listenerRegistration = firestore.collection("Usuarios")
+            .document(userId)
+            .collection("Transacciones")
+            .whereEqualTo("goalId", goalId)
+            .orderBy("date", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val transactions = snapshot.documents.mapNotNull { document ->
+                        document.toObject(TransactionDto::class.java)?.apply { id = document.id }
+                    }
+                    trySend(transactions)
+                }
+            }
+
+        awaitClose { listenerRegistration.remove() }
     }
 }

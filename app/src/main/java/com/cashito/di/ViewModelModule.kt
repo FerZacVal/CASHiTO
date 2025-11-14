@@ -39,8 +39,9 @@ val viewModelModule = module {
 
     // --- Goal ViewModels ---
     viewModel { GoalsViewModel(get()) }
-    viewModel { GoalDetailViewModel(get()) }
-    viewModel { GoalFormViewModel(get(), get()) }
+    viewModel { GoalDetailViewModel(get(), get(), get(), get()) }
+    // ARREGLADO: Se inyectan los tres casos de uso necesarios para crear, leer y actualizar metas.
+    viewModel { GoalFormViewModel(get(), get(), get(), get()) }
 
     // --- Dashboard & Profile ---
     viewModel { DashboardViewModel(get(), get(), get()) }
