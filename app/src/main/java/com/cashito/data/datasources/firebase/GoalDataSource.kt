@@ -1,3 +1,4 @@
+
 package com.cashito.data.datasources.firebase
 
 import android.util.Log
@@ -15,48 +16,57 @@ class GoalDataSource(
     private val auth: FirebaseAuth
 ) {
 
-    suspend fun addGoal(goalDto: GoalDto) {
-        val userId = auth.currentUser?.uid ?: run {
-            Log.e("GoalDataSource", "Error: User not authenticated.")
-            throw IllegalStateException("Usuario no autenticado para crear meta")
-        }
+    private val userId: String
+        get() = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
 
+    private val goalsCollection
+        get() = firestore.collection("Usuarios").document(userId).collection("Metas")
+
+    suspend fun addGoal(goalDto: GoalDto) {
         goalDto.userId = userId
-        firestore.collection("Usuarios").document(userId).collection("Metas")
-            .add(goalDto)
-            .await()
+        goalsCollection.add(goalDto).await()
     }
 
     fun observeGoals(): Flow<List<GoalDto>> = callbackFlow {
-        val userId = auth.currentUser?.uid
-        if (userId == null) {
-            Log.e("GoalDataSource", "Error: User not authenticated.")
-            close(IllegalStateException("Usuario no autenticado para observar metas"))
-            return@callbackFlow
-        }
-
-        val listenerRegistration = firestore.collection("Usuarios")
-            .document(userId)
-            .collection("Metas")
+        val listenerRegistration = goalsCollection
             .orderBy("creationDate", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Log.e("GoalDataSource", "Error listening to goals snapshot.", error)
                     close(error)
                     return@addSnapshotListener
                 }
-
                 if (snapshot != null) {
                     val goals = snapshot.documents.mapNotNull { document ->
-                        val goal = document.toObject(GoalDto::class.java)
-                        goal?.id = document.id
-                        goal
+                        document.toObject(GoalDto::class.java)?.apply { id = document.id }
                     }
-                    trySend(goals) // Emite la nueva lista de metas
+                    trySend(goals)
                 }
             }
-        
-        // Se llama cuando el Flow es cancelado
         awaitClose { listenerRegistration.remove() }
+    }
+
+    fun observeGoalById(id: String): Flow<GoalDto?> = callbackFlow {
+        val docRef = goalsCollection.document(id)
+        val listener = docRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                val goal = snapshot.toObject(GoalDto::class.java)?.apply { this.id = snapshot.id }
+                trySend(goal)
+            } else {
+                trySend(null)
+            }
+        }
+        awaitClose { listener.remove() }
+    }
+
+    suspend fun deleteGoal(id: String) {
+        goalsCollection.document(id).delete().await()
+    }
+
+    suspend fun updateGoal(goalDto: GoalDto) {
+        goalsCollection.document(goalDto.id).set(goalDto).await()
     }
 }

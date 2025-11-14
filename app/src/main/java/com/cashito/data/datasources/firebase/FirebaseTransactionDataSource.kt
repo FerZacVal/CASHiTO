@@ -1,3 +1,4 @@
+
 package com.cashito.data.datasources.firebase
 
 import android.util.Log
@@ -154,5 +155,33 @@ class FirebaseTransactionDataSource(
         Log.d("FlowDebug", "DataSource: Deleting document $transactionId for user $userId.")
         firestore.collection("Usuarios").document(userId).collection("Transacciones").document(transactionId).delete().await()
         Log.d("FlowDebug", "DataSource: Document successfully deleted.")
+    }
+
+    fun observeTransactionsByGoal(goalId: String): Flow<List<TransactionDto>> = callbackFlow {
+        val userId = auth.currentUser?.uid ?: run {
+            close(IllegalStateException("User not authenticated"))
+            return@callbackFlow
+        }
+
+        val listenerRegistration = firestore.collection("Usuarios")
+            .document(userId)
+            .collection("Transacciones")
+            .whereEqualTo("goalId", goalId)
+            .orderBy("date", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val transactions = snapshot.documents.mapNotNull { document ->
+                        document.toObject(TransactionDto::class.java)?.apply { id = document.id }
+                    }
+                    trySend(transactions)
+                }
+            }
+
+        awaitClose { listenerRegistration.remove() }
     }
 }

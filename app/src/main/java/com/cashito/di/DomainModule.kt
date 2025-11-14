@@ -1,3 +1,4 @@
+
 package com.cashito.di
 
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
@@ -6,13 +7,17 @@ import com.cashito.domain.usecases.auth.RegisterUseCase
 import com.cashito.domain.usecases.balance.GetBalanceUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
 import com.cashito.domain.usecases.goal.CreateGoalUseCase
+import com.cashito.domain.usecases.goal.DeleteGoalUseCase
+import com.cashito.domain.usecases.goal.GetGoalByIdUseCase
 import com.cashito.domain.usecases.goal.GetGoalsUseCase
+import com.cashito.domain.usecases.goal.UpdateGoalUseCase
 import com.cashito.domain.usecases.income.AddIncomeUseCase
 import com.cashito.domain.usecases.reports.ObserveExpenseReportUseCase
 import com.cashito.domain.usecases.reports.ObserveIncomeReportUseCase
 import com.cashito.domain.usecases.reports.ObserveReportsUseCase
 import com.cashito.domain.usecases.transaction.DeleteTransactionUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionByIdUseCase
+import com.cashito.domain.usecases.transaction.GetTransactionsForGoalUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import com.cashito.domain.usecases.transaction.UpdateTransactionUseCase
 import org.koin.dsl.module
@@ -30,13 +35,17 @@ val domainModule = module {
 
     // Goal
     factory { CreateGoalUseCase(get()) }
-    factory { GetGoalsUseCase(get()) } // AÑADIDO
+    factory { GetGoalsUseCase(get()) }
+    factory { GetGoalByIdUseCase(get()) }
+    factory { DeleteGoalUseCase(get()) }
+    factory { UpdateGoalUseCase(get()) }
 
     // Transaction
     factory { GetTransactionsUseCase(get(), get()) }
     factory { GetTransactionByIdUseCase(get()) }
     factory { UpdateTransactionUseCase(get()) }
     factory { DeleteTransactionUseCase(get()) }
+    factory { GetTransactionsForGoalUseCase(get()) }
 
     // Balance
     factory { GetBalanceUseCase(get(), get()) }

@@ -1,3 +1,4 @@
+
 package com.cashito.di
 
 import com.cashito.ui.viewmodel.BalanceViewModel
@@ -33,7 +34,7 @@ val viewModelModule = module {
 
     // --- Goal ViewModels (necesitan SavedStateHandle) ---
     viewModel { GoalsViewModel(get()) }
-    viewModel { GoalDetailViewModel(get()) }
+    viewModel { GoalDetailViewModel(get(), get(), get(), get()) } // ACTUALIZADO
     viewModel { GoalFormViewModel(get(), get()) }
 
     // --- Dashboard & Profile ---

@@ -1,3 +1,4 @@
+
 package com.cashito.data.repositories
 
 import com.cashito.data.datasources.firebase.GoalDataSource
@@ -22,14 +23,30 @@ class GoalRepositoryImpl(
             dtoList.map { it.toDomain() }
         }
     }
+
+    override suspend fun getGoalById(id: String): Flow<Goal?> {
+        return dataSource.observeGoalById(id).map { it?.toDomain() }
+    }
+
+    override suspend fun deleteGoal(id: String) {
+        dataSource.deleteGoal(id)
+    }
+
+    override suspend fun updateGoal(goal: Goal) {
+        val goalDto = goal.toDto()
+        dataSource.updateGoal(goalDto)
+    }
 }
 
 private fun Goal.toDto(): GoalDto {
     return GoalDto(
+        id = this.id,
+        userId = this.userId,
         name = this.name,
         targetAmount = this.targetAmount,
         savedAmount = this.savedAmount,
         targetDate = this.targetDate,
+        creationDate = this.creationDate,
         icon = this.icon,
         colorHex = this.colorHex
     )
