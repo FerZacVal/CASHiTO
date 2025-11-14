@@ -28,6 +28,7 @@ data class QuickSaveCategory(
 
 data class QuickSaveUiState(
     val transactionId: String? = null,
+    val goalId: String? = null, // <-- AÑADIDO: Para guardar el contexto de la meta
     val isEditing: Boolean = false,
     val presetAmounts: List<String> = listOf("50", "100", "500", "1000"),
     val categories: List<QuickSaveCategory> = emptyList(),
@@ -49,7 +50,12 @@ class QuickSaveViewModel(
 
     init {
         loadCategories()
+        // Leemos ambos argumentos de navegación. Pueden ser nulos.
         val transactionId: String? = savedStateHandle["transactionId"]
+        val goalId: String? = savedStateHandle["goalId"]
+
+        _uiState.update { it.copy(goalId = goalId) } // Guardamos el goalId en el estado
+
         if (transactionId != null) {
             loadIncomeForEditing(transactionId)
         }
@@ -139,7 +145,8 @@ class QuickSaveViewModel(
                             name = selectedCategory.title,
                             icon = selectedCategory.icon,
                             color = selectedCategory.colorHex
-                        )
+                        ),
+                        goalId = state.goalId // <-- AÑADIDO: Pasamos el goalId al crear el ingreso
                     )
                     addIncomeUseCase(income)
                     _uiState.update { it.copy(incomeConfirmed = true) }
