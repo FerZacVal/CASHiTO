@@ -24,6 +24,16 @@ class CategoryRepositoryImpl(
             dtoList.map { it.toDomain() }
         }
     }
+
+    override suspend fun getCategoryById(categoryId: String): Category? {
+        return dataSource.getCategoryById(categoryId)?.toDomain()
+    }
+
+    override suspend fun updateCategory(category: Category) { // ACTUALIZADO
+        val userId = auth.currentUser?.uid ?: throw IllegalStateException("Usuario no autenticado")
+        val categoryDto = category.toDto(userId)
+        dataSource.updateCategory(category.id, categoryDto)
+    }
 }
 
 // --- Mappers privados para esta implementación ---
@@ -35,7 +45,7 @@ private fun Category.toDto(userId: String): CategoryDto {
         color = this.color,
         budget = this.budget,
         userId = userId,
-        type = if (this.budget != null) "gasto" else "ingreso" // Asumimos que solo los gastos tienen presupuesto
+        type = if (this.budget != null && this.budget > 0) "gasto" else "ingreso"
     )
 }
 

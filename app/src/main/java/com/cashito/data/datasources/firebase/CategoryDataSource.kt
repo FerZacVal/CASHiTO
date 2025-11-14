@@ -21,7 +21,6 @@ class CategoryDataSource(
         get() = firestore.collection("Usuarios").document(userId).collection("Categorias")
 
     suspend fun addCategory(categoryDto: CategoryDto) {
-        // Asegurarse de que el userId está en el DTO antes de guardarlo
         categoriesCollection.add(categoryDto.copy(userId = this.userId)).await()
     }
 
@@ -40,7 +39,15 @@ class CategoryDataSource(
                     trySend(dtoList)
                 }
             }
-        // Cuando el flow se cancele, removemos el listener para evitar leaks de memoria
         awaitClose { listener.remove() }
+    }
+
+    suspend fun getCategoryById(categoryId: String): CategoryDto? {
+        val document = categoriesCollection.document(categoryId).get().await()
+        return document.toObject(CategoryDto::class.java)?.apply { id = document.id }
+    }
+
+    suspend fun updateCategory(categoryId: String, updatedCategory: CategoryDto) { // ACTUALIZADO
+        categoriesCollection.document(categoryId).set(updatedCategory).await()
     }
 }

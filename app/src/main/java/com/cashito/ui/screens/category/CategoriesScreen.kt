@@ -1,13 +1,11 @@
 package com.cashito.ui.screens.category
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cashito.Routes
 import com.cashito.ui.theme.Spacing
 import com.cashito.ui.viewmodel.CategoriesUiState
 import com.cashito.ui.viewmodel.CategoriesViewModel
@@ -49,6 +48,11 @@ fun CategoriesScreen(
 
     CategoriesScreenContent(
         uiState = uiState,
+        onCategoryClick = { categoryId ->
+            // CORRECCIÓN: Reemplazamos el placeholder en la ruta
+            val route = Routes.CATEGORY_EDIT.replace("{categoryId}", categoryId)
+            navController.navigate(route)
+        },
         onNavigateBack = { navController.popBackStack() }
     )
 }
@@ -57,6 +61,7 @@ fun CategoriesScreen(
 @Composable
 fun CategoriesScreenContent(
     uiState: CategoriesUiState,
+    onCategoryClick: (String) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
@@ -83,7 +88,10 @@ fun CategoriesScreenContent(
                 contentPadding = PaddingValues(vertical = Spacing.md)
             ) {
                 items(uiState.categories) { category ->
-                    CategoryItem(category = category)
+                    CategoryItem(
+                        category = category,
+                        onClick = { onCategoryClick(category.id) }
+                    )
                 }
             }
         }
@@ -91,8 +99,9 @@ fun CategoriesScreenContent(
 }
 
 @Composable
-fun CategoryItem(category: UiCategory) {
+fun CategoryItem(category: UiCategory, onClick: () -> Unit) {
     ListItem(
+        modifier = Modifier.clickable(onClick = onClick),
         headlineContent = { Text(category.name, fontWeight = FontWeight.Medium) },
         supportingContent = { 
             category.budget?.let { 

@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.cashito.ui.screens.category.CategoryEditScreen
+import com.cashito.ui.screens.category.CategoriesScreen
 import com.cashito.ui.screens.category_form.CategoryFormScreen
 import com.cashito.ui.screens.dashboard.DashboardScreen
 import com.cashito.ui.screens.goal_detail.GoalDetailScreen
@@ -42,6 +44,8 @@ object Routes {
     const val BALANCE_REPORT = "balance_report"
     const val PROFILE = "profile"
     const val CATEGORY_FORM = "category_form"
+    const val CATEGORIES = "categories"
+    const val CATEGORY_EDIT = "category_edit/{categoryId}" // ACTUALIZADO
     const val TRANSACTION_EDIT = "transaction_edit"
 }
 
@@ -55,12 +59,6 @@ fun AppNavHost(
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.REGISTER) { CreateUserScreen(navController) }
         composable(Routes.DASHBOARD) { DashboardScreen(navController) }
-        composable(
-            route = Routes.GOAL_DETAIL,
-            arguments = listOf(navArgument("goalId") { type = NavType.StringType })
-        ) {
-            GoalDetailScreen(navController = navController)
-        }
         composable(Routes.GOALS) { GoalsScreen(navController) }
         composable(Routes.TRANSACTIONS) { TransactionsScreen(navController) }
         composable(Routes.QUICK_SAVE) { QuickSaveScreen(navController) }
@@ -69,17 +67,28 @@ fun AppNavHost(
         composable(Routes.CATEGORY_EXPENSE_REPORT) { CategoryExpenseReportScreen(navController) }
         composable(Routes.INCOME_REPORT) { IncomeReportScreen(navController) }
         composable(Routes.BALANCE_REPORT) { BalanceScreen(navController) }
+        composable(Routes.PROFILE) { ProfileScreen(navController) }
+        composable(Routes.CATEGORY_FORM) { CategoryFormScreen(navController) }
+        composable(Routes.CATEGORIES) { CategoriesScreen(navController) }
+        
+        composable(
+            route = Routes.GOAL_DETAIL,
+            arguments = listOf(navArgument("goalId") { type = NavType.StringType })
+        ) {
+            GoalDetailScreen(navController = navController)
+        }
         composable(
             route = "${Routes.GOAL_FORM}?goalId={goalId}",
-            arguments = listOf(navArgument("goalId") {
-                type = NavType.StringType
-                nullable = true
-            })
+            arguments = listOf(navArgument("goalId") { type = NavType.StringType; nullable = true })
         ) { 
             GoalFormScreen(navController = navController) 
         }
-        composable(Routes.PROFILE) { ProfileScreen(navController) }
-        composable(Routes.CATEGORY_FORM) { CategoryFormScreen(navController) }
+        composable(
+            route = Routes.CATEGORY_EDIT, // ACTUALIZADO
+            arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+        ) {
+            CategoryEditScreen(navController) // ACTUALIZADO
+        }
         composable(
             route = "${Routes.TRANSACTION_EDIT}/{transactionId}",
             arguments = listOf(navArgument("transactionId") { type = NavType.StringType })

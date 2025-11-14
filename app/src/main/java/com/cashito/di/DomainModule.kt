@@ -5,6 +5,8 @@ import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
 import com.cashito.domain.usecases.balance.GetBalanceUseCase
+import com.cashito.domain.usecases.category.GetCategoryByIdUseCase
+import com.cashito.domain.usecases.category.UpdateCategoryUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
 import com.cashito.domain.usecases.goal.CreateGoalUseCase
 import com.cashito.domain.usecases.goal.GetGoalsUseCase
@@ -24,7 +26,7 @@ val domainModule = module {
     factory { RegisterUseCase(get()) }
     factory { LoginUseCase(get()) }
     factory { GetCurrentUserUseCase(get()) }
-    factory { AutoLoginUseCase(get(), get()) } // AÑADIDO
+    factory { AutoLoginUseCase(get(), get()) }
 
     // Income & Expense
     factory { AddIncomeUseCase(get()) }
@@ -42,6 +44,10 @@ val domainModule = module {
 
     // Balance
     factory { GetBalanceUseCase(get(), get()) }
+
+    // Category
+    factory { GetCategoryByIdUseCase(get()) }
+    factory { UpdateCategoryUseCase(get()) } // ACTUALIZADO
 
     // Reports
     factory { ObserveReportsUseCase(get(), get()) }

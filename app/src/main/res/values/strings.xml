@@ -30,6 +30,7 @@
     <string name="dashboard_quick_action_save">Ahorro rápido</string>
     <string name="dashboard_quick_action_spend">Gasto rápido</string>
     <string name="dashboard_quick_action_create_goal">Crear Meta</string>
+    <string name="dashboard_quick_action_categories">Categorias</string>
     <string name="dashboard_recent_transactions_title">Movimientos recientes</string>
     <string name="dashboard_view_all_button">Ver todos</string>
     <string name="dashboard_insights_title">¿Sabías que?</string>

@@ -2,6 +2,7 @@ package com.cashito.di
 
 import com.cashito.ui.viewmodel.BalanceViewModel
 import com.cashito.ui.viewmodel.CategoriesViewModel
+import com.cashito.ui.viewmodel.CategoryEditViewModel
 import com.cashito.ui.viewmodel.CategoryExpenseReportViewModel
 import com.cashito.ui.viewmodel.CategoryFormViewModel
 import com.cashito.ui.viewmodel.CreateUserViewModel
@@ -47,7 +48,8 @@ val viewModelModule = module {
 
     // --- Category ViewModels ---
     viewModel { CategoryFormViewModel(get()) }
-    viewModel { CategoriesViewModel(get()) } // AÑADIDO
+    viewModel { CategoriesViewModel(get()) }
+    viewModel { CategoryEditViewModel(get(), get(), get()) } // ACTUALIZADO
 
     // --- Reports & Balance ViewModels ---
     viewModel { ReportsViewModel(get()) }
