@@ -45,9 +45,9 @@ class BalanceViewModel(
                 val entries = grouped.map { (key, list) ->
                     BalanceEntry(
                         label = when (period) {
-                            "Diario" -> "Día $key"
-                            "Semanal" -> "Sem $key"
-                            "Mensual" -> "Mes $key"
+                            "Diario" -> key.toString() // <-- ¡AQUÍ!
+                            "Semanal" -> "S$key"
+                            "Mensual" -> "M$key"
                             else -> key.toString()
                         },
                         balance = list.sumOf {

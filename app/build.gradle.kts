@@ -74,6 +74,9 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-android:3.5.6")
     implementation("io.insert-koin:koin-androidx-compose:3.5.6")
+
+    //CHarts
+    implementation("com.github.tehras:charts:0.2.4-alpha")
 }
 
 // Force Gradle sync
