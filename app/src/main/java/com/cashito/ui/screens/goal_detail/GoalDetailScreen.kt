@@ -1,4 +1,3 @@
-
 package com.cashito.ui.screens.goal_detail
 
 import androidx.compose.foundation.background
@@ -73,12 +72,14 @@ fun GoalDetailScreen(
     GoalDetailScreenContent(
         uiState = uiState,
         onNavigateBack = { navController.popBackStack() },
-        onNavigateToIncome = { navController.navigate("quick_save") },
+        // ACTUALIZADO: Pasamos el goalId al navegar al ingreso rápido
+        onNavigateToIncome = { goalId -> navController.navigate("quick_save?goalId=$goalId") }, 
         onNavigateToEdit = { goalId -> navController.navigate("goal_form?goalId=$goalId") },
         onShowMenu = viewModel::onShowMenu,
         onDeleteGoal = viewModel::deleteGoal,
         onRecurringChanged = viewModel::onRecurringChanged,
-        onTransactionClick = { /* TODO */ }
+        // ACTUALIZADO: Navegamos a la pantalla de edición de transacciones
+        onTransactionClick = { transaction -> navController.navigate("transaction_edit/${transaction.id}") }
     )
 }
 
@@ -87,7 +88,7 @@ fun GoalDetailScreen(
 fun GoalDetailScreenContent(
     uiState: GoalDetailUiState,
     onNavigateBack: () -> Unit,
-    onNavigateToIncome: () -> Unit,
+    onNavigateToIncome: (String) -> Unit, // ACTUALIZADO: Ahora recibe el goalId
     onNavigateToEdit: (String) -> Unit,
     onShowMenu: (Boolean) -> Unit,
     onDeleteGoal: () -> Unit,
@@ -166,7 +167,8 @@ fun GoalDetailScreenContent(
                     ) {
                         PrimaryButton(
                             text = stringResource(id = R.string.goal_detail_deposit_button),
-                            onClick = onNavigateToIncome,
+                            // ACTUALIZADO: Pasamos el goal.id a la función de navegación
+                            onClick = { onNavigateToIncome(goal.id) }, 
                             modifier = Modifier.weight(1f)
                         )
                         SecondaryButton(

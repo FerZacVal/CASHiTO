@@ -39,5 +39,12 @@ data class Income(
      * Aunque los ingresos no siempre se categorizan, mantener este campo asegura la simetría
      * con la entidad `Expense` y simplifica el mapeo desde la entidad `Transaccion` de la capa de datos.
      */
-    val category: Category?
+    val category: Category?,
+
+    /**
+     * El ID de la meta de ahorro a la que se asocia este ingreso. Es anulable (nullable)
+     * porque no todos los ingresos son un aporte a una meta. Se rellena cuando el ingreso
+     * se crea desde la pantalla de detalle de una meta.
+     */
+    val goalId: String? = null
 )

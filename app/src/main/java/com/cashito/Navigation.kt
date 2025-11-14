@@ -42,7 +42,8 @@ object Routes {
     const val BALANCE_REPORT = "balance_report"
     const val PROFILE = "profile"
     const val CATEGORY_FORM = "category_form"
-    const val TRANSACTION_EDIT = "transaction_edit"
+    // ARREGLADO: La ruta debe coincidir con cómo la usamos.
+    const val TRANSACTION_EDIT = "transaction_edit/{transactionId}"
 }
 
 @Composable
@@ -63,7 +64,18 @@ fun AppNavHost(
         }
         composable(Routes.GOALS) { GoalsScreen(navController) }
         composable(Routes.TRANSACTIONS) { TransactionsScreen(navController) }
-        composable(Routes.QUICK_SAVE) { QuickSaveScreen(navController) }
+        
+        // ARREGLADO: Definimos la ruta para que acepte el goalId opcional.
+        composable(
+            route = "${Routes.QUICK_SAVE}?goalId={goalId}",
+            arguments = listOf(navArgument("goalId") {
+                type = NavType.StringType
+                nullable = true
+            })
+        ) { 
+            QuickSaveScreen(navController) 
+        }
+
         composable(Routes.QUICK_OUT) { QuickOutScreen(navController) }
         composable(Routes.REPORTS) { ReportsScreen(navController) }
         composable(Routes.CATEGORY_EXPENSE_REPORT) { CategoryExpenseReportScreen(navController) }
@@ -81,7 +93,7 @@ fun AppNavHost(
         composable(Routes.PROFILE) { ProfileScreen(navController) }
         composable(Routes.CATEGORY_FORM) { CategoryFormScreen(navController) }
         composable(
-            route = "${Routes.TRANSACTION_EDIT}/{transactionId}",
+            route = Routes.TRANSACTION_EDIT, // Ahora usa la constante correcta
             arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
         ) {
             TransactionEditScreen(navController)

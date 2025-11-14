@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 // --- ARQUITECTURA DE ESTADO DE LA UI ---
 // Estas clases data definen la "forma" de los datos que la UI puede mostrar.
@@ -139,6 +140,11 @@ class GoalDetailViewModel(
                     //    Actualizamos el `_uiState` con el nuevo estado completo.
                     _uiState.value = newState
                 }
+            } catch (e: CancellationException) {
+                // ARREGLADO: Ignoramos la CancellationException. Esto es normal y esperado cuando el usuario
+                // sale de la pantalla y el viewModelScope cancela la corrutina.
+                // Se relanza para asegurar que la corrutina se detenga por completo.
+                throw e
             } catch (e: Exception) {
                 // 5. ¡MANEJO DE ERRORES CRÍTICO! Si algo falla en CUALQUIER punto de la carga (ej: sin internet,
                 //    o el famoso error de índice de Firestore), la excepción se captura aquí.
