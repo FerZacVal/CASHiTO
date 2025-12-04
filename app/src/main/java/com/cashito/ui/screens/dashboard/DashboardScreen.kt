@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Badge
@@ -28,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,6 +40,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.R
 import com.cashito.Routes
+import com.cashito.domain.entities.gamification.WeeklyChallenge
 import com.cashito.ui.components.cards.GoalCard
 import com.cashito.ui.components.cards.HeroCard
 import com.cashito.ui.components.navigation.CashitoBottomNavigation
@@ -58,6 +63,8 @@ import com.cashito.ui.viewmodel.DashboardTransaction
 import com.cashito.ui.viewmodel.DashboardUiState
 import com.cashito.ui.viewmodel.DashboardViewModel
 import org.koin.androidx.compose.koinViewModel
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun DashboardScreen(
@@ -79,7 +86,8 @@ fun DashboardScreen(
         onCreateGoalClick = { navController.navigate(Routes.GOAL_FORM) },
         onNotificationClick = { /* TODO */ },
         onTransactionItemClick = { /* TODO */ },
-        onCategoriesClick = { navController.navigate(Routes.CATEGORIES) }
+        onCategoriesClick = { navController.navigate(Routes.CATEGORIES) },
+        onRewardsClick = { navController.navigate(Routes.REWARDS) }
     )
 }
 
@@ -97,14 +105,16 @@ fun DashboardScreenContent(
     onCreateGoalClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onTransactionItemClick: (DashboardTransaction) -> Unit,
-    onCategoriesClick: () -> Unit
+    onCategoriesClick: () -> Unit,
+    onRewardsClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
             DashboardTopBar(
                 userName = uiState.userName,
                 onNotificationClick = onNotificationClick,
-                onSettingsClick = onProfileClick
+                onSettingsClick = onProfileClick,
+                onRewardsClick = onRewardsClick
             )
         },
         bottomBar = {
@@ -152,6 +162,17 @@ fun DashboardScreenContent(
                 }
 
                 item { Spacer(modifier = Modifier.height(Spacing.xl)) }
+
+                // Weekly Challenge Section
+                if (uiState.weeklyChallenge != null) {
+                    item {
+                        WeeklyChallengeCard(
+                            challenge = uiState.weeklyChallenge,
+                            onClick = onRewardsClick
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.xl))
+                    }
+                }
 
                 item {
                     Text(
@@ -271,6 +292,83 @@ fun DashboardScreenContent(
     }
 }
 
+@Composable
+fun WeeklyChallengeCard(
+    challenge: WeeklyChallenge,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(Spacing.md)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🏆", style = MaterialTheme.typography.headlineMedium)
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    Text(
+                        text = challenge.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+                if (challenge.isCompleted && !challenge.isRewardClaimed) {
+                    Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                        Text("¡Reclamar!", modifier = Modifier.padding(4.dp))
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            
+            Text(
+                text = challenge.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            val progress = (challenge.currentAmount / challenge.targetAmount).toFloat().coerceIn(0f, 1f)
+            LinearProgressIndicator(
+                progress = progress,
+                modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                strokeCap = StrokeCap.Round
+            )
+            
+            Spacer(modifier = Modifier.height(Spacing.xs))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // ARREGLADO: Mostramos el monto limitado al objetivo para no confundir al usuario (ej: 200 / 200)
+                val displayAmount = challenge.currentAmount.coerceAtMost(challenge.targetAmount)
+                Text(
+                    text = NumberFormat.getCurrencyInstance(Locale("es", "PE")).format(displayAmount),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = NumberFormat.getCurrencyInstance(Locale("es", "PE")).format(challenge.targetAmount),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun InsightsCard() {
@@ -299,7 +397,8 @@ fun InsightsCard() {
 fun DashboardTopBar(
     userName: String,
     onNotificationClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onRewardsClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -335,6 +434,9 @@ fun DashboardTopBar(
         }
 
         Row {
+             IconButton(onClick = onRewardsClick) {
+                Icon(Icons.Default.EmojiEvents, contentDescription = stringResource(id = R.string.dashboard_rewards_button_description))
+            }
             BadgedBox(
                 badge = {
                     Badge { Text("3") }
@@ -445,7 +547,8 @@ fun DashboardScreenPreview() {
             onCreateGoalClick = {},
             onNotificationClick = {},
             onTransactionItemClick = {},
-            onCategoriesClick = {}
+            onCategoriesClick = {},
+            onRewardsClick = {}
         )
     }
 }

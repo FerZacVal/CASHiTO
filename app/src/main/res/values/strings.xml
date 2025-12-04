@@ -180,4 +180,8 @@
     <string name="splash_subtitle">Ahorra fácil. Llega a tus metas.</string>
     <string name="splash_start_button">Comenzar</string>
     <string name="splash_login_prompt">¿Ya tienes cuenta? Iniciar sesión</string>
+
+    <!-- Gamification -->
+    <string name="dashboard_rewards_title">Recompensas</string>
+    <string name="dashboard_rewards_button_description">Ir a recompensas</string>
 </resources>

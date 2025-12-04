@@ -16,6 +16,7 @@ import com.cashito.ui.viewmodel.ProfileViewModel
 import com.cashito.ui.viewmodel.QuickOutViewModel
 import com.cashito.ui.viewmodel.QuickSaveViewModel
 import com.cashito.ui.viewmodel.ReportsViewModel
+import com.cashito.ui.viewmodel.RewardsViewModel
 import com.cashito.ui.viewmodel.SplashViewModel
 import com.cashito.ui.viewmodel.TransactionEditViewModel
 import com.cashito.ui.viewmodel.TransactionsViewModel
@@ -44,7 +45,7 @@ val viewModelModule = module {
     viewModel { GoalFormViewModel(get(), get(), get(), get()) }
 
     // --- Dashboard & Profile ---
-    viewModel { DashboardViewModel(get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get()) } // Updated to inject GetWeeklyChallengeUseCase
     viewModel { ProfileViewModel(get()) }
 
     // --- Category ViewModels ---
@@ -57,4 +58,7 @@ val viewModelModule = module {
     viewModel { CategoryExpenseReportViewModel(get()) }
     viewModel { IncomeReportViewModel(get()) }
     viewModel { BalanceViewModel(get()) }
+    
+    // --- Gamification ---
+    viewModel { RewardsViewModel(get(), get(), get(), get(), get()) }
 }

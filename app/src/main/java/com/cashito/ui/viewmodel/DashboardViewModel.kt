@@ -3,8 +3,10 @@ package com.cashito.ui.viewmodel
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cashito.domain.entities.gamification.WeeklyChallenge
 import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.balance.GetBalanceUseCase
+import com.cashito.domain.usecases.gamification.GetWeeklyChallengeUseCase
 import com.cashito.domain.usecases.goal.GetGoalsUseCase
 import com.cashito.ui.theme.primaryLight
 import com.cashito.ui.theme.secondaryLight
@@ -44,14 +46,16 @@ data class DashboardUiState(
     val goals: List<DashboardGoal> = emptyList(),
     val transactions: List<DashboardTransaction> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null // AÑADIDO
+    val error: String? = null,
+    val weeklyChallenge: WeeklyChallenge? = null // AÑADIDO
 )
 
 // --- VIEWMODEL ---
 class DashboardViewModel(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val getBalanceUseCase: GetBalanceUseCase,
-    private val getGoalsUseCase: GetGoalsUseCase
+    private val getGoalsUseCase: GetGoalsUseCase,
+    private val getWeeklyChallengeUseCase: GetWeeklyChallengeUseCase // AÑADIDO
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -60,6 +64,7 @@ class DashboardViewModel(
     init {
         refreshData()
         observeGoals()
+        observeChallenge() // AÑADIDO
     }
 
     fun refreshData() {
@@ -85,6 +90,15 @@ class DashboardViewModel(
                     val uiGoals = domainGoals.map { it.toDashboardGoal() }
                     _uiState.update { it.copy(goals = uiGoals) }
                     // TODO: Podríamos añadir lógica para seleccionar la meta principal
+                }
+        }
+    }
+
+    private fun observeChallenge() {
+        viewModelScope.launch {
+            getWeeklyChallengeUseCase()
+                .collect { challenge ->
+                    _uiState.update { it.copy(weeklyChallenge = challenge) }
                 }
         }
     }

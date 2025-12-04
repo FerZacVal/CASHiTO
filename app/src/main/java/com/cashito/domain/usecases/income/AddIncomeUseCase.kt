@@ -3,6 +3,7 @@ package com.cashito.domain.usecases.income
 import com.cashito.domain.entities.income.Income
 import com.cashito.domain.repositories.goal.GoalRepository
 import com.cashito.domain.repositories.income.IncomeRepository
+import com.cashito.domain.usecases.gamification.UpdateChallengeProgressUseCase
 import kotlinx.coroutines.flow.first
 
 /**
@@ -12,10 +13,12 @@ import kotlinx.coroutines.flow.first
  * 2.  Si el ingreso está asociado a una meta (`goalId` no es nulo), actualiza
  *     el monto ahorrado (`savedAmount`) de la meta correspondiente para mantener
  *     la consistencia de los datos.
+ * 3.  Actualiza el progreso del reto semanal.
  */
 class AddIncomeUseCase(
     private val incomeRepository: IncomeRepository,
-    private val goalRepository: GoalRepository // ARREGLADO: Se añade la dependencia del repositorio de metas.
+    private val goalRepository: GoalRepository,
+    private val updateChallengeProgressUseCase: UpdateChallengeProgressUseCase // AÑADIDO
 ) {
     suspend operator fun invoke(income: Income) {
         // Paso 1: Siempre guardar la transacción del ingreso.
@@ -35,5 +38,8 @@ class AddIncomeUseCase(
                 goalRepository.updateGoal(updatedGoal)
             }
         }
+        
+        // Paso 3: Actualizar el progreso del reto semanal
+        updateChallengeProgressUseCase(income.amount)
     }
 }
