@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,18 +15,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cashito.R
+import com.cashito.domain.entities.goal.Goal
 import com.cashito.ui.components.buttons.PrimaryButton
 import com.cashito.ui.components.buttons.SmallButton
 import com.cashito.ui.components.inputs.CashitoTextField
@@ -53,6 +59,8 @@ import com.cashito.ui.viewmodel.QuickOutUiState
 import com.cashito.ui.viewmodel.QuickOutViewModel
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun QuickOutScreen(
@@ -80,6 +88,16 @@ fun QuickOutScreen(
             onNavigateBack = { navController.popBackStack() }
         )
 
+        if (uiState.showShortfallDialog) {
+            ShortfallDialog(
+                deficit = uiState.shortfallAmount,
+                totalBalance = uiState.totalBalance,
+                availableGoals = uiState.availableGoals,
+                onSelectGoal = viewModel::onConfirmShortfallWithdrawal,
+                onDismiss = viewModel::onDismissShortfallDialog
+            )
+        }
+
         AnimatedVisibility(
             visible = showSuccessPopup,
             enter = fadeIn(),
@@ -90,6 +108,72 @@ fun QuickOutScreen(
         }
     }
 }
+
+@Composable
+fun ShortfallDialog(
+    deficit: Double,
+    totalBalance: Double,
+    availableGoals: List<Goal>,
+    onSelectGoal: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val format = NumberFormat.getCurrencyInstance(Locale("es", "PE"))
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Saldo insuficiente") },
+        text = {
+            Column {
+                Text(
+                    "Tu saldo libre no alcanza para cubrir este gasto. Te faltan ${format.format(deficit)}.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(Spacing.md))
+                Text(
+                    "Selecciona de qué meta quieres retirar el dinero restante:",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                
+                if (availableGoals.isEmpty()) {
+                     Text(
+                        "No tienes metas con saldo disponible.",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    LazyColumn(modifier = Modifier.height(200.dp)) {
+                        items(availableGoals) { goal ->
+                            if (goal.savedAmount > 0) {
+                                ListItem(
+                                    headlineContent = { Text(goal.name) },
+                                    supportingContent = { Text("Saldo: ${format.format(goal.savedAmount)}") },
+                                    leadingContent = { Text(goal.icon) },
+                                    modifier = Modifier
+                                        .clickable { onSelectGoal(goal.id) }
+                                        .padding(vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                Text(
+                    "Advertencia: Retirar de tus metas afectará tu progreso y cancelará cualquier Boost de APR activo.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        confirmButton = {
+             TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
 
 @Composable
 fun QuickOutScreenContent(

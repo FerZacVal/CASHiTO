@@ -277,8 +277,6 @@ fun BoostDetailsDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 DetailRow("APR Aplicado:", "${goal.activeBoostApr}%")
-                // No tenemos el monto base original guardado, pero podemos inferir que el beneficio se calculó sobre el monto que había.
-                // Sin embargo, lo más importante es mostrar la ganancia FINAL garantizada.
                 
                 if (goal.activeBoostProfit != null) {
                     DetailRow("Ganancia Garantizada:", NumberFormat.getCurrencyInstance(Locale("es", "PE")).format(goal.activeBoostProfit))
@@ -289,10 +287,18 @@ fun BoostDetailsDialog(
                 }
                 
                 Spacer(modifier = Modifier.height(Spacing.sm))
+                
                 Text(
-                    "Nota: Este beneficio ya está calculado y es fijo. Nuevos aportes a esta meta no modificarán este monto.",
+                    text = "Nota: Este beneficio ya está calculado y es fijo. Nuevos aportes a esta meta no modificarán este monto.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                // Mensaje adicional sobre cancelación (ACTUALIZADO)
+                Text(
+                    text = "¡Importante! Si eliminas la meta o retiras fondos reduciendo el saldo por debajo del monto inicial, el beneficio se cancelará automáticamente y no será acreditado.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         },

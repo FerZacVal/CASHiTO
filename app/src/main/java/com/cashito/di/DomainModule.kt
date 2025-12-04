@@ -5,6 +5,7 @@ import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
 import com.cashito.domain.usecases.balance.GetBalanceUseCase
+import com.cashito.domain.usecases.balance.GetFinancialBreakdownUseCase
 import com.cashito.domain.usecases.category.GetCategoryByIdUseCase
 import com.cashito.domain.usecases.category.UpdateCategoryUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
@@ -38,10 +39,9 @@ val domainModule = module {
     factory { AutoLoginUseCase(get(), get()) }
 
     // Income & Expense
-    // ARREGLADO: Se inyectan ambos repositorios (Income y Goal) para mantener la consistencia de datos.
-    // ARREGLADO: Ahora tambien inyectamos el caso de uso para actualizar el progreso del reto
     factory { AddIncomeUseCase(get(), get(), get()) }
-    factory { AddExpenseUseCase(get()) }
+    // ARREGLADO: Inyectadas las tres dependencias
+    factory { AddExpenseUseCase(get(), get(), get()) }
 
     // Goal
     factory { CreateGoalUseCase(get()) }
@@ -59,10 +59,11 @@ val domainModule = module {
 
     // Balance
     factory { GetBalanceUseCase(get(), get()) }
+    factory { GetFinancialBreakdownUseCase(get(), get(), get()) }
 
     // Category
     factory { GetCategoryByIdUseCase(get()) }
-    factory { UpdateCategoryUseCase(get()) } // ACTUALIZADO
+    factory { UpdateCategoryUseCase(get()) }
 
     // Reports
     factory { ObserveReportsUseCase(get(), get()) }
@@ -73,6 +74,6 @@ val domainModule = module {
     factory { GetWeeklyChallengeUseCase(get()) }
     factory { ClaimRewardUseCase(get()) }
     factory { GetUserRewardsUseCase(get()) }
-    factory { UseRewardUseCase(get(), get()) } // ARREGLADO: Inyectado GamificationRepository Y GoalRepository
-    factory { UpdateChallengeProgressUseCase(get()) } // AÑADIDO
+    factory { UseRewardUseCase(get(), get()) }
+    factory { UpdateChallengeProgressUseCase(get()) }
 }

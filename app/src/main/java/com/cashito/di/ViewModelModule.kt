@@ -33,7 +33,8 @@ val viewModelModule = module {
     viewModel { CreateUserViewModel(get()) }
 
     // --- Transaction ViewModels ---
-    viewModel { QuickOutViewModel(get(), get(), get()) }
+    // ARREGLADO: QuickOutViewModel ahora recibe GetGoalsUseCase y savedStateHandle
+    viewModel { QuickOutViewModel(get(), get(), get(), get()) }
     viewModel { QuickSaveViewModel(get(), get(), get()) }
     viewModel { TransactionsViewModel(get(), get()) }
     viewModel { TransactionEditViewModel(get(), get(), get()) }
@@ -41,17 +42,16 @@ val viewModelModule = module {
     // --- Goal ViewModels ---
     viewModel { GoalsViewModel(get()) }
     viewModel { GoalDetailViewModel(get(), get(), get(), get()) }
-    // ARREGLADO: Se inyectan los tres casos de uso necesarios para crear, leer y actualizar metas.
     viewModel { GoalFormViewModel(get(), get(), get(), get()) }
 
     // --- Dashboard & Profile ---
-    viewModel { DashboardViewModel(get(), get(), get(), get()) } // Updated to inject GetWeeklyChallengeUseCase
+    viewModel { DashboardViewModel(get(), get(), get(), get()) } 
     viewModel { ProfileViewModel(get()) }
 
     // --- Category ViewModels ---
     viewModel { CategoryFormViewModel(get()) }
     viewModel { CategoriesViewModel(get()) }
-    viewModel { CategoryEditViewModel(get(), get(), get()) } // ACTUALIZADO
+    viewModel { CategoryEditViewModel(get(), get(), get()) }
 
     // --- Reports & Balance ViewModels ---
     viewModel { ReportsViewModel(get()) }

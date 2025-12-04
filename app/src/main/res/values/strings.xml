@@ -24,6 +24,9 @@
     <string name="category_expense_report_empty_legend_message">No hay datos de gastos para mostrar.</string>
 
     <!-- DashboardScreen -->
+    <string name="dashboard_total_balance_label">Balance Total</string> <!-- AÑADIDO -->
+    <string name="dashboard_income_button">Ingreso</string> <!-- AÑADIDO -->
+    <string name="dashboard_expense_button">Gasto</string> <!-- AÑADIDO -->
     <string name="dashboard_add_category_button_description">Añadir categoría</string>
     <string name="dashboard_goals_title">Tus metas</string>
     <string name="dashboard_quick_actions_title">Acciones rápidas</string>

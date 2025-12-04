@@ -152,10 +152,11 @@ fun DashboardScreenContent(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.lg)
             ) {
                 item {
+                    // ACTUALIZADO: Ahora usamos los 3 balances
                     HeroCard(
                         totalBalance = uiState.totalBalance,
-                        goalProgress = uiState.mainGoalProgressText,
-                        progressPercentage = uiState.mainGoalProgressPercentage,
+                        freeBalance = uiState.freeBalance,
+                        goalsBalance = uiState.goalsBalance,
                         onIncomeClick = onQuickSaveClick,
                         onExpenseClick = onQuickOutClick
                     )
@@ -524,8 +525,8 @@ fun DashboardScreenPreview() {
             uiState = DashboardUiState(
                 userName = "Ana",
                 totalBalance = "S/ 3,420.50",
-                mainGoalProgressText = "Meta principal: Viaje a Cusco — 65%",
-                mainGoalProgressPercentage = 65,
+                freeBalance = "S/ 1,420.50",
+                goalsBalance = "S/ 2,000.00",
                 goals = listOf(
                     DashboardGoal("1", "Viaje a Cusco", "3,420", "5,000", 0.65f, "✈️", primaryLight),
                     DashboardGoal("2", "Laptop nueva", "800", "4,500", 0.18f, "💻", secondaryLight)
