@@ -14,5 +14,10 @@ data class Goal(
     val targetDate: Date?,
     val creationDate: Date,
     val icon: String,
-    val colorHex: String
+    val colorHex: String,
+    // Nuevos campos para gamificación
+    val activeBoostId: String? = null, // ID del reward activo
+    val activeBoostApr: Double? = null, // Valor del APR activo
+    val boostExpiryDate: Date? = null, // Fecha de vencimiento del boost
+    val activeBoostProfit: Double? = null // Ganancia calculada fija (Snapshot)
 )

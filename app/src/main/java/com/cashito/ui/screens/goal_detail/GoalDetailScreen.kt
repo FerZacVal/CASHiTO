@@ -2,6 +2,7 @@ package com.cashito.ui.screens.goal_detail
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,9 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +43,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -59,6 +65,8 @@ import com.cashito.ui.viewmodel.GoalDetailUiState
 import com.cashito.ui.viewmodel.GoalDetailViewModel
 import com.cashito.ui.viewmodel.GoalTransaction
 import org.koin.androidx.compose.koinViewModel
+import java.text.NumberFormat
+import java.util.Locale
 import kotlin.math.log10
 
 @Composable
@@ -82,6 +90,7 @@ fun GoalDetailScreen(
         onShowMenu = viewModel::onShowMenu,
         onDeleteGoal = viewModel::deleteGoal,
         onRecurringChanged = viewModel::onRecurringChanged,
+        onShowBoostDetails = viewModel::onShowBoostDetails,
         onTransactionClick = { transaction -> navController.navigate("transaction_edit/${transaction.id}") }
     )
 }
@@ -96,6 +105,7 @@ fun GoalDetailScreenContent(
     onShowMenu: (Boolean) -> Unit,
     onDeleteGoal: () -> Unit,
     onRecurringChanged: (Boolean) -> Unit,
+    onShowBoostDetails: (Boolean) -> Unit,
     onTransactionClick: (GoalTransaction) -> Unit
 ) {
     val goal = uiState.goal
@@ -157,6 +167,53 @@ fun GoalDetailScreenContent(
             ) {
                 item { GoalSummary(goal = goal) }
 
+                // Sección de Boost Activo
+                if (goal.activeBoostApr != null) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { onShowBoostDetails(true) },
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFFFE082) // Color dorado para el boost
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(Spacing.md),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.TrendingUp,
+                                    contentDescription = null,
+                                    tint = Color(0xFF5D4037),
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Boost Activo: +${goal.activeBoostApr}% APR",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF5D4037)
+                                    )
+                                    if (goal.boostExpiryDate != null) {
+                                        Text(
+                                            text = "Expira el: ${goal.boostExpiryDate}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF5D4037).copy(alpha = 0.8f)
+                                        )
+                                    }
+                                }
+                                // Indicador de click
+                                Text("ℹ\uFE0F", fontSize = androidx.compose.ui.unit.TextUnit.Unspecified)
+                            }
+                        }
+                    }
+                }
+
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -197,7 +254,64 @@ fun GoalDetailScreenContent(
                      TransactionItem(transaction = transaction, onClick = { onTransactionClick(transaction) })
                 }
             }
+            
+            // Diálogo de detalles del Boost
+            if (uiState.showBoostDetails && goal.activeBoostApr != null) {
+                BoostDetailsDialog(
+                    goal = goal,
+                    onDismiss = { onShowBoostDetails(false) }
+                )
+            }
         }
+    }
+}
+
+@Composable
+fun BoostDetailsDialog(
+    goal: GoalDetail,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Detalles del Boost") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                DetailRow("APR Aplicado:", "${goal.activeBoostApr}%")
+                // No tenemos el monto base original guardado, pero podemos inferir que el beneficio se calculó sobre el monto que había.
+                // Sin embargo, lo más importante es mostrar la ganancia FINAL garantizada.
+                
+                if (goal.activeBoostProfit != null) {
+                    DetailRow("Ganancia Garantizada:", NumberFormat.getCurrencyInstance(Locale("es", "PE")).format(goal.activeBoostProfit))
+                }
+                
+                if (goal.boostExpiryDate != null) {
+                    DetailRow("Fecha de Acreditación:", goal.boostExpiryDate)
+                }
+                
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                Text(
+                    "Nota: Este beneficio ya está calculado y es fijo. Nuevos aportes a esta meta no modificarán este monto.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Entendido")
+            }
+        }
+    )
+}
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -346,7 +460,8 @@ fun GoalDetailScreenPreview() {
             onShowMenu = {},
             onDeleteGoal = {},
             onRecurringChanged = {},
-            onTransactionClick = {}
+            onTransactionClick = {},
+            onShowBoostDetails = {}
         )
     }
 }

@@ -17,5 +17,10 @@ data class GoalDto(
     val targetDate: Date? = null,
     @ServerTimestamp val creationDate: Date? = null, // Anotado para que Firestore ponga la fecha del servidor
     val icon: String = "",
-    val colorHex: String = ""
+    val colorHex: String = "",
+    // Nuevos campos para gamificación
+    val activeBoostId: String? = null,
+    val activeBoostApr: Double? = null,
+    val boostExpiryDate: Date? = null,
+    val activeBoostProfit: Double? = null
 )

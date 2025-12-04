@@ -73,6 +73,6 @@ val domainModule = module {
     factory { GetWeeklyChallengeUseCase(get()) }
     factory { ClaimRewardUseCase(get()) }
     factory { GetUserRewardsUseCase(get()) }
-    factory { UseRewardUseCase(get()) }
+    factory { UseRewardUseCase(get(), get()) } // ARREGLADO: Inyectado GamificationRepository Y GoalRepository
     factory { UpdateChallengeProgressUseCase(get()) } // AÑADIDO
 }

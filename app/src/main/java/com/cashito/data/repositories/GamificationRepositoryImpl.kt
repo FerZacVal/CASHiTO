@@ -26,9 +26,6 @@ class GamificationRepositoryImpl(
     }
 
     private fun getStartAndEndDate(weekId: String): Pair<Date, Date> {
-        // Parse weekId simply or just use current week dates for now.
-        // Ideally we should parse the weekId to get accurate dates if we are viewing history,
-        // but for "Current" challenge, using current calendar is fine.
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -43,7 +40,6 @@ class GamificationRepositoryImpl(
 
     override fun getCurrentWeeklyChallenge(): Flow<WeeklyChallenge?> = flow {
         val weekId = getCurrentWeekId()
-        // We fetch the config once per stream collection start.
         val targetAmount = try {
             dataSource.getGlobalConfigWeeklyTarget()
         } catch (e: Exception) {
@@ -54,7 +50,6 @@ class GamificationRepositoryImpl(
             if (dto != null) {
                 emit(dto.toDomain())
             } else {
-                // Create in-memory default challenge (Lazy creation on read)
                 val (startDate, endDate) = getStartAndEndDate(weekId)
                 emit(
                     WeeklyChallenge(
@@ -79,38 +74,37 @@ class GamificationRepositoryImpl(
     }
 
     override suspend fun claimReward(challengeId: String): Reward {
-        // Generate random reward
         val random = Math.random()
         val reward = when {
-            random < 0.3 -> Reward( // 30% chance
+            random < 0.3 -> Reward(
                 id = UUID.randomUUID().toString(),
                 type = RewardType.APR_BOOST,
                 value = 20.0,
                 durationDays = 7,
                 description = "APR 20% por 7 días"
             )
-            random < 0.4 -> Reward( // 10% chance
+            random < 0.4 -> Reward(
                 id = UUID.randomUUID().toString(),
                 type = RewardType.APR_BOOST,
                 value = 350.0,
                 durationDays = 3,
                 description = "APR 350% por 3 días"
             )
-            random < 0.6 -> Reward( // 20% chance
+            random < 0.6 -> Reward(
                 id = UUID.randomUUID().toString(),
                 type = RewardType.APR_BOOST,
                 value = 5.0,
                 durationDays = 10,
                 description = "APR 5% por 10 días"
             )
-            random < 0.7 -> Reward( // 10% chance
+            random < 0.7 -> Reward(
                 id = UUID.randomUUID().toString(),
                 type = RewardType.RETRY_CHANCE,
                 value = 1.0,
                 durationDays = 0,
                 description = "Tira otra vez"
             )
-            else -> Reward( // 30% chance
+            else -> Reward(
                 id = UUID.randomUUID().toString(),
                 type = RewardType.NONE,
                 value = 0.0,
@@ -118,15 +112,6 @@ class GamificationRepositoryImpl(
                 description = "¡Sigue intentando!"
             )
         }
-        
-        // If it's NONE or RETRY, we might handle it differently, but for the DB we persist the reward.
-        // Even if it is NONE, we might want to record that they claimed the reward for the week.
-        // However, the Mock implementation just returned it.
-        // The plan says: "Actualizamos el reto: isRewardClaimed = true. Creamos el nuevo documento en users/{id}/rewards/."
-        
-        // If the reward is NONE, we still mark the challenge as claimed? Usually yes.
-        // If it is RETRY, maybe not? The Mock said:
-        // "Mark challenge as reward claimed if it's not a retry"
         
         if (reward.type != RewardType.RETRY_CHANCE) {
              dataSource.claimReward(challengeId, reward.toDto())
@@ -136,17 +121,17 @@ class GamificationRepositoryImpl(
     }
 
     override fun getUserRewards(): Flow<List<Reward>> {
+        // MODIFICADO: Ya no filtramos los usados (isUsed), solo los de tipo NONE.
+        // Queremos mostrar historial de premios usados.
         return dataSource.observeUserRewards().map { list ->
             list.map { it.toDomain() }
-                .filter { !it.isUsed && it.type != RewardType.NONE }
+                .filter { it.type != RewardType.NONE }
         }
     }
 
     override suspend fun useReward(rewardId: String, goalId: String?) {
         dataSource.markRewardAsUsed(rewardId, goalId)
     }
-
-    // --- Mappers ---
 
     private fun WeeklyChallengeDto.toDomain(): WeeklyChallenge {
         val (startDate, endDate) = getStartAndEndDate(this.weekId)
@@ -183,10 +168,10 @@ class GamificationRepositoryImpl(
             value = this.value,
             durationDays = this.durationDays,
             description = this.description,
-            earnedDate = null, // Server timestamp will fill this
+            earnedDate = null,
             isUsed = this.isUsed,
             appliedToGoalId = this.appliedToGoalId,
-            expiryDate = null // Not using expiry yet
+            expiryDate = null
         )
     }
 }

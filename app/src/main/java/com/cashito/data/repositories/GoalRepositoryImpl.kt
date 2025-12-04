@@ -1,4 +1,3 @@
-
 package com.cashito.data.repositories
 
 import com.cashito.data.datasources.firebase.GoalDataSource
@@ -48,7 +47,11 @@ private fun Goal.toDto(): GoalDto {
         targetDate = this.targetDate,
         creationDate = this.creationDate,
         icon = this.icon,
-        colorHex = this.colorHex
+        colorHex = this.colorHex,
+        activeBoostId = this.activeBoostId,
+        activeBoostApr = this.activeBoostApr,
+        boostExpiryDate = this.boostExpiryDate,
+        activeBoostProfit = this.activeBoostProfit
     )
 }
 
@@ -62,6 +65,10 @@ private fun GoalDto.toDomain(): Goal {
         targetDate = this.targetDate,
         creationDate = this.creationDate ?: Date(),
         icon = this.icon,
-        colorHex = this.colorHex
+        colorHex = this.colorHex,
+        activeBoostId = this.activeBoostId,
+        activeBoostApr = this.activeBoostApr,
+        boostExpiryDate = this.boostExpiryDate,
+        activeBoostProfit = this.activeBoostProfit
     )
 }

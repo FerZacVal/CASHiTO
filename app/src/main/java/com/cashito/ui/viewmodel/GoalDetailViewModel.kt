@@ -22,19 +22,19 @@ import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
 // --- STATE ---
-/**
- * ARREGLADO: Los montos ahora son Doubles para evitar errores de formato.
- * La UI se encargará de formatearlos como texto.
- */
 data class GoalDetail(
     val id: String,
     val title: String,
-    val savedAmount: Double, // Ahora es Double
-    val targetAmount: Double, // Ahora es Double
+    val savedAmount: Double,
+    val targetAmount: Double,
     val progress: Float,
     val icon: String,
     val color: Color,
-    val targetDate: String
+    val targetDate: String,
+    // New fields for Gamification
+    val activeBoostApr: Double? = null,
+    val boostExpiryDate: String? = null,
+    val activeBoostProfit: Double? = null // Ganancia calculada
 )
 
 data class GoalTransaction(
@@ -52,6 +52,7 @@ data class GoalDetailUiState(
     val transactions: List<GoalTransaction> = emptyList(),
     val isRecurringEnabled: Boolean = true,
     val showMenu: Boolean = false,
+    val showBoostDetails: Boolean = false, // Nuevo estado para el diálogo
     val isLoading: Boolean = true,
     val goalDeleted: Boolean = false,
     val error: String? = null
@@ -120,22 +121,33 @@ class GoalDetailViewModel(
     fun onShowMenu(show: Boolean) {
         _uiState.update { it.copy(showMenu = show) }
     }
+
+    fun onShowBoostDetails(show: Boolean) {
+        _uiState.update { it.copy(showBoostDetails = show) }
+    }
 }
 
 // --- Mappers ---
 
 private fun Goal.toGoalDetail(): GoalDetail {
     val progress = if (this.targetAmount > 0) (this.savedAmount / this.targetAmount).toFloat() else 0f
+    
+    val boostExpiry = this.boostExpiryDate?.let {
+        SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it)
+    }
+    
     return GoalDetail(
         id = this.id,
         title = this.name,
-        // ARREGLADO: Pasamos los Doubles directamente.
         savedAmount = this.savedAmount,
         targetAmount = this.targetAmount,
         progress = progress,
         icon = this.icon,
         color = Color(android.graphics.Color.parseColor(this.colorHex)),
-        targetDate = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(this.targetDate)
+        targetDate = this.targetDate?.let { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it) } ?: "Sin fecha",
+        activeBoostApr = this.activeBoostApr,
+        boostExpiryDate = boostExpiry,
+        activeBoostProfit = this.activeBoostProfit
     )
 }
 
