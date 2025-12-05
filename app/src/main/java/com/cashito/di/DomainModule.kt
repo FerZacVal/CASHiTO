@@ -5,9 +5,15 @@ import com.cashito.domain.usecases.auth.GetCurrentUserUseCase
 import com.cashito.domain.usecases.auth.LoginUseCase
 import com.cashito.domain.usecases.auth.RegisterUseCase
 import com.cashito.domain.usecases.balance.GetBalanceUseCase
+import com.cashito.domain.usecases.balance.GetFinancialBreakdownUseCase
 import com.cashito.domain.usecases.category.GetCategoryByIdUseCase
 import com.cashito.domain.usecases.category.UpdateCategoryUseCase
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
+import com.cashito.domain.usecases.gamification.ClaimRewardUseCase
+import com.cashito.domain.usecases.gamification.GetUserRewardsUseCase
+import com.cashito.domain.usecases.gamification.GetWeeklyChallengeUseCase
+import com.cashito.domain.usecases.gamification.UpdateChallengeProgressUseCase
+import com.cashito.domain.usecases.gamification.UseRewardUseCase
 import com.cashito.domain.usecases.goal.CreateGoalUseCase
 import com.cashito.domain.usecases.goal.DeleteGoalUseCase
 import com.cashito.domain.usecases.goal.GetGoalByIdUseCase
@@ -33,9 +39,9 @@ val domainModule = module {
     factory { AutoLoginUseCase(get(), get()) }
 
     // Income & Expense
-    // ARREGLADO: Se inyectan ambos repositorios (Income y Goal) para mantener la consistencia de datos.
-    factory { AddIncomeUseCase(get(), get()) }
-    factory { AddExpenseUseCase(get()) }
+    factory { AddIncomeUseCase(get(), get(), get()) }
+    // ARREGLADO: Inyectadas las tres dependencias
+    factory { AddExpenseUseCase(get(), get(), get()) }
 
     // Goal
     factory { CreateGoalUseCase(get()) }
@@ -53,13 +59,21 @@ val domainModule = module {
 
     // Balance
     factory { GetBalanceUseCase(get(), get()) }
+    factory { GetFinancialBreakdownUseCase(get(), get(), get()) }
 
     // Category
     factory { GetCategoryByIdUseCase(get()) }
-    factory { UpdateCategoryUseCase(get()) } // ACTUALIZADO
+    factory { UpdateCategoryUseCase(get()) }
 
     // Reports
     factory { ObserveReportsUseCase(get(), get()) }
     factory { ObserveIncomeReportUseCase(get()) }
     factory { ObserveExpenseReportUseCase(get()) }
+
+    // Gamification
+    factory { GetWeeklyChallengeUseCase(get()) }
+    factory { ClaimRewardUseCase(get()) }
+    factory { GetUserRewardsUseCase(get()) }
+    factory { UseRewardUseCase(get(), get()) }
+    factory { UpdateChallengeProgressUseCase(get()) }
 }

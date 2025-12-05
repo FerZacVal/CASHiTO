@@ -23,6 +23,7 @@ import com.cashito.ui.screens.reports.BalanceScreen
 import com.cashito.ui.screens.reports.CategoryExpenseReportScreen
 import com.cashito.ui.screens.reports.IncomeReportScreen
 import com.cashito.ui.screens.reports.ReportsScreen
+import com.cashito.ui.screens.rewards.RewardsScreen
 import com.cashito.ui.screens.splash.SplashScreen
 import com.cashito.ui.screens.transactions.TransactionEditScreen
 import com.cashito.ui.screens.transactions.TransactionsScreen
@@ -45,6 +46,7 @@ object Routes {
     const val PROFILE = "profile"
     const val CATEGORY_FORM = "category_form"
     const val CATEGORIES = "categories"
+    const val REWARDS = "rewards"
     const val CATEGORY_EDIT = "category_edit/{categoryId}" // ACTUALIZADO
     // ARREGLADO: La ruta debe coincidir con cómo la usamos.
     const val TRANSACTION_EDIT = "transaction_edit/{transactionId}"
@@ -88,13 +90,8 @@ fun AppNavHost(
         composable(Routes.PROFILE) { ProfileScreen(navController) }
         composable(Routes.CATEGORY_FORM) { CategoryFormScreen(navController) }
         composable(Routes.CATEGORIES) { CategoriesScreen(navController) }
+        composable(Routes.REWARDS) { RewardsScreen(navController) }
 
-        composable(
-            route = Routes.GOAL_DETAIL,
-            arguments = listOf(navArgument("goalId") { type = NavType.StringType })
-        ) {
-            GoalDetailScreen(navController = navController)
-        }
         composable(
             route = "${Routes.GOAL_FORM}?goalId={goalId}",
             arguments = listOf(navArgument("goalId") { type = NavType.StringType; nullable = true })

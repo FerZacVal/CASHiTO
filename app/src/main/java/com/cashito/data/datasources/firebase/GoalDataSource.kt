@@ -1,9 +1,10 @@
-
 package com.cashito.data.datasources.firebase
 
 import android.util.Log
 import com.cashito.data.dto.GoalDto
+import com.cashito.data.dto.TransactionDto
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
@@ -68,5 +69,48 @@ class GoalDataSource(
 
     suspend fun updateGoal(goalDto: GoalDto) {
         goalsCollection.document(goalDto.id).set(goalDto).await()
+    }
+
+    /**
+     * Ejecuta una transacción atómica en Firestore para retirar fondos de una meta y registrar el movimiento.
+     *
+     * @param goalId El ID de la meta de la cual se retirarán los fondos.
+     * @param amount El monto positivo a retirar.
+     * @param transactionDto El objeto DTO de la transacción que se registrará (tipo gasto/ajuste).
+     */
+    suspend fun withdrawFromGoal(goalId: String, amount: Double, transactionDto: TransactionDto) {
+        val goalRef = goalsCollection.document(goalId)
+        val transactionRef = firestore.collection("Usuarios").document(userId).collection("Transacciones").document()
+
+        transactionDto.userId = userId
+
+        firestore.runTransaction { transaction ->
+            val goalSnapshot = transaction.get(goalRef)
+            
+            // 1. Validaciones
+            if (!goalSnapshot.exists()) {
+                throw IllegalStateException("La meta no existe")
+            }
+
+            // Usamos FieldPath para acceder a propiedades nested si fuera necesario, pero aquí es directo.
+            val currentSavedAmount = goalSnapshot.getDouble("savedAmount") ?: 0.0
+            val newSavedAmount = currentSavedAmount - amount
+
+            // 2. Actualizar la meta: Reducir saldo y cancelar boost si existe
+            val updates = mutableMapOf<String, Any>(
+                "savedAmount" to newSavedAmount,
+                "activeBoostId" to FieldValue.delete(),
+                "activeBoostApr" to FieldValue.delete(),
+                "boostExpiryDate" to FieldValue.delete(),
+                "activeBoostProfit" to FieldValue.delete()
+            )
+            transaction.update(goalRef, updates)
+
+            // 3. Crear la transacción de retiro/ajuste
+            // Aseguramos que la transacción tenga el ID generado
+            transactionDto.id = transactionRef.id
+            transaction.set(transactionRef, transactionDto)
+
+        }.await()
     }
 }

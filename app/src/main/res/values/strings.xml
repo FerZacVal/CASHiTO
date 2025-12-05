@@ -24,6 +24,9 @@
     <string name="category_expense_report_empty_legend_message">No hay datos de gastos para mostrar.</string>
 
     <!-- DashboardScreen -->
+    <string name="dashboard_total_balance_label">Balance Total</string> <!-- AÑADIDO -->
+    <string name="dashboard_income_button">Ingreso</string> <!-- AÑADIDO -->
+    <string name="dashboard_expense_button">Gasto</string> <!-- AÑADIDO -->
     <string name="dashboard_add_category_button_description">Añadir categoría</string>
     <string name="dashboard_goals_title">Tus metas</string>
     <string name="dashboard_quick_actions_title">Acciones rápidas</string>
@@ -180,4 +183,8 @@
     <string name="splash_subtitle">Ahorra fácil. Llega a tus metas.</string>
     <string name="splash_start_button">Comenzar</string>
     <string name="splash_login_prompt">¿Ya tienes cuenta? Iniciar sesión</string>
+
+    <!-- Gamification -->
+    <string name="dashboard_rewards_title">Recompensas</string>
+    <string name="dashboard_rewards_button_description">Ir a recompensas</string>
 </resources>

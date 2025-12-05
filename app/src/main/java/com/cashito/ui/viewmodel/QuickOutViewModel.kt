@@ -6,8 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cashito.domain.entities.category.Category
 import com.cashito.domain.entities.expense.Expense
+import com.cashito.domain.entities.goal.Goal
 import com.cashito.domain.repositories.category.CategoryRepository
 import com.cashito.domain.usecases.expense.AddExpenseUseCase
+import com.cashito.domain.usecases.expense.InsufficientFreeBalanceException
+import com.cashito.domain.usecases.goal.GetGoalsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,13 +40,20 @@ data class QuickOutUiState(
     val selectedPresetAmount: String? = null,
     val selectedCategoryId: String = "",
     val isConfirmEnabled: Boolean = false,
-    val expenseConfirmed: Boolean = false
+    val expenseConfirmed: Boolean = false,
+    // Shortfall State
+    val showShortfallDialog: Boolean = false,
+    val shortfallAmount: Double = 0.0,
+    val totalBalance: Double = 0.0,
+    val availableGoals: List<Goal> = emptyList(),
+    val pendingExpense: Expense? = null
 )
 
 // --- VIEWMODEL ---
 class QuickOutViewModel(
     private val addExpenseUseCase: AddExpenseUseCase,
-    private val categoryRepository: CategoryRepository, // AÑADIDO
+    private val categoryRepository: CategoryRepository,
+    private val getGoalsUseCase: GetGoalsUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -51,7 +61,8 @@ class QuickOutViewModel(
     val uiState: StateFlow<QuickOutUiState> = _uiState.asStateFlow()
 
     init {
-        observeCategories() // CAMBIADO
+        observeCategories()
+        observeGoals()
         val transactionId: String? = savedStateHandle["transactionId"]
         if (transactionId != null) {
             loadExpenseForEditing(transactionId)
@@ -66,6 +77,12 @@ class QuickOutViewModel(
                 _uiState.update { it.copy(categories = uiCategories) }
             }
             .catch { /* TODO: Handle error */ }
+            .launchIn(viewModelScope)
+    }
+    
+    private fun observeGoals() {
+        getGoalsUseCase()
+            .onEach { goals -> _uiState.update { it.copy(availableGoals = goals) } }
             .launchIn(viewModelScope)
     }
 
@@ -107,13 +124,13 @@ class QuickOutViewModel(
 
     fun onConfirmExpense() {
         if (!_uiState.value.isConfirmEnabled) return
-        _uiState.update { it.copy(isConfirmEnabled = false) }
-
+        
         if (_uiState.value.isEditing) {
             // TODO: Llamar a UpdateExpenseUseCase
             _uiState.update { it.copy(expenseConfirmed = true) }
         } else {
             viewModelScope.launch {
+                _uiState.update { it.copy(isConfirmEnabled = false) } // Disable button to prevent double click
                 val state = _uiState.value
                 val amountValue = state.amount.toDoubleOrNull() ?: 0.0
                 val selectedCategory = state.categories.firstOrNull { it.id == state.selectedCategoryId }
@@ -129,14 +146,56 @@ class QuickOutViewModel(
                             name = selectedCategory.title,
                             icon = selectedCategory.icon,
                             color = selectedCategory.colorHex,
-                            budget = 0.0 // Presupuesto no es relevante aquí
+                            budget = 0.0 
                         )
                     )
-                    addExpenseUseCase(expense)
-                    _uiState.update { it.copy(expenseConfirmed = true) }
+                    
+                    try {
+                        addExpenseUseCase(expense)
+                        _uiState.update { it.copy(expenseConfirmed = true) }
+                    } catch (e: InsufficientFreeBalanceException) {
+                        // Shortfall detected!
+                        _uiState.update { 
+                            it.copy(
+                                showShortfallDialog = true,
+                                shortfallAmount = e.deficit,
+                                totalBalance = e.totalBalance,
+                                pendingExpense = expense,
+                                isConfirmEnabled = true // Re-enable if user cancels dialog
+                            ) 
+                        }
+                    } catch (e: Exception) {
+                        // Generic error
+                         _uiState.update { it.copy(isConfirmEnabled = true) }
+                    }
                 }
             }
         }
+    }
+    
+    fun onConfirmShortfallWithdrawal(goalId: String) {
+        val state = _uiState.value
+        val expense = state.pendingExpense ?: return
+        val deficit = state.shortfallAmount
+        
+        viewModelScope.launch {
+            try {
+                addExpenseUseCase.addExpenseWithWithdrawal(expense, goalId, deficit)
+                _uiState.update { 
+                    it.copy(
+                        expenseConfirmed = true, 
+                        showShortfallDialog = false,
+                        pendingExpense = null
+                    ) 
+                }
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+    
+    fun onDismissShortfallDialog() {
+        _uiState.update { it.copy(showShortfallDialog = false, pendingExpense = null) }
     }
 }
 

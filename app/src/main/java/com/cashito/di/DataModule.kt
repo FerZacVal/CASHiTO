@@ -3,18 +3,21 @@ package com.cashito.di
 import androidx.room.Room
 import com.cashito.data.datasources.firebase.CategoryDataSource
 import com.cashito.data.datasources.firebase.FirebaseAuthDataSource
+import com.cashito.data.datasources.firebase.FirebaseGamificationDataSource
 import com.cashito.data.datasources.firebase.FirebaseTransactionDataSource
 import com.cashito.data.datasources.firebase.GoalDataSource
 import com.cashito.data.datasources.local.CashitoDatabase
 import com.cashito.data.repositories.AuthRepositoryImpl
 import com.cashito.data.repositories.CategoryRepositoryImpl
 import com.cashito.data.repositories.ExpenseRepositoryImpl
+import com.cashito.data.repositories.GamificationRepositoryImpl
 import com.cashito.data.repositories.GoalRepositoryImpl
 import com.cashito.data.repositories.IncomeRepositoryImpl
 import com.cashito.data.repositories.TransactionRepositoryImpl
 import com.cashito.domain.repositories.auth.AuthRepository
 import com.cashito.domain.repositories.category.CategoryRepository
 import com.cashito.domain.repositories.expense.ExpenseRepository
+import com.cashito.domain.repositories.gamification.GamificationRepository
 import com.cashito.domain.repositories.goal.GoalRepository
 import com.cashito.domain.repositories.income.IncomeRepository
 import com.cashito.domain.repositories.transaction.TransactionRepository
@@ -39,7 +42,8 @@ val dataModule = module {
     single { FirebaseAuthDataSource(get()) }
     single { FirebaseTransactionDataSource(get(), get()) }
     single { GoalDataSource(get(), get()) }
-    single { CategoryDataSource(get(), get()) } // AÑADIDO
+    single { CategoryDataSource(get(), get()) }
+    single { FirebaseGamificationDataSource(get(), get()) } // AÑADIDO: DataSource Real
 
     // --- Repositories ---
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
@@ -47,5 +51,6 @@ val dataModule = module {
     single<IncomeRepository> { IncomeRepositoryImpl(get()) }
     single<TransactionRepository> { TransactionRepositoryImpl(get()) }
     single<GoalRepository> { GoalRepositoryImpl(get()) }
-    single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) } // AÑADIDO
+    single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
+    single<GamificationRepository> { GamificationRepositoryImpl(get()) } // AÑADIDO: Implementación Real
 }

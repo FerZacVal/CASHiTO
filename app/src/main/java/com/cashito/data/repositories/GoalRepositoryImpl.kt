@@ -1,9 +1,10 @@
-
 package com.cashito.data.repositories
 
 import com.cashito.data.datasources.firebase.GoalDataSource
 import com.cashito.data.dto.GoalDto
+import com.cashito.data.dto.TransactionDto
 import com.cashito.domain.entities.goal.Goal
+import com.cashito.domain.entities.transaction.Transaction
 import com.cashito.domain.repositories.goal.GoalRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -36,6 +37,11 @@ class GoalRepositoryImpl(
         val goalDto = goal.toDto()
         dataSource.updateGoal(goalDto)
     }
+
+    override suspend fun withdrawFromGoal(goalId: String, amount: Double, transaction: Transaction) {
+        val transactionDto = transaction.toDto()
+        dataSource.withdrawFromGoal(goalId, amount, transactionDto)
+    }
 }
 
 private fun Goal.toDto(): GoalDto {
@@ -48,7 +54,11 @@ private fun Goal.toDto(): GoalDto {
         targetDate = this.targetDate,
         creationDate = this.creationDate,
         icon = this.icon,
-        colorHex = this.colorHex
+        colorHex = this.colorHex,
+        activeBoostId = this.activeBoostId,
+        activeBoostApr = this.activeBoostApr,
+        boostExpiryDate = this.boostExpiryDate,
+        activeBoostProfit = this.activeBoostProfit
     )
 }
 
@@ -62,6 +72,25 @@ private fun GoalDto.toDomain(): Goal {
         targetDate = this.targetDate,
         creationDate = this.creationDate ?: Date(),
         icon = this.icon,
-        colorHex = this.colorHex
+        colorHex = this.colorHex,
+        activeBoostId = this.activeBoostId,
+        activeBoostApr = this.activeBoostApr,
+        boostExpiryDate = this.boostExpiryDate,
+        activeBoostProfit = this.activeBoostProfit
+    )
+}
+
+private fun Transaction.toDto(): TransactionDto {
+    return TransactionDto(
+        id = this.id,
+        userId = "", // El DataSource se encargará de asignar el userId actual
+        description = this.description,
+        amount = this.amount,
+        date = this.date,
+        type = this.type.name,
+        categoryId = this.category?.id ?: "",
+        categoryName = this.category?.name ?: "",
+        categoryIcon = this.category?.icon ?: "",
+        goalId = this.goalId
     )
 }
