@@ -53,7 +53,8 @@ fun ReportsScreen(
         onNavigateBack = { navController.popBackStack() },
         onNavigateToCategoryReport = { navController.navigate(Routes.CATEGORY_EXPENSE_REPORT) },
         onNavigateToIncomeReport = { navController.navigate(Routes.INCOME_REPORT) },
-        onNavigateToBalanceReport = { navController.navigate(Routes.BALANCE_REPORT) }
+        onNavigateToBalanceReport = { navController.navigate(Routes.BALANCE_REPORT) },
+        onNavigateToCashFlow = { navController.navigate(Routes.MONTHLY_CASH_FLOW) }
     )
 }
 
@@ -64,7 +65,8 @@ fun ReportsScreenContent(
     onNavigateBack: () -> Unit,
     onNavigateToCategoryReport: () -> Unit,
     onNavigateToIncomeReport: () -> Unit,
-    onNavigateToBalanceReport: () -> Unit
+    onNavigateToBalanceReport: () -> Unit,
+    onNavigateToCashFlow: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -94,6 +96,7 @@ fun ReportsScreenContent(
                 item { ReportNavigationCard("Desglose de Ingresos", "Analiza tus ingresos por cada categoría", onNavigateToIncomeReport) }
                 item { ReportNavigationCard("Desglose de Gastos", "Analiza tus gastos por cada categoría", onNavigateToCategoryReport) }
                 item { ReportNavigationCard("Análisis de Balances", "Revisa la evolución de tu saldo", onNavigateToBalanceReport) }
+                item { ReportNavigationCard("Flujo de Caja Mensual", "Descubre tus movimientos diarios", onNavigateToCashFlow) }
             }
         }
     }
@@ -142,7 +145,8 @@ fun ReportsScreenPreview() {
             onNavigateBack = {},
             onNavigateToCategoryReport = {},
             onNavigateToIncomeReport = {},
-            onNavigateToBalanceReport = {}
+            onNavigateToBalanceReport = {},
+            onNavigateToCashFlow = {}
         )
     }
 }

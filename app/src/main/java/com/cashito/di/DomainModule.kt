@@ -29,6 +29,7 @@ import com.cashito.domain.usecases.transaction.GetTransactionsForGoalUseCase
 import com.cashito.domain.usecases.transaction.GetTransactionsUseCase
 import com.cashito.domain.usecases.transaction.UpdateTransactionUseCase
 import org.koin.dsl.module
+import com.cashito.domain.usecases.reports.ObserveMonthlyCashFlowUseCase
 
 val domainModule = module {
 
@@ -76,4 +77,5 @@ val domainModule = module {
     factory { GetUserRewardsUseCase(get()) }
     factory { UseRewardUseCase(get(), get()) }
     factory { UpdateChallengeProgressUseCase(get()) }
+    factory { ObserveMonthlyCashFlowUseCase(get(), get()) }
 }

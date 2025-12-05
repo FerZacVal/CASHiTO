@@ -22,6 +22,7 @@ import com.cashito.ui.viewmodel.TransactionEditViewModel
 import com.cashito.ui.viewmodel.TransactionsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import com.cashito.ui.viewmodel.MonthlyCashFlowViewModel
 
 val viewModelModule = module {
 
@@ -58,6 +59,7 @@ val viewModelModule = module {
     viewModel { CategoryExpenseReportViewModel(get()) }
     viewModel { IncomeReportViewModel(get()) }
     viewModel { BalanceViewModel(get()) }
+    viewModel { MonthlyCashFlowViewModel(get()) }
     
     // --- Gamification ---
     viewModel { RewardsViewModel(get(), get(), get(), get(), get()) }

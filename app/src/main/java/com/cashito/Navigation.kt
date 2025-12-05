@@ -27,6 +27,7 @@ import com.cashito.ui.screens.rewards.RewardsScreen
 import com.cashito.ui.screens.splash.SplashScreen
 import com.cashito.ui.screens.transactions.TransactionEditScreen
 import com.cashito.ui.screens.transactions.TransactionsScreen
+import com.cashito.ui.screens.reports.MonthlyCashFlowScreen
 
 object Routes {
     const val SPLASH = "splash"
@@ -50,6 +51,7 @@ object Routes {
     const val CATEGORY_EDIT = "category_edit/{categoryId}" // ACTUALIZADO
     // ARREGLADO: La ruta debe coincidir con cómo la usamos.
     const val TRANSACTION_EDIT = "transaction_edit/{transactionId}"
+    const val MONTHLY_CASH_FLOW = "monthly_cash_flow"
 }
 
 @Composable
@@ -109,6 +111,9 @@ fun AppNavHost(
             arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
         ) {
             TransactionEditScreen(navController)
+        }
+        composable(Routes.MONTHLY_CASH_FLOW) {
+            MonthlyCashFlowScreen(navController = navController)
         }
     }
 }
